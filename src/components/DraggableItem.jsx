@@ -14,21 +14,13 @@ export default function DraggableItem({ id, item, isClickMode, isSelected, onCli
     boxSizing: 'border-box'
   };
 
-  const getProxiedSrc = (url) => {
-    if (url && (url.startsWith('http://') || url.startsWith('https://')) && !url.includes('supabase.co')) {
-      return `https://corsproxy.io/?${encodeURIComponent(url)}`;
-    }
-    return url;
-  };
-
   return (
     <img
       ref={setNodeRef}
       style={style}
       {...listeners}
       {...attributes}
-      src={getProxiedSrc(item.src)}
-      crossOrigin="anonymous"
+      src={item.src}
       title={item.nome}
       className={`personagem-item ${transform ? 'dragging' : ''}`}
       alt={item.nome}
