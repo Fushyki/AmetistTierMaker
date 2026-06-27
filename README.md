@@ -14,7 +14,13 @@
 
 O **Ametist Tier Maker** é uma aplicação web Full-Stack moderna para montagem de classificações (Tier Lists). Construída com foco primário na experiência do usuário, ela oferece uma interface rica com tema escuro (Dark Mode), micro-interações fluidas e total suporte a dispositivos móveis.
 
-## 🚀 Funcionalidades Principais
+## Motivação do Projeto
+
+Este projeto nasceu de uma frustração real com os "Tiermakers" tradicionais disponíveis na internet. A grande maioria das ferramentas atuais peca por layouts defasados, falta de recursos de customização e interfaces engessadas que prejudicam a experiência do usuário. 
+
+A vontade de desenvolver o Ametist surgiu especificamente da necessidade de classificar personagens e itens do universo de **Genshin Impact**. Diante da falta de uma plataforma bonita e funcional para criar essas listas, decidi construir do zero uma solução premium, moderna e flexível que resolvesse todos esses problemas estruturais.
+
+## Funcionalidades Principais
 
 * **Drag and Drop Interativo:** Arraste e solte personagens e itens de forma natural, tanto no computador quanto em celulares.
 * **Sistema de Autenticação:** Crie uma conta de forma rápida para gerenciar seus dados.
@@ -23,23 +29,23 @@ O **Ametist Tier Maker** é uma aplicação web Full-Stack moderna para montagem
 * **Personalização Total:** Altere cores das fileiras, limpe inventários e customize a interface visual com a opção "Layout Avançado".
 * **Design Responsivo:** Construído com CSS puro otimizado matematicamente para não perder qualidade nem espaços em telas de smartphones.
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 Este projeto foi construído do zero utilizando as melhores tecnologias e práticas modernas do mercado:
 
 * **[React (via Vite)](https://vitejs.dev/):** Utilizado para a estrutura completa de componentes da interface (UI) e gerenciamento de estado complexo.
 * **[Supabase](https://supabase.com/):** O backend como serviço (BaaS). Responsável pelo banco de dados PostgreSQL relacional, sistema de autenticação de usuários (Auth) e armazenamento.
 * **[HTML5 Drag and Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API):** Gerenciamento nativo de eventos de arrastar/soltar para máxima performance, sem depender de bibliotecas pesadas de terceiros.
-* **Vanilla CSS3:** Toda a estilização — desde o design *glassmorphism*, sombras dinâmicas até a responsividade e o layout modular — foi escrita com CSS moderno (Grid e Flexbox) garantindo zero inchaço na aplicação.
+* **Vanilla CSS3:** Toda a estilização — desde o design glassmorphism, sombras dinâmicas até a responsividade e o layout modular — foi escrita com CSS moderno (Grid e Flexbox) garantindo zero inchaço na aplicação.
 
-## 📱 Visualização
+## Visualização
 
 Você pode acessar a versão ao vivo do projeto diretamente no link abaixo:
 
-🔗 **[ametist-tier-maker.vercel.app](https://ametist-tier-maker.vercel.app/)**
+**[ametist-tier-maker.vercel.app](https://ametist-tier-maker.vercel.app/)**
 
 ---
 
 <div align="center">
-  <p>Desenvolvido com 💜 por <a href="https://github.com/Fushyki">Davi Batista (Fushyki)</a>.</p>
+  <p>Desenvolvido por <a href="https://github.com/Fushyki">Davi Batista (Fushyki)</a>.</p>
 </div>
