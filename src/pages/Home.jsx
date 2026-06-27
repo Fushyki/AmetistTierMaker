@@ -5,7 +5,7 @@ import '../index.css';
 export default function Home() {
   return (
     <div className="tierlist-container" style={{ textAlign: 'center', marginTop: '100px' }}>
-      <h1>Bem-vindo ao TierMaker 2.0</h1>
+      <h1>Bem-vindo ao Ametist</h1>
       <p style={{ color: '#aaa', marginBottom: '40px' }}>
         Crie suas próprias Tier Lists de forma rápida e mobile-friendly!
       </p>

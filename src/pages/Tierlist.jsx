@@ -395,16 +395,24 @@ function Tierlist() {
   };
 
   const handleExportImage = async () => {
-    const html2canvas = (await import('html2canvas')).default;
-    const boardElement = document.getElementById('board');
-    if (!boardElement) return;
-    
-    html2canvas(boardElement, { backgroundColor: '#161618', useCORS: true }).then(canvas => {
+    try {
+      const htmlToImage = await import('html-to-image');
+      const boardElement = document.getElementById('board');
+      if (!boardElement) return;
+      
+      const dataUrl = await htmlToImage.toPng(boardElement, { 
+        backgroundColor: '#161618',
+        pixelRatio: 2 // Melhor qualidade na imagem final
+      });
+      
       const link = document.createElement('a');
       link.download = 'minha-tierlist.png';
-      link.href = canvas.toDataURL();
+      link.href = dataUrl;
       link.click();
-    });
+    } catch (error) {
+      console.error('Erro ao salvar imagem:', error);
+      alert('Houve um erro ao gerar a imagem. Tente novamente.');
+    }
   };
 
   return (
