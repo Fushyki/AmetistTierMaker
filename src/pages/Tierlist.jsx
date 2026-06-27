@@ -508,7 +508,7 @@ function Tierlist() {
                 Adicionar Linha
               </button>
               <button onClick={resetarTierList} className="btn-danger outline">
-                Reseta Tudo
+                Reset
               </button>
             </div>
           </div>
