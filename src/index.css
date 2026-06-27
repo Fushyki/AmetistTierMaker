@@ -1,4 +1,4 @@
-﻿/* 1. CONFIGURAÃ‡Ã•ES GERAIS */
+/* 1. CONFIGURAÃ‡Ã•ES GERAIS */
 body {
     background-color: #0b0b0c;
     color: white;
@@ -368,48 +368,49 @@ h1 {
 @media (max-width: 768px) {
     .tierlist-container {
         width: 100%;
-        padding: 5px;
-        margin-top: 10px;
+        padding: 4px;
+        margin-top: 5px;
     }
     
     .tier-label {
-        width: 35px !important;
-        min-width: 35px !important;
-        font-size: 1.1rem !important;
-        border-radius: 6px;
+        width: 25px !important;
+        min-width: 25px !important;
+        font-size: 0.9rem !important;
+        border-radius: 4px;
     }
 
     .tier-items {
-        gap: 6px !important;
-        padding: 8px !important;
-        grid-template-columns: repeat(auto-fill, 65px) !important;
-        min-height: 80px;
+        gap: 4px !important;
+        padding: 4px !important;
+        grid-template-columns: repeat(auto-fill, 50px) !important;
+        min-height: 55px;
     }
 
     .personagem-item {
-        width: 65px !important;
-        height: 65px !important;
-        flex: 0 0 65px !important;
+        width: 50px !important;
+        height: 50px !important;
+        flex: 0 0 50px !important;
     }
 
     .tier-row {
-        gap: 6px !important;
+        gap: 4px !important;
+        margin-bottom: 4px !important;
     }
 
     .column-header-row {
-        padding-left: 45px;
-        padding-right: 10px;
-        gap: 6px;
+        padding-left: 35px;
+        padding-right: 5px;
+        gap: 4px;
     }
 
     .inventory-section {
-        padding: 10px;
-        margin-top: 20px;
+        padding: 8px;
+        margin-top: 15px;
     }
 
     .col-title-box {
-        font-size: 0.6rem;
-        padding: 4px;
+        font-size: 0.55rem;
+        padding: 3px;
     }
 }
 
