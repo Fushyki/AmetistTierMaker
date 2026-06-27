@@ -1,10 +1,17 @@
 <div align="center">
-  <img src="public/favicon.svg" alt="Ametist Tier Maker Logo" width="120" />
+  <img src="public/cristal.png" alt="Ametist Tier Maker Logo" width="120" />
   <h1>Ametist Tier Maker</h1>
+  
+  <br/>
+  
+  <a href="https://ametist-tier-maker.vercel.app/">
+    <img src="https://img.shields.io/badge/ACESSAR_O_SITE_AGORA-b062eb?style=for-the-badge&logo=vercel&logoColor=white" alt="Acessar o Site Agora" />
+  </a>
+
+  <br/><br/>
+
   <p>Crie, personalize e salve suas Tier Lists definitivas na nuvem com um design premium.</p>
 
-  [![Website Vercel](https://img.shields.io/badge/Acessar_Site_Oficial-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://ametist-tier-maker.vercel.app/)
-  
   ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
   ![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)
   ![Supabase](https://img.shields.io/badge/Supabase-181818?style=for-the-badge&logo=supabase&logoColor=white)
@@ -37,12 +44,6 @@ Este projeto foi construído do zero utilizando as melhores tecnologias e práti
 * **[Supabase](https://supabase.com/):** O backend como serviço (BaaS). Responsável pelo banco de dados PostgreSQL relacional, sistema de autenticação de usuários (Auth) e armazenamento.
 * **[HTML5 Drag and Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API):** Gerenciamento nativo de eventos de arrastar/soltar para máxima performance, sem depender de bibliotecas pesadas de terceiros.
 * **Vanilla CSS3:** Toda a estilização — desde o design glassmorphism, sombras dinâmicas até a responsividade e o layout modular — foi escrita com CSS moderno (Grid e Flexbox) garantindo zero inchaço na aplicação.
-
-## Visualização
-
-Você pode acessar a versão ao vivo do projeto diretamente no link abaixo:
-
-**[ametist-tier-maker.vercel.app](https://ametist-tier-maker.vercel.app/)**
 
 ---
 
