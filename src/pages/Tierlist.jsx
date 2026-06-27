@@ -402,7 +402,10 @@ function Tierlist() {
       
       const dataUrl = await htmlToImage.toPng(boardElement, { 
         backgroundColor: '#161618',
-        pixelRatio: 2 // Melhor qualidade na imagem final
+        pixelRatio: 2, // Melhor qualidade na imagem final
+        // Se uma imagem de fora (ex: Discord) bloquear o download por CORS,
+        // ele coloca um pixel transparente no lugar em vez de crachar o site inteiro.
+        imagePlaceholder: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
       });
       
       const link = document.createElement('a');
