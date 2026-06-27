@@ -135,12 +135,9 @@ function Tierlist() {
 
   const loadFromApiAgain = async () => {
     const defaultUrl = localStorage.getItem('tierlist-api-url') || 'https://api.lunaris.moe/data/6.6.54.3/charlist.json';
-    const newUrl = prompt('Digite a URL do charlist.json (ou confirme para usar a atual):', defaultUrl);
     
-    if (newUrl) {
-      localStorage.setItem('tierlist-api-url', newUrl);
-      try {
-        const res = await fetch(newUrl);
+    try {
+      const res = await fetch(defaultUrl);
         const data = await res.json();
         const existingIds = new Set(items.map(i => i.id));
         
@@ -160,9 +157,8 @@ function Tierlist() {
 
         setItems(prev => [...prev, ...newItems]);
       } catch (err) {
-        alert("Erro ao carregar da API. Verifique a URL.");
+        console.error("Erro ao carregar da API:", err);
       }
-    }
   };
 
   const handleLayoutChange = (newMode) => {
