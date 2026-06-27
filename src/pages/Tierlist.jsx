@@ -433,10 +433,17 @@ function Tierlist() {
               <button onClick={handleExportJSON} className="btn-primary">
                 Salvar (JSON)
               </button>
-              {user && (
+              {user ? (
                 <button onClick={handleSaveToCloud} className="btn-primary">
                   Salvar na Nuvem
                 </button>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <button disabled className="btn-primary" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+                    Salvar na Nuvem
+                  </button>
+                  <span style={{ fontSize: '0.7rem', color: '#b062eb', textAlign: 'center' }}>Faça login para salvar!</span>
+                </div>
               )}
               <label className="btn-secondary" style={{ cursor: 'pointer', textAlign: 'center' }}>
                 Carregar (JSON)
