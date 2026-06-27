@@ -1,0 +1,43 @@
+import React from 'react';
+import TierRow from './TierRow';
+
+export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick }) {
+  return (
+    <div id="board">
+      {ranksData.map((grupo) => (
+        <div key={grupo.id} className="tier-section-group">
+          {layoutMode === 'avancado' && (
+            <div className="group-header" contentEditable suppressContentEditableWarning>
+              {grupo.titulo}
+            </div>
+          )}
+          
+          {layoutMode === 'avancado' && (
+            <div className={`column-header-row grid-${colunas}`}>
+              {Array.from({ length: colunas }).map((_, i) => (
+                <div key={i} className="col-title-box" contentEditable suppressContentEditableWarning>
+                  {i === 0 ? 'DPS' : i === 1 ? 'SUPPORT' : 'SUSTAIN'}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="section-grid">
+            {grupo.ranks.map((rank) => (
+              <TierRow 
+                key={rank.id} 
+                rank={rank} 
+                colunas={colunas} 
+                items={items.filter(item => item.tierId === rank.id)}
+                onRemoveRow={onRemoveRow}
+                selectedItem={selectedItem}
+                setSelectedItem={setSelectedItem}
+                onAreaClick={onAreaClick}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
