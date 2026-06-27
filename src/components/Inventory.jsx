@@ -85,9 +85,6 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
             {items.length} imagens no inventário
           </span>
           <div className="btn-group-mini">
-            <button className="clear-inventory-btn" title="Remover todas as imagens do inventário" onClick={onClear}>
-              Limpar
-            </button>
             <button className="clear-inventory-btn" title="Excluir o personagem selecionado" onClick={onDeleteSelected}>
               Excluir Sel.
             </button>
@@ -95,7 +92,10 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
               Duplicar Sel.
             </button>
             <button className="clear-inventory-btn" title="Baixa os personagens mais recentes do servidor" onClick={onUpdateApi}>
-              Atualizar API
+              Restaurar
+            </button>
+            <button className="clear-inventory-btn" title="Remover todas as imagens do inventário" onClick={onClear}>
+              Limpar
             </button>
           </div>
         </div>
