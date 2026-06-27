@@ -42,6 +42,26 @@ function Tierlist() {
   const [selectedItem, setSelectedItem] = useState(null);
   const isInitialMount = useRef(true);
 
+  // Deselecionar ao clicar fora
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      // Se clicou em algo que NÃO é um personagem nem uma área de drop, limpa a seleção
+      if (
+        selectedItem &&
+        !e.target.closest('.personagem-item') &&
+        !e.target.closest('.storage-box') &&
+        !e.target.closest('.tier-row') &&
+        !e.target.closest('.section-grid') &&
+        !e.target.closest('.control-card')
+      ) {
+        setSelectedItem(null);
+      }
+    };
+    
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, [selectedItem]);
+
   useEffect(() => {
     const currentId = localStorage.getItem('tierlist-current-id');
     if (currentId) {
