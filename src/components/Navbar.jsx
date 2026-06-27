@@ -10,9 +10,10 @@ export default function Navbar() {
     <nav className="ametist-navbar">
       <div className="navbar-container">
         <div className="navbar-logo">
-          <Link to="/">Ametist</Link>
+          <span>Ametist</span>
         </div>
         <div className="navbar-links">
+          <Link to="/" className="nav-item">Home</Link>
           <Link to="/tierlist" className="nav-item">Criar Tierlist</Link>
           {user ? (
             <Link to="/admin" className="nav-btn">Meu Painel</Link>

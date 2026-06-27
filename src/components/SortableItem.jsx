@@ -34,7 +34,10 @@ export default function SortableItem({ id, item, isSelected, onClick }) {
       title={item.nome}
       className={`personagem-item`}
       alt={item.nome}
-      onClick={() => onClick(item)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(item);
+      }}
     />
   );
 }

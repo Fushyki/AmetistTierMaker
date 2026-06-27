@@ -4,7 +4,7 @@ import { supabase } from '../supabaseClient';
 import '../index.css';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -18,14 +18,17 @@ export default function Login() {
     setLoading(true);
     
     try {
+      // Gambiarra: Adiciona o domínio para fingir que é um e-mail válido para o Supabase
+      const fakeEmail = username.includes('@') ? username : `${username}@ametist.com`;
+
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: fakeEmail, password });
         if (error) throw error;
         navigate('/admin');
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ email: fakeEmail, password });
         if (error) throw error;
-        alert('Cadastro realizado! Se o e-mail for real, talvez seja necessário confirmar o link enviado.');
+        alert('Cadastro realizado com sucesso!');
         setIsLogin(true);
       }
     } catch (err) {
@@ -43,10 +46,10 @@ export default function Login() {
       
       <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <input 
-          type="email" 
-          placeholder="Seu E-mail" 
-          value={email}
-          onChange={e => setEmail(e.target.value)}
+          type="text" 
+          placeholder="Nome de Usuário" 
+          value={username}
+          onChange={e => setUsername(e.target.value)}
           required
           style={{ padding: '12px', borderRadius: '6px', border: '1px solid #333', background: '#161618', color: 'white' }}
         />

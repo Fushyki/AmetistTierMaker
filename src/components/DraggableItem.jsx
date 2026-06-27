@@ -24,7 +24,10 @@ export default function DraggableItem({ id, item, isClickMode, isSelected, onCli
       title={item.nome}
       className={`personagem-item ${transform ? 'dragging' : ''}`}
       alt={item.nome}
-      onClick={() => onClick(item)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(item);
+      }}
     />
   );
 }

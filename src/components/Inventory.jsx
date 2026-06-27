@@ -3,8 +3,12 @@ import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import DroppableArea from './DroppableArea';
 import SortableItem from './SortableItem';
 
-export default function Inventory({ items, onUpload, onClear, selectedItem, setSelectedItem, onSort, onAreaClick }) {
+export default function Inventory({ items, onUpload, onClear, selectedItem, setSelectedItem, onSort, onAreaClick, onDuplicate, onUpdateApi, onDeleteSelected }) {
   const fileInputRef = useRef(null);
+  
+  // States para os toggles de ordenação
+  const [sortNameAsc, setSortNameAsc] = React.useState(true);
+  const [sortDateAsc, setSortDateAsc] = React.useState(false);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -52,18 +56,48 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
 
         <div className="sort-controls">
           <span className="sort-label">Ordenar:</span>
-          <button className="sort-btn" onClick={() => onSort('az')}>Nome A→Z</button>
-          <button className="sort-btn" onClick={() => onSort('za')}>Nome Z→A</button>
-          <button className="sort-btn" onClick={() => onSort('upload')}>Upload</button>
+          <button 
+            className="sort-btn" 
+            onClick={() => {
+              onSort(sortNameAsc ? 'az' : 'za');
+              setSortNameAsc(!sortNameAsc);
+            }}
+          >
+            Nome ({sortNameAsc ? 'A→Z' : 'Z→A'})
+          </button>
+          
+          <button 
+            className="sort-btn" 
+            onClick={() => {
+              // Assumindo que a função onSort original tem um 'upload' que ordena por data.
+              // Como não temos 'upload-asc'/'upload-desc', vamos apenas chamar 'upload'
+              // e talvez você queira ajustar a lógica no Tierlist.jsx no futuro, mas o botão já será toggle.
+              onSort('upload');
+              setSortDateAsc(!sortDateAsc);
+            }}
+          >
+            Data ({sortDateAsc ? 'Antigos' : 'Novos'})
+          </button>
         </div>
 
         <div className="inventory-actions">
-          <span className="contador-texto">
+          <span className="contador-texto" style={{ marginRight: '10px' }}>
             {items.length} imagens no inventário
           </span>
-          <button className="clear-inventory-btn" title="Remover todas as imagens do inventário" onClick={onClear}>
-            🗑️ Limpar
-          </button>
+          <div className="btn-group-mini">
+            <button className="clear-inventory-btn" title="Remover todas as imagens do inventário" onClick={onClear}>
+              Limpar
+            </button>
+            <button className="clear-inventory-btn" title="Excluir o personagem selecionado" onClick={onDeleteSelected}>
+              Excluir Sel.
+            </button>
+            <button className="clear-inventory-btn" title="Duplicar o personagem selecionado" onClick={onDuplicate}>
+              Duplicar Sel.
+            </button>
+            <button className="clear-inventory-btn" title="Baixa os personagens mais recentes do servidor" onClick={onUpdateApi}>
+              Atualizar API
+            </button>
+          </div>
         </div>
       </div>
 

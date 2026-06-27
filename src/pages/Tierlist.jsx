@@ -400,18 +400,21 @@ function Tierlist() {
   };
 
   const handleDuplicateSelected = () => {
-    if (!selectedItem) {
-      alert("Selecione um personagem primeiro clicando nele.");
-      return;
-    }
+    if (!selectedItem) return;
     const newItem = {
       ...selectedItem,
-      id: 'dupe-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+      id: selectedItem.id + '-copy-' + Date.now(),
       tierId: null,
       colIndex: null,
       uploadIndex: Date.now()
     };
     setItems(prev => [...prev, newItem]);
+  };
+
+  const handleDeleteSelected = () => {
+    if (!selectedItem) return;
+    setItems(prev => prev.filter(item => item.id !== selectedItem.id));
+    setSelectedItem(null);
   };
 
   const handleExportImage = async () => {
@@ -504,12 +507,6 @@ function Tierlist() {
               <button onClick={adicionarLinha} className="btn-secondary">
                 Adicionar Linha
               </button>
-              <button onClick={handleDuplicateSelected} className="btn-secondary">
-                Duplicar Item
-              </button>
-              <button onClick={loadFromApiAgain} className="btn-danger">
-                Atualizar API
-              </button>
               <button onClick={resetarTierList} className="btn-danger outline">
                 Reseta Tudo
               </button>
@@ -540,6 +537,9 @@ function Tierlist() {
           setSelectedItem={setSelectedItem}
           onSort={sortInventory}
           onAreaClick={() => handleAreaClick(null, null)}
+          onDuplicate={handleDuplicateSelected}
+          onUpdateApi={loadFromApiAgain}
+          onDeleteSelected={handleDeleteSelected}
         />
       </div>
     </DndContext>
