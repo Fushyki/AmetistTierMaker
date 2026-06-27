@@ -10,10 +10,7 @@ export default function Navbar() {
     <nav className="ametist-navbar">
       <div className="navbar-container">
         <div className="navbar-logo">
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src="/cristal.png" alt="Ametist Icon" style={{ height: '35px', objectFit: 'contain' }} />
-            <img src="/texto.png" alt="Ametist" style={{ height: '22px', objectFit: 'contain' }} />
-          </Link>
+          <Link to="/">Ametist</Link>
         </div>
         <div className="navbar-links">
           <Link to="/tierlist" className="nav-item">Criar Tierlist</Link>
