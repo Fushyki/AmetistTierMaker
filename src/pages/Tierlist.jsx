@@ -411,7 +411,7 @@ function Tierlist() {
       link.click();
     } catch (error) {
       console.error('Erro ao salvar imagem:', error);
-      alert('Houve um erro ao gerar a imagem. Tente novamente.');
+      alert('Houve um erro ao gerar a imagem: ' + (error.message || error));
     }
   };
 
