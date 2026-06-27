@@ -512,6 +512,7 @@ function Tierlist() {
           selectedItem={selectedItem}
           setSelectedItem={setSelectedItem}
           onSort={sortInventory}
+          onAreaClick={() => handleAreaClick(null, null)}
         />
       </div>
     </DndContext>

@@ -3,7 +3,7 @@ import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import DroppableArea from './DroppableArea';
 import SortableItem from './SortableItem';
 
-export default function Inventory({ items, onUpload, onClear, selectedItem, setSelectedItem, onSort }) {
+export default function Inventory({ items, onUpload, onClear, selectedItem, setSelectedItem, onSort, onAreaClick }) {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -68,7 +68,7 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
       </div>
 
       <SortableContext items={items.map(i => i.id)} strategy={rectSortingStrategy}>
-        <DroppableArea id="inventory" className="storage-box">
+        <DroppableArea id="inventory" className="storage-box" onClick={onAreaClick}>
           {items.map(item => (
             <SortableItem 
               key={item.id} 
