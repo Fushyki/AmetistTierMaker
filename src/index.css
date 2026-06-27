@@ -363,3 +363,52 @@ h1 {
 .col-selector { display: flex; align-items: center; justify-content: space-between; background: #2a2033; padding: 8px 15px; border-radius: 8px; color: white; }
 .col-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: transparent; color: #888; cursor: pointer; transition: all 0.2s; }
 .col-btn.active { background: #b062eb; color: white; font-weight: bold; }
+
+/* OTIMIZAÇÃO PARA CELULARES */
+@media (max-width: 768px) {
+    .tierlist-container {
+        width: 100%;
+        padding: 5px;
+        margin-top: 10px;
+    }
+    
+    .tier-label {
+        width: 35px !important;
+        min-width: 35px !important;
+        font-size: 1.1rem !important;
+        border-radius: 6px;
+    }
+
+    .tier-items {
+        gap: 6px !important;
+        padding: 8px !important;
+        grid-template-columns: repeat(auto-fill, 65px) !important;
+        min-height: 80px;
+    }
+
+    .personagem-item {
+        width: 65px !important;
+        height: 65px !important;
+        flex: 0 0 65px !important;
+    }
+
+    .tier-row {
+        gap: 6px !important;
+    }
+
+    .column-header-row {
+        padding-left: 45px;
+        padding-right: 10px;
+        gap: 6px;
+    }
+
+    .inventory-section {
+        padding: 10px;
+        margin-top: 20px;
+    }
+
+    .col-title-box {
+        font-size: 0.6rem;
+        padding: 4px;
+    }
+}
