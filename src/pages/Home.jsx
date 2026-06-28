@@ -52,9 +52,9 @@ export default function Home() {
 
   return (
     <div className="tierlist-container" style={{ textAlign: 'center', marginTop: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
-        <img src="/ametist-logo.png" alt="Ametist Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
-        <img src="/ametist-text.png" alt="Bem-vindo ao Ametist" style={{ height: '35px', objectFit: 'contain' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <img src="/ametist-logo.png" alt="Ametist Logo" className="hero-logo-icon" />
+        <img src="/ametist-text.png" alt="Bem-vindo ao Ametist" className="hero-logo-text" />
       </div>
       <p style={{ color: '#aaa', marginBottom: '30px', fontSize: '1.1rem' }}>
         Crie suas próprias Tier Lists de forma rápida e mobile-friendly!
