@@ -53,11 +53,19 @@ export default function Home() {
   return (
     <div className="tierlist-container" style={{ textAlign: 'center', marginTop: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <h1>Bem-vindo ao Ametist</h1>
-      <p style={{ color: '#aaa', marginBottom: '10px', fontSize: '1.1rem' }}>
+      <p style={{ color: '#aaa', marginBottom: '30px', fontSize: '1.1rem' }}>
         Crie suas próprias Tier Lists de forma rápida e mobile-friendly!
       </p>
 
-      <div style={{ marginTop: '50px', width: '100%', maxWidth: '1000px' }}>
+      {!user && (
+        <div style={{ background: 'linear-gradient(90deg, rgba(176,98,235,0.1) 0%, rgba(255,215,0,0.1) 100%)', padding: '15px 30px', borderRadius: '12px', border: '1px solid rgba(176,98,235,0.3)', marginBottom: '40px', maxWidth: '600px' }}>
+          <p style={{ margin: 0, color: '#ddd', fontSize: '0.95rem', lineHeight: '1.5' }}>
+            Crie sua conta gratuitamente para salvar suas Tier Lists e criar seus templates, além de continuar editando elas de qualquer dispositivo, a qualquer momento.
+          </p>
+        </div>
+      )}
+
+      <div style={{ marginTop: '20px', width: '100%', maxWidth: '1000px' }}>
         <h2 style={{ color: '#fff', marginBottom: '20px' }}>Novos Templates da Comunidade</h2>
         
         <input 
