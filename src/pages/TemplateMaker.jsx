@@ -402,8 +402,9 @@ export default function TemplateMaker() {
             </div>
           </div>
         )}
+      </div>
         
-        {items.length > 0 && (
+      {items.length > 0 && (
         <div className="control-card" style={{ padding: '20px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <h3>Imagens ({items.length})</h3>
