@@ -57,11 +57,6 @@ export default function Admin() {
     navigate('/');
   };
 
-  const handleCreateNew = () => {
-    localStorage.removeItem('tierlist-current-id');
-    navigate('/tierlist');
-  };
-
   const handleEdit = (tierlist) => {
     localStorage.setItem('tierlist-current-id', tierlist.id);
     navigate('/tierlist');
@@ -105,9 +100,6 @@ export default function Admin() {
       <div style={{ background: '#161618', padding: '20px', borderRadius: '12px', border: '1px solid #2a2a2a' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h3>Suas Tier Lists Salvas na Nuvem</h3>
-          <button onClick={handleCreateNew} style={{ padding: '10px 20px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-            + Criar Nova
-          </button>
         </div>
         
         {loading ? (
@@ -152,12 +144,6 @@ export default function Admin() {
             >
               Data ({sortDateAsc ? 'Antigos' : 'Recentes'})
             </button>
-
-            <Link to="/template-maker">
-              <button style={{ padding: '10px 20px', backgroundColor: '#b062eb', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                + Criar Novo Modelo
-              </button>
-            </Link>
           </div>
         </div>
         
@@ -200,12 +186,20 @@ export default function Admin() {
                     </div>
                   </Link>
                   <button 
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteTemplate(template.id); }}
+                    onClick={() => handleDeleteTemplate(template.id)}
                     style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255,0,0,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     title="Excluir Template"
                   >
                     🗑️
                   </button>
+                  <Link to={`/template-maker?editTemplateId=${template.id}`}>
+                    <button 
+                      style={{ position: 'absolute', top: '10px', right: '55px', backgroundColor: 'rgba(33, 150, 243, 0.9)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      title="Editar Template"
+                    >
+                      ✏️
+                    </button>
+                  </Link>
                 </div>
               ))}
             </div>

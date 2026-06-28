@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import TierBoard from '../components/TierBoard';
 import { fetchAndParseAPI } from '../utils/apiParser';
 
@@ -24,6 +24,9 @@ const initialRanksClassico = [
 export default function TemplateMaker() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const editTemplateId = searchParams.get('editTemplateId');
   
   const [name, setName] = useState('');
   const [coverImage, setCoverImage] = useState(null);
@@ -49,6 +52,34 @@ export default function TemplateMaker() {
   const [layoutMode, setLayoutMode] = useState('classico');
   const [ranksData, setRanksData] = useState(initialRanksClassico);
   const colunas = layoutMode === 'classico' ? 1 : 3;
+
+  useEffect(() => {
+    if (editTemplateId) {
+      const fetchTemplateToEdit = async () => {
+        const { data, error } = await supabase.from('templates').select('*').eq('id', editTemplateId).single();
+        if (data && data.data) {
+          setName(data.name);
+          setCoverImage(data.cover_image);
+          setIsPublic(data.is_public);
+          
+          const tData = data.data;
+          setRanksData(tData.ranksData || initialRanksClassico);
+          setItems(tData.items || []);
+          setLayoutMode(tData.layoutMode || 'classico');
+          
+          if (tData.apiConfig) {
+            setDataSourceType('api');
+            setApiConfig(tData.apiConfig);
+          } else {
+            setDataSourceType('manual');
+          }
+        } else if (error) {
+          console.error("Erro ao buscar template para edição:", error);
+        }
+      };
+      fetchTemplateToEdit();
+    }
+  }, [editTemplateId]);
 
   const fileInputRef = useRef(null);
   const coverInputRef = useRef(null);
@@ -226,25 +257,37 @@ export default function TemplateMaker() {
 
     try {
       const templateDataPayload = {
-        items: dataSourceType === 'manual' ? items : [], // Não salva os itens brutos no DB se for API
+        items: dataSourceType === 'manual' ? items : [],
         apiConfig: dataSourceType === 'api' ? apiConfig : null,
         ranksData,
         layoutMode,
         colunas
       };
 
-      const { data, error } = await supabase.from('templates').insert([{
-        user_id: user.id,
-        name: name.trim(),
-        cover_image: coverImage,
-        is_public: isPublic,
-        data: templateDataPayload
-      }]).select();
+      if (editTemplateId) {
+        const { error } = await supabase.from('templates').update({
+          name: name.trim(),
+          cover_image: coverImage,
+          is_public: isPublic,
+          data: templateDataPayload
+        }).eq('id', editTemplateId);
+        
+        if (error) throw error;
+        alert("Template atualizado com sucesso!");
+        navigate(`/tierlist?templateId=${editTemplateId}`);
+      } else {
+        const { data, error } = await supabase.from('templates').insert([{
+          user_id: user.id,
+          name: name.trim(),
+          cover_image: coverImage,
+          is_public: isPublic,
+          data: templateDataPayload
+        }]).select();
 
-      if (error) throw error;
-      
-      alert("Template publicado com sucesso!");
-      navigate(`/tierlist?templateId=${data[0].id}`);
+        if (error) throw error;
+        alert("Template publicado com sucesso!");
+        navigate(`/tierlist?templateId=${data[0].id}`);
+      }
     } catch (err) {
       console.error(err);
       alert("Erro ao publicar. Verifique se a tabela 'templates' existe no Supabase.");
@@ -466,7 +509,7 @@ export default function TemplateMaker() {
           className="btn-primary" 
           style={{ padding: '15px 40px', fontSize: '1.2rem', background: 'linear-gradient(135deg, #b062eb, #7d3ba3)', boxShadow: '0 4px 15px rgba(176,98,235,0.4)' }}
         >
-          Publicar Template
+          {editTemplateId ? 'Atualizar Template' : 'Publicar Template'}
         </button>
       </div>
     </div>

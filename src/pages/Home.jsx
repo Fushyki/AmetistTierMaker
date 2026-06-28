@@ -104,13 +104,23 @@ export default function Home() {
                   </div>
                 </Link>
                 {user && (user.id === template.user_id || isAdmin(user)) && (
-                  <button 
-                    onClick={(e) => handleDeleteTemplate(template.id, e)}
-                    style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255,0,0,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    title="Excluir Template"
-                  >
-                    🗑️
-                  </button>
+                  <>
+                    <button 
+                      onClick={(e) => handleDeleteTemplate(template.id, e)}
+                      style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255,0,0,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      title="Excluir Template"
+                    >
+                      🗑️
+                    </button>
+                    <Link to={`/template-maker?editTemplateId=${template.id}`}>
+                      <button 
+                        style={{ position: 'absolute', top: '10px', right: '55px', backgroundColor: 'rgba(33, 150, 243, 0.9)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        title="Editar Template"
+                      >
+                        ✏️
+                      </button>
+                    </Link>
+                  </>
                 )}
               </div>
             ))}
