@@ -418,3 +418,16 @@ h1 {
     }
 }
 
+/* Modos Especiais: Exportação Limpa e Modo Apresentação */
+.clean-mode .tier-settings,
+.presentation-mode .tier-settings {
+    display: none !important;
+}
+
+.clean-mode .tier-items.drag-over,
+.presentation-mode .tier-items.drag-over {
+    border-color: transparent !important;
+    background-color: transparent !important;
+}
+
+

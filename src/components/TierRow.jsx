@@ -3,7 +3,7 @@ import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import DroppableArea from './DroppableArea';
 import SortableItem from './SortableItem';
 
-export default function TierRow({ rank, items, colunas, onRemoveRow, selectedItem, setSelectedItem, onAreaClick }) {
+export default function TierRow({ rank, items, colunas, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem }) {
   const isCustomTier = rank.id.startsWith('tier-') && rank.id.length > 10; 
   const colorInputRef = useRef(null);
 
@@ -52,6 +52,7 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
                     item={item}
                     isSelected={selectedItem && selectedItem.id === item.id}
                     onClick={(clickedItem) => setSelectedItem(clickedItem)}
+                    onDoubleClick={onDoubleClickItem}
                   />
                 ))}
               </DroppableArea>

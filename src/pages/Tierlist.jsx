@@ -38,6 +38,7 @@ function Tierlist() {
     return saved ? JSON.parse(saved) : [];
   });
   
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
   const { user } = useAuth();
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -301,6 +302,12 @@ function Tierlist() {
     });
   };
 
+  const handleDoubleClickItem = (item) => {
+    if (item.tierId !== null) {
+      moveItem(item.id, null, null);
+    }
+  };
+
   const handleAreaClick = (tierId, colIndex) => {
     if (selectedItem) {
       moveItem(selectedItem.id, tierId, colIndex);
@@ -410,13 +417,16 @@ function Tierlist() {
       const boardElement = document.getElementById('board');
       if (!boardElement) return;
       
+      boardElement.classList.add('clean-mode');
+
       const dataUrl = await htmlToImage.toPng(boardElement, { 
         backgroundColor: '#161618',
-        pixelRatio: 1, // Reduzido para 1 para evitar limites de memória em celulares
-        cacheBust: true, // Força o recarregamento de imagens para evitar falhas de cache
-        // Removido o imagePlaceholder para forçar o carregamento real e ver se resolve o sumiço
+        pixelRatio: 1, 
+        cacheBust: true, 
       });
       
+      boardElement.classList.remove('clean-mode');
+
       const link = document.createElement('a');
       link.download = 'minha-tierlist.png';
       link.href = dataUrl;
@@ -429,9 +439,19 @@ function Tierlist() {
 
   return (
     <DndContext sensors={sensors} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-      <div className="tierlist-container">
-        <h1>Minha Lista de Personagens</h1>
+      <div className={`tierlist-container ${isPresentationMode ? 'presentation-mode' : ''}`}>
+        
+        {isPresentationMode && (
+          <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
+            <button onClick={() => setIsPresentationMode(false)} style={{ padding: '10px 20px', fontSize: '1.2rem', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+              Sair do Modo Apresentação
+            </button>
+          </div>
+        )}
 
+        {!isPresentationMode && <h1>Minha Lista de Personagens</h1>}
+
+        {!isPresentationMode && (
         <div className="controls-wrapper">
           {/* GRUPO 1: AÇÕES PRINCIPAIS E NUVEM */}
           <div className="control-card">
@@ -466,6 +486,9 @@ function Tierlist() {
           <div className="control-card">
             <h3>Configuração</h3>
             <div className="btn-grid">
+              <button onClick={() => setIsPresentationMode(true)} className="btn-secondary">
+                Modo Apresentação
+              </button>
               <button 
                 onClick={() => handleLayoutChange('avancado')}
                 className={layoutMode === 'avancado' ? 'btn-active' : 'btn-secondary'}
@@ -478,12 +501,14 @@ function Tierlist() {
               >
                 Modo Clássico
               </button>
-              <div className="col-selector">
-                <span>Colunas:</span>
-                <button onClick={() => handleColunasChange(1)} className={colunas === 1 ? 'col-btn active' : 'col-btn'}>1</button>
-                <button onClick={() => handleColunasChange(2)} className={colunas === 2 ? 'col-btn active' : 'col-btn'}>2</button>
-                <button onClick={() => handleColunasChange(3)} className={colunas === 3 ? 'col-btn active' : 'col-btn'}>3</button>
-              </div>
+              {layoutMode === 'avancado' && (
+                <div className="col-selector">
+                  <span>Colunas:</span>
+                  <button onClick={() => handleColunasChange(1)} className={colunas === 1 ? 'col-btn active' : 'col-btn'}>1</button>
+                  <button onClick={() => handleColunasChange(2)} className={colunas === 2 ? 'col-btn active' : 'col-btn'}>2</button>
+                  <button onClick={() => handleColunasChange(3)} className={colunas === 3 ? 'col-btn active' : 'col-btn'}>3</button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -500,6 +525,7 @@ function Tierlist() {
             </div>
           </div>
         </div>
+        )}
 
         <div className="dica-texto" style={{ marginBottom: '20px', textAlign: 'center' }}>
           Dica: No celular, clique na imagem e depois clique na área de tier desejada para mover.
@@ -514,8 +540,10 @@ function Tierlist() {
           selectedItem={selectedItem}
           setSelectedItem={setSelectedItem}
           onAreaClick={handleAreaClick}
+          onDoubleClickItem={handleDoubleClickItem}
         />
 
+        {!isPresentationMode && (
         <Inventory 
           items={items.filter(item => item.tierId === null)} 
           onUpload={handleUpload}
@@ -528,6 +556,7 @@ function Tierlist() {
           onUpdateApi={loadFromApiAgain}
           onDeleteSelected={handleDeleteSelected}
         />
+        )}
       </div>
     </DndContext>
   );

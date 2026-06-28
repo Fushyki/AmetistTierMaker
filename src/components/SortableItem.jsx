@@ -2,7 +2,7 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-export default function SortableItem({ id, item, isSelected, onClick }) {
+export default function SortableItem({ id, item, isSelected, onClick, onDoubleClick }) {
   const {
     attributes,
     listeners,
@@ -37,6 +37,10 @@ export default function SortableItem({ id, item, isSelected, onClick }) {
       onClick={(e) => {
         e.stopPropagation();
         onClick(item);
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        if (onDoubleClick) onDoubleClick(item);
       }}
     />
   );
