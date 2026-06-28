@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import TierBoard from '../components/TierBoard';
+import { fetchAndParseAPI } from '../utils/apiParser';
 
 const initialRanksAvancado = [
   { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
@@ -31,6 +32,19 @@ export default function TemplateMaker() {
   const [masterDimensions, setMasterDimensions] = useState(null);
   const [items, setItems] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [dataSourceType, setDataSourceType] = useState('manual'); // 'manual' ou 'api'
+  const [apiConfig, setApiConfig] = useState({
+    url: '',
+    arrayPath: '',
+    namePath: '',
+    imagePath: '',
+    imageBaseUrl: '',
+    replaceFrom: '',
+    replaceTo: '',
+    imageSuffix: ''
+  });
+  const [isTestingApi, setIsTestingApi] = useState(false);
   
   const [layoutMode, setLayoutMode] = useState('classico');
   const [ranksData, setRanksData] = useState(initialRanksClassico);
@@ -196,15 +210,31 @@ export default function TemplateMaker() {
     });
   };
 
+  const handleTestApi = async () => {
+    if (!apiConfig.url) return alert('Insira a URL da API primeiro.');
+    setIsTestingApi(true);
+    try {
+      const apiItems = await fetchAndParseAPI(apiConfig);
+      setItems(apiItems);
+      alert(`Sucesso! API retornou ${apiItems.length} itens.`);
+    } catch (error) {
+      alert(`Erro ao ler API: ${error.message}`);
+    } finally {
+      setIsTestingApi(false);
+    }
+  };
+
   const handleSaveTemplate = async () => {
     if (!user) return alert("Você precisa estar logado para publicar um template!");
     if (!name.trim()) return alert("Dê um nome para o template.");
     if (!coverImage) return alert("O template precisa de uma imagem de capa.");
-    if (items.length === 0) return alert("O template precisa de pelo menos 1 imagem.");
+    if (items.length === 0 && dataSourceType === 'manual') return alert("O template precisa de pelo menos 1 imagem.");
+    if (items.length === 0 && dataSourceType === 'api') return alert("Teste a API primeiro para garantir que ela carrega os itens.");
 
     try {
       const templateDataPayload = {
-        items,
+        items: dataSourceType === 'manual' ? items : [], // Não salva os itens brutos no DB se for API
+        apiConfig: dataSourceType === 'api' ? apiConfig : null,
         ranksData,
         layoutMode,
         colunas
@@ -297,24 +327,83 @@ export default function TemplateMaker() {
       </div>
 
       <div className="control-card" style={{ padding: '20px', marginBottom: '20px' }}>
-        <h3>Banco de Imagens</h3>
-        <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '15px' }}>
-          <strong>A Regra:</strong> A PRIMEIRA imagem que você upar ditará o tamanho exato e formato (aspect ratio) de todas as outras. Suba pacotes de imagens à vontade, elas serão padronizadas.
-        </p>
-        
-        {masterDimensions && (
-          <div style={{ padding: '10px', backgroundColor: 'rgba(176, 98, 235, 0.1)', borderRadius: '5px', marginBottom: '15px', color: '#b062eb' }}>
-            Regra ativa: <strong>{masterDimensions.width}x{masterDimensions.height}px</strong>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <h3>Banco de Imagens</h3>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              className={dataSourceType === 'manual' ? 'btn-active' : 'btn-secondary'}
+              onClick={() => setDataSourceType('manual')}
+            >Upload Manual</button>
+            <button 
+              className={dataSourceType === 'api' ? 'btn-active' : 'btn-secondary'}
+              onClick={() => setDataSourceType('api')}
+            >API Customizada</button>
+          </div>
+        </div>
+
+        {dataSourceType === 'manual' ? (
+          <div>
+            <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '15px' }}>
+              Faça upload de todas as imagens que compõem este template. Elas serão salvas no banco de dados.
+            </p>
+            <div 
+              style={{ border: '2px dashed #b062eb', padding: '40px 20px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', backgroundColor: 'rgba(176,98,235,0.05)', marginBottom: '15px' }}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {isProcessing ? (
+                <div style={{ color: '#b062eb', fontWeight: 'bold' }}>Processando imagens...</div>
+              ) : (
+                <>
+                  <div style={{ fontSize: '2rem', marginBottom: '10px' }}>📁</div>
+                  <div style={{ color: '#ddd' }}>Clique aqui para selecionar múltiplas imagens</div>
+                </>
+              )}
+              <input 
+                type="file" 
+                multiple 
+                accept="image/*" 
+                onChange={handleItemsUpload} 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+              />
+            </div>
+          </div>
+        ) : (
+          <div style={{ background: '#161618', padding: '15px', borderRadius: '8px' }}>
+            <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '15px' }}>
+              Conecte a uma API JSON externa. As imagens não serão salvas no seu banco, e sim carregadas diretamente da API toda vez que a Tier List for aberta.
+            </p>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              <input type="text" placeholder="URL da API (ex: https://api.exemplo.com/dados.json)" value={apiConfig.url} onChange={e => setApiConfig({...apiConfig, url: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+              
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <input type="text" placeholder="Caminho para a Lista (ex: data.items) [Deixe vazio se for na raiz]" value={apiConfig.arrayPath} onChange={e => setApiConfig({...apiConfig, arrayPath: e.target.value})} style={{ flex: 1, padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+                <input type="text" placeholder="Campo do Nome (ex: ptName)" value={apiConfig.namePath} onChange={e => setApiConfig({...apiConfig, namePath: e.target.value})} style={{ flex: 1, padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+                <input type="text" placeholder="Campo da Imagem (ex: CardImg)" value={apiConfig.imagePath} onChange={e => setApiConfig({...apiConfig, imagePath: e.target.value})} style={{ flex: 1, padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+              </div>
+
+              <div style={{ borderTop: '1px solid #333', marginTop: '10px', paddingTop: '10px' }}>
+                <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#b062eb' }}>Regras de Montagem da Imagem (Opcional)</p>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="URL Base (ex: https://site.com/assets/)" value={apiConfig.imageBaseUrl} onChange={e => setApiConfig({...apiConfig, imageBaseUrl: e.target.value})} style={{ flex: 1, padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+                  <input type="text" placeholder="Substituir (De) ex: UI_Gacha_" value={apiConfig.replaceFrom} onChange={e => setApiConfig({...apiConfig, replaceFrom: e.target.value})} style={{ width: '150px', padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+                  <input type="text" placeholder="Substituir (Para) ex: UI_" value={apiConfig.replaceTo} onChange={e => setApiConfig({...apiConfig, replaceTo: e.target.value})} style={{ width: '150px', padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+                  <input type="text" placeholder="Sufixo (ex: .webp)" value={apiConfig.imageSuffix} onChange={e => setApiConfig({...apiConfig, imageSuffix: e.target.value})} style={{ width: '120px', padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+                </div>
+              </div>
+
+              <button 
+                onClick={handleTestApi} 
+                disabled={isTestingApi}
+                style={{ marginTop: '10px', padding: '10px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: isTestingApi ? 'wait' : 'pointer' }}
+              >
+                {isTestingApi ? 'Lendo API...' : 'Testar Conexão com API'}
+              </button>
+            </div>
           </div>
         )}
-
-        <label className="btn-primary" style={{ display: 'inline-block', cursor: 'pointer', width: '100%', textAlign: 'center', padding: '15px', fontSize: '1.1rem' }}>
-          {isProcessing ? 'Processando Imagens...' : '+ Adicionar Imagens aos Personagens'}
-          <input type="file" accept="image/*" multiple onChange={handleItemsUpload} ref={fileInputRef} style={{ display: 'none' }} disabled={isProcessing} />
-        </label>
-      </div>
-
-      {items.length > 0 && (
+        
+        {items.length > 0 && (
         <div className="control-card" style={{ padding: '20px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <h3>Imagens ({items.length})</h3>

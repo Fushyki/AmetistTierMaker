@@ -6,6 +6,7 @@ import Inventory from '../components/Inventory';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabaseClient';
 import { useSearchParams } from 'react-router-dom';
+import { fetchAndParseAPI } from '../utils/apiParser';
 import '../index.css';
 
 const initialRanksAvancado = [
@@ -147,10 +148,21 @@ function Tierlist() {
             
             if (data.data.items && data.data.ranksData) {
               // New template structure
-              setItems(data.data.items);
               setRanksData(data.data.ranksData);
               setLayoutMode(data.data.layoutMode || 'classico');
               setColunas(data.data.colunas || 1);
+
+              if (data.data.apiConfig) {
+                try {
+                  const apiItems = await fetchAndParseAPI(data.data.apiConfig);
+                  setItems(apiItems);
+                } catch (apiErr) {
+                  console.error("Erro ao puxar API do template:", apiErr);
+                  alert("Erro ao puxar imagens da API do Template.");
+                }
+              } else {
+                setItems(data.data.items);
+              }
             } else {
               // Legacy template structure (just array of items)
               setItems(data.data);
@@ -240,7 +252,14 @@ function Tierlist() {
         // Restaurar imagens do Template carregado
         const { data, error } = await supabase.from('templates').select('data').eq('id', activeTemplateId).single();
         if (data && data.data) {
-          const templateItems = data.data.items || data.data; // Handles both new and legacy template structures
+          let templateItems = [];
+          
+          if (data.data.apiConfig) {
+            templateItems = await fetchAndParseAPI(data.data.apiConfig);
+          } else {
+            templateItems = data.data.items || data.data; // Handles both new and legacy template structures
+          }
+
           const missingItems = templateItems.filter(item => !existingIds.has(item.id));
           
           if (missingItems.length > 0) {
