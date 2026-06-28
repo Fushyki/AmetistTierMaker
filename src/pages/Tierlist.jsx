@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { DndContext, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
+import toast from 'react-hot-toast';
 import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
 import { useAuth } from '../contexts/AuthContext';
@@ -158,7 +159,7 @@ function Tierlist() {
                   setItems(apiItems);
                 } catch (apiErr) {
                   console.error("Erro ao puxar API do template:", apiErr);
-                  alert("Erro ao puxar imagens da API do Template.");
+                  toast.error("Erro ao puxar imagens da API do Template.");
                 }
               } else {
                 setItems(data.data.items);
@@ -267,7 +268,7 @@ function Tierlist() {
             const restoredItems = missingItems.map(item => ({ ...item, tierId: null, colIndex: null }));
             setItems(prev => [...prev, ...restoredItems]);
           } else {
-            alert('Todas as imagens originais do template já estão presentes.');
+            toast.success('Todas as imagens originais do template já estão presentes.');
           }
         }
       } else {
@@ -534,10 +535,10 @@ function Tierlist() {
           if (data.layoutMode) setLayoutMode(data.layoutMode);
           if (data.colunas) setColunas(data.colunas);
         } else {
-          alert('Arquivo JSON inválido.');
+          toast.error('Arquivo JSON inválido.');
         }
       } catch (err) {
-        alert('Erro ao ler o arquivo JSON.');
+        toast.error('Erro ao ler o arquivo JSON.');
       }
     };
     reader.readAsText(file);
@@ -545,7 +546,7 @@ function Tierlist() {
   };
 
   const handleSaveToCloud = async () => {
-    if (!user) return alert("Faça login para salvar na nuvem.");
+    if (!user) return toast.error("Faça login para salvar na nuvem.");
     const currentId = localStorage.getItem('tierlist-current-id');
     const dataToSave = { items, ranksData, layoutMode, colunas };
     
@@ -559,9 +560,9 @@ function Tierlist() {
         if (error) throw error;
         localStorage.setItem('tierlist-current-id', data[0].id);
       }
-      alert('Tierlist salva na nuvem com sucesso!');
+      toast.success('Tierlist salva na nuvem com sucesso!');
     } catch (err) {
-      alert('Erro ao salvar: ' + err.message);
+      toast.error('Erro ao salvar: ' + err.message);
     }
   };
 
@@ -607,7 +608,7 @@ function Tierlist() {
       link.click();
     } catch (error) {
       console.error('Erro ao salvar imagem:', error);
-      alert('Houve um erro ao gerar a imagem: ' + (error.message || error));
+      toast.error('Houve um erro ao gerar a imagem: ' + (error.message || error));
     }
   };
 

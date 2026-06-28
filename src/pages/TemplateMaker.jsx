@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import TierBoard from '../components/TierBoard';
 import { fetchAndParseAPI } from '../utils/apiParser';
 
@@ -128,7 +129,7 @@ export default function TemplateMaker() {
       const result = await processImage(file, 600, 338);
       setCoverImage(result.dataUrl);
     } catch (err) {
-      alert("Erro ao processar a capa.");
+      toast.error("Erro ao processar a capa.");
     }
   };
 
@@ -165,7 +166,7 @@ export default function TemplateMaker() {
       
       setItems(prev => [...prev, ...newProcessedItems]);
     } catch (err) {
-      alert("Erro ao processar as imagens.");
+      toast.error("Erro ao processar as imagens.");
     } finally {
       setIsProcessing(false);
     }
@@ -235,25 +236,25 @@ export default function TemplateMaker() {
   };
 
   const handleTestApi = async () => {
-    if (!apiConfig.url) return alert('Insira a URL da API primeiro.');
+    if (!apiConfig.url) return toast.error('Insira a URL da API primeiro.');
     setIsTestingApi(true);
     try {
       const apiItems = await fetchAndParseAPI(apiConfig);
       setItems(apiItems);
-      alert(`Sucesso! API retornou ${apiItems.length} itens.`);
+      toast.success(`Sucesso! API retornou ${apiItems.length} itens.`);
     } catch (error) {
-      alert(`Erro ao ler API: ${error.message}`);
+      toast.error(`Erro ao ler API: ${error.message}`);
     } finally {
       setIsTestingApi(false);
     }
   };
 
   const handleSaveTemplate = async () => {
-    if (!user) return alert("Você precisa estar logado para publicar um template!");
-    if (!name.trim()) return alert("Dê um nome para o template.");
-    if (!coverImage) return alert("O template precisa de uma imagem de capa.");
-    if (items.length === 0 && dataSourceType === 'manual') return alert("O template precisa de pelo menos 1 imagem.");
-    if (items.length === 0 && dataSourceType === 'api') return alert("Teste a API primeiro para garantir que ela carrega os itens.");
+    if (!user) return toast.error("Você precisa estar logado para publicar um template!");
+    if (!name.trim()) return toast.error("Dê um nome para o template.");
+    if (!coverImage) return toast.error("O template precisa de uma imagem de capa.");
+    if (items.length === 0 && dataSourceType === 'manual') return toast.error("O template precisa de pelo menos 1 imagem.");
+    if (items.length === 0 && dataSourceType === 'api') return toast.error("Teste a API primeiro para garantir que ela carrega os itens.");
 
     try {
       const templateDataPayload = {
@@ -273,7 +274,7 @@ export default function TemplateMaker() {
         }).eq('id', editTemplateId);
         
         if (error) throw error;
-        alert("Template atualizado com sucesso!");
+        toast.success("Template atualizado com sucesso!");
         navigate(`/tierlist?templateId=${editTemplateId}`);
       } else {
         const { data, error } = await supabase.from('templates').insert([{
@@ -285,12 +286,13 @@ export default function TemplateMaker() {
         }]).select();
 
         if (error) throw error;
-        alert("Template publicado com sucesso!");
+        toast.success("Template publicado com sucesso!");
         navigate(`/tierlist?templateId=${data[0].id}`);
       }
     } catch (err) {
       console.error(err);
-      alert("Erro ao publicar. Verifique se a tabela 'templates' existe no Supabase.");
+      console.error(err);
+      toast.error("Erro ao publicar. Verifique se a tabela 'templates' existe no Supabase.");
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { supabase } from '../supabaseClient';
 import '../index.css';
 
@@ -25,11 +26,11 @@ export default function Login() {
       } else {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        alert('Cadastro realizado! Confirme no seu e-mail se necessário.');
+        toast.success('Cadastro realizado! Confirme no seu e-mail se necessário.');
         setIsLogin(true);
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Erro ao autenticar');
+      toast.error('Erro na autenticação: ' + err.message);
     } finally {
       setLoading(false);
     }

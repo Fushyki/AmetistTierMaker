@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabaseClient';
 import { isAdmin } from '../utils/admin';
+import toast from 'react-hot-toast';
 import '../index.css';
 
 export default function Home() {
@@ -43,7 +44,7 @@ export default function Home() {
       if (!error) {
         setTemplates(prev => prev.filter(t => t.id !== templateId));
       } else {
-        alert("Erro ao deletar: " + error.message);
+        toast.error("Erro ao deletar: " + error.message);
       }
     }
   };
