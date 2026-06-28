@@ -669,6 +669,7 @@ function Tierlist() {
           onMoveRow={handleMoveRow}
           onAddRow={handleAddRow}
           onUpdateRow={handleUpdateRow}
+          isPresentationMode={isPresentationMode}
         />
 
         {!isPresentationMode && (

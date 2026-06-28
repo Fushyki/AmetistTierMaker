@@ -3,7 +3,7 @@ import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import DroppableArea from './DroppableArea';
 import SortableItem from './SortableItem';
 
-export default function TierRow({ rank, items, colunas, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onUpdateRow }) {
+export default function TierRow({ rank, items, colunas, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onUpdateRow, isPresentationMode }) {
   const isCustomTier = rank.id.startsWith('tier-') && rank.id.length > 10; 
   const colorInputRef = useRef(null);
 
@@ -22,10 +22,11 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
       <div 
         className={`tier-label ${rank.c || 'f-rank'}`} 
         style={rank.bgColor ? { backgroundColor: rank.bgColor } : {}}
-        contentEditable 
+        contentEditable={!isPresentationMode}
         suppressContentEditableWarning
-        onContextMenu={handleRightClick}
+        onContextMenu={isPresentationMode ? undefined : handleRightClick}
         onBlur={(e) => {
+          if (isPresentationMode) return;
           const newText = e.currentTarget.textContent.trim();
           if (newText !== rank.l) onUpdateRow(rank.id, { l: newText });
         }}
@@ -67,16 +68,18 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
         })}
       </div>
       
-      <div className="tier-settings" style={{ display: 'flex', flexDirection: 'column', gap: '2px', padding: '5px' }}>
-        <button onClick={() => onMoveRow(rank.id, 'up')} title="Mover para Cima" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#fff' }}>▲</button>
-        <button onClick={() => onMoveRow(rank.id, 'down')} title="Mover para Baixo" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#fff' }}>▼</button>
-        {isCustomTier && (
-          <button className="remove-row-btn" onClick={() => onRemoveRow(rank.id)} title="Excluir Linha" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginTop: '2px' }}>
-            🗑️
-          </button>
-        )}
-        <button className="config-btn" title="Configurar Cor" onClick={handleRightClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginTop: '2px' }}>⚙️</button>
-      </div>
+      {!isPresentationMode && (
+        <div className="tier-settings" style={{ display: 'flex', flexDirection: 'column', gap: '2px', padding: '5px' }}>
+          <button onClick={() => onMoveRow(rank.id, 'up')} title="Mover para Cima" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#fff' }}>▲</button>
+          <button onClick={() => onMoveRow(rank.id, 'down')} title="Mover para Baixo" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#fff' }}>▼</button>
+          {isCustomTier && (
+            <button className="remove-row-btn" onClick={() => onRemoveRow(rank.id)} title="Excluir Linha" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginTop: '2px' }}>
+              🗑️
+            </button>
+          )}
+          <button className="config-btn" title="Configurar Cor" onClick={handleRightClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginTop: '2px' }}>⚙️</button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,13 +1,13 @@
 import React from 'react';
 import TierRow from './TierRow';
 
-export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onAddRow, onUpdateRow }) {
+export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onAddRow, onUpdateRow, isPresentationMode }) {
   return (
     <div id="board">
       {ranksData.map((grupo, groupIndex) => (
         <div key={grupo.id} className="tier-section-group">
           {layoutMode === 'avancado' && (
-            <div className="group-header" contentEditable suppressContentEditableWarning>
+            <div className="group-header" contentEditable={!isPresentationMode} suppressContentEditableWarning>
               {grupo.titulo}
             </div>
           )}
@@ -17,14 +17,16 @@ export default function TierBoard({ ranksData, items, colunas, layoutMode, onRem
               <div className="tier-label" style={{ background: 'transparent', minHeight: 'auto', height: 'auto', opacity: 0 }}></div>
               <div className={`tier-drop-area grid-${colunas}`}>
                 {Array.from({ length: colunas }).map((_, i) => (
-                  <div key={i} className="col-title-box" contentEditable suppressContentEditableWarning>
+                  <div key={i} className="col-title-box" contentEditable={!isPresentationMode} suppressContentEditableWarning>
                     {i === 0 ? 'DPS' : i === 1 ? 'SUPPORT' : 'SUSTAIN'}
                   </div>
                 ))}
               </div>
-              <div className="tier-settings" style={{ visibility: 'hidden', padding: '5px', display: 'flex', flexDirection: 'column' }}>
-                <button style={{ fontSize: '1.2rem', padding: '5px' }}>⚙️</button>
-              </div>
+              {!isPresentationMode && (
+                <div className="tier-settings" style={{ visibility: 'hidden', padding: '5px', display: 'flex', flexDirection: 'column' }}>
+                  <button style={{ fontSize: '1.2rem', padding: '5px' }}>⚙️</button>
+                </div>
+              )}
             </div>
           )}
 
@@ -42,16 +44,19 @@ export default function TierBoard({ ranksData, items, colunas, layoutMode, onRem
                 onDoubleClickItem={onDoubleClickItem}
                 onMoveRow={onMoveRow}
                 onUpdateRow={onUpdateRow}
+                isPresentationMode={isPresentationMode}
               />
             ))}
           </div>
-          <button 
-            className="btn-secondary add-tier-row-btn" 
-            onClick={() => onAddRow(grupo.id)}
-            style={{ width: '100%', marginTop: '5px', padding: '10px', display: 'flex', justifyContent: 'center', opacity: 0.8 }}
-          >
-            + Adicionar Nova Linha
-          </button>
+          {!isPresentationMode && (
+            <button 
+              className="btn-secondary add-tier-row-btn" 
+              onClick={() => onAddRow(grupo.id)}
+              style={{ width: '100%', marginTop: '5px', padding: '10px', display: 'flex', justifyContent: 'center', opacity: 0.8 }}
+            >
+              + Adicionar Nova Linha
+            </button>
+          )}
         </div>
       ))}
     </div>
