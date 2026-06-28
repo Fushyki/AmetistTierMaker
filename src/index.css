@@ -454,3 +454,11 @@ h1 {
     }
 }
 
+
+
+/* SweetAlert Customizations */
+.swal-custom-popup {
+  border: 1px solid #333 !important;
+  border-radius: 12px !important;
+}
+

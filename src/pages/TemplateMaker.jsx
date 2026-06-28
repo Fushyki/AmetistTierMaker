@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { confirmAction } from '../utils/alerts';
 import TierBoard from '../components/TierBoard';
 import { fetchAndParseAPI } from '../utils/apiParser';
 
@@ -174,16 +175,26 @@ export default function TemplateMaker() {
     e.target.value = '';
   };
 
-  const handleReset = () => {
-    if (confirm("Tem certeza que deseja apagar o banco de imagens atual?")) {
+  const handleReset = async () => {
+    const isConfirmed = await confirmAction(
+      'Limpar Imagens',
+      'Tem certeza que deseja apagar o banco de imagens atual?',
+      'Sim, apagar'
+    );
+    if (isConfirmed) {
       setItems([]);
       setMasterDimensions(null);
     }
   };
 
-  const handleLayoutChange = (newMode) => {
+  const handleLayoutChange = async (newMode) => {
     if (layoutMode === newMode) return;
-    if (confirm('Atenção: Mudar o modo limpará a estrutura atual de Tiers. Deseja continuar?')) {
+    const isConfirmed = await confirmAction(
+      'Mudar Layout',
+      'Atenção: Mudar o modo limpará a estrutura atual de Tiers. Deseja continuar?',
+      'Sim, mudar'
+    );
+    if (isConfirmed) {
       setLayoutMode(newMode);
       setRanksData(newMode === 'classico' ? initialRanksClassico : initialRanksAvancado);
     }

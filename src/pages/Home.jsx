@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabaseClient';
 import { isAdmin } from '../utils/admin';
+import { confirmAction } from '../utils/alerts';
 import toast from 'react-hot-toast';
 import '../index.css';
 
@@ -39,7 +40,12 @@ export default function Home() {
   const handleDeleteTemplate = async (templateId, e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (confirm("Tem certeza que deseja deletar este template para sempre?")) {
+    const isConfirmed = await confirmAction(
+      'Deletar Template',
+      'Tem certeza que deseja deletar este template para sempre?',
+      'Sim, deletar'
+    );
+    if (isConfirmed) {
       const { error } = await supabase.from('templates').delete().eq('id', templateId);
       if (!error) {
         setTemplates(prev => prev.filter(t => t.id !== templateId));

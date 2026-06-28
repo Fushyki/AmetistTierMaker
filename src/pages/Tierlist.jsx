@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { DndContext, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import toast from 'react-hot-toast';
+import { confirmAction } from '../utils/alerts';
 import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
 import { useAuth } from '../contexts/AuthContext';
@@ -298,9 +299,14 @@ function Tierlist() {
     }
   };
 
-  const handleLayoutChange = (newMode) => {
+  const handleLayoutChange = async (newMode) => {
     if (layoutMode === newMode) return;
-    if (confirm('Atenção: Mudar o modo de layout limpará sua montagem atual e devolverá os personagens ao inventário. Deseja continuar?')) {
+    const isConfirmed = await confirmAction(
+      'Mudar Layout',
+      'Atenção: Mudar o modo de layout limpará sua montagem atual e devolverá os personagens ao inventário. Deseja continuar?',
+      'Sim, mudar'
+    );
+    if (isConfirmed) {
       saveHistoryState(items, ranksData);
       setLayoutMode(newMode);
       localStorage.setItem('tierlist-layout', newMode);
@@ -312,8 +318,13 @@ function Tierlist() {
     }
   };
 
-  const resetarTierList = () => {
-    if (confirm('Tem certeza que deseja resetar tudo? Todas as imagens no quadro serão perdidas.')) {
+  const resetarTierList = async () => {
+    const isConfirmed = await confirmAction(
+      'Resetar Tudo',
+      'Tem certeza que deseja resetar tudo? Todas as imagens no quadro serão perdidas.',
+      'Sim, resetar'
+    );
+    if (isConfirmed) {
       saveHistoryState(items, ranksData);
       setItems([]);
       setRanksData(layoutMode === 'classico' ? initialRanksClassico : initialRanksAvancado);

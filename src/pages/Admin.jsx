@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabaseClient';
+import { confirmAction } from '../utils/alerts';
 import '../index.css';
 
 export default function Admin() {
@@ -63,14 +64,24 @@ export default function Admin() {
   };
 
   const handleDelete = async (id) => {
-    if (confirm('Tem certeza que deseja deletar essa tierlist da nuvem?')) {
+    const isConfirmed = await confirmAction(
+      'Deletar Tier List',
+      'Tem certeza que deseja deletar essa tierlist da nuvem?',
+      'Sim, deletar'
+    );
+    if (isConfirmed) {
       await supabase.from('tierlists').delete().eq('id', id);
       fetchTierlists();
     }
   };
 
   const handleDeleteTemplate = async (id) => {
-    if (confirm('Tem certeza que deseja deletar este TEMPLATE da nuvem? Isso afetará a Galeria se ele for público.')) {
+    const isConfirmed = await confirmAction(
+      'Deletar Template',
+      'Tem certeza que deseja deletar este TEMPLATE da nuvem? Isso afetará a Galeria se ele for público.',
+      'Sim, deletar template'
+    );
+    if (isConfirmed) {
       await supabase.from('templates').delete().eq('id', id);
       fetchUserTemplates();
     }
