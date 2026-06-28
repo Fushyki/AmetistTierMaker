@@ -23,9 +23,9 @@ O **Ametist Tier Maker** é uma aplicação web Full-Stack moderna para montagem
 
 ## Motivação do Projeto
 
-Este projeto nasceu de uma frustração real com os "Tiermakers" tradicionais disponíveis na internet. A grande maioria das ferramentas atuais peca por layouts defasados, falta de recursos de customização e interfaces engessadas que prejudicam a experiência do usuário. 
+Nasceu de uma frustração real com os "Tiermakers" tradicionais disponíveis na internet. A grande maioria das ferramentas atuais peca por layouts defasados, falta de recursos de customização e interfaces engessadas que prejudicam a experiência do usuário. 
 
-A vontade de desenvolver o Ametist surgiu especificamente da necessidade de classificar personagens e itens do universo de **Genshin Impact**. Diante da falta de uma plataforma bonita e funcional para criar essas listas, decidi construir do zero uma solução premium, moderna e flexível que resolvesse todos esses problemas estruturais.
+A vontade de desenvolver o Ametist surgiu especificamente da necessidade de classificar personagens e itens do universo de **Genshin Impact**.Na falta de uma plataforma bonita e funcional para criar essas listas, decidi construir do zero uma solução premium, moderna e flexível que resolvesse todos esses problemas estruturais e falta de funcionaldiades.
 
 ## Funcionalidades Principais
 
