@@ -15,7 +15,7 @@ export default function Home() {
 
       <div style={{ background: 'linear-gradient(90deg, rgba(176,98,235,0.1) 0%, rgba(255,215,0,0.1) 100%)', padding: '15px 30px', borderRadius: '12px', border: '1px solid rgba(176,98,235,0.3)', marginBottom: '40px', maxWidth: '600px' }}>
         <p style={{ margin: 0, color: '#ddd', fontSize: '0.95rem', lineHeight: '1.5' }}>
-          Crie sua conta gratuitamente para SALVAR suas Tier Lists e continuar editando elas de qualquer dispositivo, a qualquer momento.
+          Crie sua conta gratuitamente para salvar suas Tier Lists e continuar editando elas de qualquer dispositivo, a qualquer momento.
         </p>
       </div>
       

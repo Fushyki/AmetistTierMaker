@@ -335,7 +335,7 @@ h1 {
 .navbar-links { display: flex; gap: 20px; align-items: center; }
 .nav-item { color: #fff; text-decoration: none; font-weight: 500; transition: color 0.2s; }
 .nav-item:hover { color: #b062eb; }
-.nav-btn { background: #b062eb; color: #000; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: opacity 0.2s; }
+.nav-btn { background: #b062eb; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: opacity 0.2s; }
 .nav-btn:hover { opacity: 0.9; }
 .ametist-footer { background: #111; padding: 30px 0; border-top: 1px solid #222; text-align: center; margin-top: auto; }
 .footer-content { max-width: 1200px; margin: 0 auto; padding: 0 20px; }

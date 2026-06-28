@@ -13,12 +13,18 @@ export default function TierBoard({ ranksData, items, colunas, layoutMode, onRem
           )}
           
           {layoutMode === 'avancado' && (
-            <div className={`column-header-row grid-${colunas}`}>
-              {Array.from({ length: colunas }).map((_, i) => (
-                <div key={i} className="col-title-box" contentEditable suppressContentEditableWarning>
-                  {i === 0 ? 'DPS' : i === 1 ? 'SUPPORT' : 'SUSTAIN'}
-                </div>
-              ))}
+            <div className="tier-row" style={{ marginBottom: '5px' }}>
+              <div className="tier-label" style={{ background: 'transparent', minHeight: 'auto', height: 'auto', opacity: 0 }}></div>
+              <div className={`tier-drop-area grid-${colunas}`}>
+                {Array.from({ length: colunas }).map((_, i) => (
+                  <div key={i} className="col-title-box" contentEditable suppressContentEditableWarning>
+                    {i === 0 ? 'DPS' : i === 1 ? 'SUPPORT' : 'SUSTAIN'}
+                  </div>
+                ))}
+              </div>
+              <div className="tier-settings" style={{ visibility: 'hidden', padding: '5px', display: 'flex', flexDirection: 'column' }}>
+                <button style={{ fontSize: '1.2rem', padding: '5px' }}>⚙️</button>
+              </div>
             </div>
           )}
 

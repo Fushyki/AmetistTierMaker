@@ -91,7 +91,7 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
             <button className="clear-inventory-btn" title="Duplicar o personagem selecionado" onClick={onDuplicate}>
               Duplicar Sel.
             </button>
-            <button className="clear-inventory-btn" title="Baixa os personagens mais recentes do servidor" onClick={onUpdateApi}>
+            <button className="clear-inventory-btn" title="restaura/atualiza as imagens" onClick={onUpdateApi}>
               Restaurar
             </button>
             <button className="clear-inventory-btn" title="Remover todas as imagens do inventário" onClick={onClear}>
