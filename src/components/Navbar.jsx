@@ -19,7 +19,6 @@ export default function Navbar() {
         {/* Center: Links */}
         <div className="navbar-links" style={{ display: 'flex', gap: '20px', justifyContent: 'center', flex: 1 }}>
           <Link to="/" className="nav-item">Home</Link>
-          <Link to="/tierlist?new=true" className="nav-item">Criar Tierlist</Link>
           <Link to="/template-maker" className="nav-item">Criar Modelo</Link>
         </div>
 

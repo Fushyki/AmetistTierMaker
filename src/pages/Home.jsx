@@ -49,7 +49,7 @@ export default function Home() {
       </div>
       
       <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link to="/tierlist">
+        <Link to="/tierlist?new=true">
           <button style={{ padding: '15px 30px', fontSize: '1.2rem', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
             Montar Tier List
           </button>
