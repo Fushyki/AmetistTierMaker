@@ -241,6 +241,14 @@ function Tierlist() {
     }));
   };
 
+  const handleUpdateRow = (rankId, updates) => {
+    saveHistoryState(items, ranksData);
+    setRanksData(prev => prev.map(group => ({
+      ...group,
+      ranks: group.ranks.map(r => r.id === rankId ? { ...r, ...updates } : r)
+    })));
+  };
+
   const handleMoveRow = (rankId, direction) => {
     saveHistoryState(items, ranksData);
     setRanksData(prev => {
@@ -621,6 +629,7 @@ function Tierlist() {
           onDoubleClickItem={handleDoubleClickItem}
           onMoveRow={handleMoveRow}
           onAddRow={handleAddRow}
+          onUpdateRow={handleUpdateRow}
         />
 
         {!isPresentationMode && (

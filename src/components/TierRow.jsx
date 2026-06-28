@@ -3,7 +3,7 @@ import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import DroppableArea from './DroppableArea';
 import SortableItem from './SortableItem';
 
-export default function TierRow({ rank, items, colunas, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow }) {
+export default function TierRow({ rank, items, colunas, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onUpdateRow }) {
   const isCustomTier = rank.id.startsWith('tier-') && rank.id.length > 10; 
   const colorInputRef = useRef(null);
 
@@ -14,15 +14,21 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
 
   const handleColorChange = (e) => {
     e.target.parentElement.style.backgroundColor = e.target.value;
+    onUpdateRow(rank.id, { bgColor: e.target.value });
   };
 
   return (
     <div className="tier-row" id={rank.id}>
       <div 
         className={`tier-label ${rank.c || 'f-rank'}`} 
+        style={rank.bgColor ? { backgroundColor: rank.bgColor } : {}}
         contentEditable 
         suppressContentEditableWarning
         onContextMenu={handleRightClick}
+        onBlur={(e) => {
+          const newText = e.currentTarget.textContent.trim();
+          if (newText !== rank.l) onUpdateRow(rank.id, { l: newText });
+        }}
       >
         {rank.l || 'F'}
         <input 

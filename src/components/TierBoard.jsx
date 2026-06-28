@@ -1,7 +1,7 @@
 import React from 'react';
 import TierRow from './TierRow';
 
-export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onAddRow }) {
+export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onAddRow, onUpdateRow }) {
   return (
     <div id="board">
       {ranksData.map((grupo, groupIndex) => (
@@ -41,6 +41,7 @@ export default function TierBoard({ ranksData, items, colunas, layoutMode, onRem
                 onAreaClick={onAreaClick}
                 onDoubleClickItem={onDoubleClickItem}
                 onMoveRow={onMoveRow}
+                onUpdateRow={onUpdateRow}
               />
             ))}
           </div>
