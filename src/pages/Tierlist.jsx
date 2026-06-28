@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { DndContext, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
 import { useAuth } from '../contexts/AuthContext';
@@ -260,12 +261,7 @@ function Tierlist() {
       };
 
       if (overIndex !== -1) {
-         // Move to exactly before/after the hovered item
-         const itemToMove = newItems.splice(activeIndex, 1)[0];
-         // Recalculate index after splice
-         const newOverIndex = newItems.findIndex(i => i.id === overId);
-         newItems.splice(newOverIndex, 0, itemToMove);
-         return newItems;
+         return arrayMove(newItems, activeIndex, overIndex);
       }
       return newItems;
     });
@@ -286,12 +282,7 @@ function Tierlist() {
         const activeIndex = prev.findIndex(i => i.id === activeId);
         const overIndex = prev.findIndex(i => i.id === overId);
         
-        const newItems = [...prev];
-        const itemToMove = newItems.splice(activeIndex, 1)[0];
-        const newOverIndex = newItems.findIndex(i => i.id === overId);
-        // Put it after or before depending on standard array move
-        newItems.splice(newOverIndex, 0, itemToMove);
-        return newItems;
+        return arrayMove(prev, activeIndex, overIndex);
       });
     }
     setSelectedItem(null);

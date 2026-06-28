@@ -4,7 +4,7 @@ import TierRow from './TierRow';
 export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick }) {
   return (
     <div id="board">
-      {ranksData.map((grupo) => (
+      {ranksData.map((grupo, groupIndex) => (
         <div key={grupo.id} className="tier-section-group">
           {layoutMode === 'avancado' && (
             <div className="group-header" contentEditable suppressContentEditableWarning>
@@ -12,7 +12,7 @@ export default function TierBoard({ ranksData, items, colunas, layoutMode, onRem
             </div>
           )}
           
-          {layoutMode === 'avancado' && (
+          {layoutMode === 'avancado' && groupIndex === 0 && (
             <div className="tier-row" style={{ marginBottom: '5px' }}>
               <div className="tier-label" style={{ background: 'transparent', minHeight: 'auto', height: 'auto', opacity: 0 }}></div>
               <div className={`tier-drop-area grid-${colunas}`}>

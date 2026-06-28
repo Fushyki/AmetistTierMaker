@@ -82,6 +82,9 @@ h1 {
     background: #1e1e21;
     color: #eee;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 6px;
     font-size: 0.7rem;
     font-weight: bold;
