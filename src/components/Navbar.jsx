@@ -9,7 +9,8 @@ export default function Navbar() {
   return (
     <nav className="ametist-navbar">
       <div className="navbar-container">
-        <div className="navbar-logo">
+        <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src="/ametist-logo.png" alt="Ametist Logo" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
           <span>Ametist</span>
         </div>
         <div className="navbar-links">
