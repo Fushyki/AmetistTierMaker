@@ -335,7 +335,7 @@ export default function TemplateMaker() {
         </div>
       )}
 
-      <div className="control-card" style={{ marginTop: '20px', padding: '15px', backgroundColor: '#212124', borderRadius: '8px', textAlign: 'center' }}>
+      <div className="control-card" style={{ marginTop: '20px', padding: '15px', backgroundColor: '#212124', borderRadius: '8px', textAlign: 'center', maxWidth: '400px', margin: '20px auto 0 auto' }}>
         <h4 style={{ margin: '0 0 10px 0' }}>Visibilidade do Modelo</h4>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
           <button 
