@@ -157,6 +157,7 @@ function Tierlist() {
             }
             
             localStorage.setItem('tierlist-api-loaded', 'true');
+            localStorage.setItem('tierlist-active-template-id', templateId);
             
             // Remove the query param to avoid reloading on refresh
             searchParams.delete('templateId');
@@ -175,6 +176,7 @@ function Tierlist() {
       localStorage.removeItem('tierlist-items');
       localStorage.removeItem('tierlist-ranks');
       localStorage.removeItem('tierlist-api-loaded');
+      localStorage.removeItem('tierlist-active-template-id');
       
       setItems([]);
       setRanksData(initialRanksClassico);
@@ -230,12 +232,30 @@ function Tierlist() {
   };
 
   const loadFromApiAgain = async () => {
-    const defaultUrl = localStorage.getItem('tierlist-api-url') || 'https://api.lunaris.moe/data/6.6.54.3/charlist.json';
-    
+    const activeTemplateId = localStorage.getItem('tierlist-active-template-id');
+    const existingIds = new Set(items.map(i => i.id));
+
     try {
-      const res = await fetch(defaultUrl);
+      if (activeTemplateId) {
+        // Restaurar imagens do Template carregado
+        const { data, error } = await supabase.from('templates').select('data').eq('id', activeTemplateId).single();
+        if (data && data.data) {
+          const templateItems = data.data.items || data.data; // Handles both new and legacy template structures
+          const missingItems = templateItems.filter(item => !existingIds.has(item.id));
+          
+          if (missingItems.length > 0) {
+            // Add them back to inventory (tierId = null)
+            const restoredItems = missingItems.map(item => ({ ...item, tierId: null, colIndex: null }));
+            setItems(prev => [...prev, ...restoredItems]);
+          } else {
+            alert('Todas as imagens originais do template já estão presentes.');
+          }
+        }
+      } else {
+        // Restaurar imagens do Genshin (Padrão)
+        const defaultUrl = localStorage.getItem('tierlist-api-url') || 'https://api.lunaris.moe/data/6.6.54.3/charlist.json';
+        const res = await fetch(defaultUrl);
         const data = await res.json();
-        const existingIds = new Set(items.map(i => i.id));
         
         const newItems = Object.entries(data)
           .filter(([id, _]) => !existingIds.has('genshin-' + id))
@@ -252,9 +272,10 @@ function Tierlist() {
           });
 
         setItems(prev => [...prev, ...newItems]);
-      } catch (err) {
-        console.error("Erro ao carregar da API:", err);
       }
+    } catch (err) {
+      console.error("Erro ao restaurar imagens:", err);
+    }
   };
 
   const handleLayoutChange = (newMode) => {
