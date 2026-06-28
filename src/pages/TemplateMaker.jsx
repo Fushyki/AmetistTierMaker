@@ -50,13 +50,6 @@ export default function TemplateMaker() {
   const [ranksData, setRanksData] = useState(initialRanksClassico);
   const colunas = layoutMode === 'classico' ? 1 : 3;
 
-  useEffect(() => {
-    if (!user) {
-      alert("Faça login para criar templates!");
-      navigate('/login');
-    }
-  }, [user, navigate]);
-
   const fileInputRef = useRef(null);
   const coverInputRef = useRef(null);
 
@@ -257,6 +250,27 @@ export default function TemplateMaker() {
       alert("Erro ao publicar. Verifique se a tabela 'templates' existe no Supabase.");
     }
   };
+
+  if (!user) {
+    return (
+      <div className="container" style={{ padding: '40px 20px', maxWidth: '600px', margin: '100px auto', color: '#fff', textAlign: 'center' }}>
+        <h1 style={{ color: '#b062eb', marginBottom: '20px' }}>Acesso Restrito</h1>
+        <div style={{ background: '#212124', padding: '30px', borderRadius: '12px', border: '1px solid #3a3a40' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '15px' }}>🔒</div>
+          <h2 style={{ marginBottom: '15px' }}>Criar modelo é uma função exclusiva para membros</h2>
+          <p style={{ color: '#aaa', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '30px' }}>
+            Crie sua conta gratuitamente para salvar suas Tier Lists e criar seus templates, além de continuar editando elas de qualquer dispositivo, a qualquer momento.
+          </p>
+          <button 
+            onClick={() => navigate('/login')}
+            style={{ padding: '15px 30px', fontSize: '1.2rem', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Fazer Login / Criar Conta
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container" style={{ padding: '20px', maxWidth: '900px', margin: '0 auto', color: '#fff' }}>

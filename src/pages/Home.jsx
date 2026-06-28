@@ -57,33 +57,6 @@ export default function Home() {
         Crie suas próprias Tier Lists de forma rápida e mobile-friendly!
       </p>
 
-      <div style={{ background: 'linear-gradient(90deg, rgba(176,98,235,0.1) 0%, rgba(255,215,0,0.1) 100%)', padding: '15px 30px', borderRadius: '12px', border: '1px solid rgba(176,98,235,0.3)', marginBottom: '40px', maxWidth: '600px' }}>
-        <p style={{ margin: 0, color: '#ddd', fontSize: '0.95rem', lineHeight: '1.5' }}>
-          Crie sua conta gratuitamente para salvar suas Tier Lists e continuar editando elas de qualquer dispositivo, a qualquer momento.
-        </p>
-      </div>
-      
-      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link to="/tierlist?new=true">
-          <button style={{ padding: '15px 30px', fontSize: '1.2rem', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-            Montar Tier List
-          </button>
-        </Link>
-        {!user ? (
-          <Link to="/login">
-            <button style={{ padding: '15px 30px', fontSize: '1.2rem', backgroundColor: '#333', color: '#fff', border: '1px solid #555', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-              Fazer Login / Criar Conta
-            </button>
-          </Link>
-        ) : (
-          <Link to="/admin">
-            <button style={{ padding: '15px 30px', fontSize: '1.2rem', backgroundColor: '#b062eb', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-              Meu Painel
-            </button>
-          </Link>
-        )}
-      </div>
-
       <div style={{ marginTop: '50px', width: '100%', maxWidth: '1000px' }}>
         <h2 style={{ color: '#fff', marginBottom: '20px' }}>Novos Templates da Comunidade</h2>
         
