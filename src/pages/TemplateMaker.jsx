@@ -354,7 +354,6 @@ export default function TemplateMaker() {
                 <div style={{ color: '#b062eb', fontWeight: 'bold' }}>Processando imagens...</div>
               ) : (
                 <>
-                  <div style={{ fontSize: '2rem', marginBottom: '10px' }}>📁</div>
                   <div style={{ color: '#ddd' }}>Clique aqui para selecionar múltiplas imagens</div>
                 </>
               )}
