@@ -335,24 +335,24 @@ export default function TemplateMaker() {
         </div>
       )}
 
-      <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#212124', borderRadius: '8px', textAlign: 'center' }}>
-        <h3 style={{ marginBottom: '15px' }}>Visibilidade</h3>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+      <div className="control-card" style={{ marginTop: '20px', padding: '15px', backgroundColor: '#212124', borderRadius: '8px', textAlign: 'center' }}>
+        <h4 style={{ margin: '0 0 10px 0' }}>Visibilidade do Modelo</h4>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
           <button 
             className={isPublic ? 'btn-active' : 'btn-secondary'}
             onClick={() => setIsPublic(true)}
-            style={{ padding: '12px 25px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', width: '220px' }}
+            style={{ padding: '8px 15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', width: '160px' }}
           >
-            <span style={{ fontSize: '1.2rem' }}>Público</span>
-            <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>Aparece na Galeria Home</span>
+            <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>Público</span>
+            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Vai para a Galeria</span>
           </button>
           <button 
             className={!isPublic ? 'btn-active' : 'btn-secondary'}
             onClick={() => setIsPublic(false)}
-            style={{ padding: '12px 25px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', width: '220px' }}
+            style={{ padding: '8px 15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', width: '160px' }}
           >
-            <span style={{ fontSize: '1.2rem' }}>Privado</span>
-            <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>Apenas no Meu Painel</span>
+            <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>Privado</span>
+            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Só no Meu Painel</span>
           </button>
         </div>
       </div>
