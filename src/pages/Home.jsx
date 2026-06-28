@@ -14,11 +14,8 @@ export default function Home() {
       </p>
 
       <div style={{ background: 'linear-gradient(90deg, rgba(176,98,235,0.1) 0%, rgba(255,215,0,0.1) 100%)', padding: '15px 30px', borderRadius: '12px', border: '1px solid rgba(176,98,235,0.3)', marginBottom: '40px', maxWidth: '600px' }}>
-        <h3 style={{ margin: '0 0 8px 0', color: '#b062eb', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          Salve na Nuvem
-        </h3>
         <p style={{ margin: 0, color: '#ddd', fontSize: '0.95rem', lineHeight: '1.5' }}>
-          O grande diferencial do Ametist é o salvamento em nuvem! Crie sua conta gratuitamente para guardar suas Tier Lists e continuar editando elas de qualquer dispositivo, a qualquer momento.
+          Crie sua conta gratuitamente para guardar suas Tier Lists e continuar editando elas de qualquer dispositivo, a qualquer momento.
         </p>
       </div>
       
