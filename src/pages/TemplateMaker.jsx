@@ -297,12 +297,12 @@ export default function TemplateMaker() {
       <div className="control-card" style={{ padding: '20px', marginBottom: '20px' }}>
         <h3>Banco de Imagens</h3>
         <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '15px' }}>
-          <strong>A Regra de Ouro:</strong> A PRIMEIRA imagem que você upar ditará o tamanho exato e formato (aspect ratio) de todas as outras. Suba pacotes de imagens à vontade, elas serão padronizadas.
+          <strong>A Regra:</strong> A PRIMEIRA imagem que você upar ditará o tamanho exato e formato (aspect ratio) de todas as outras. Suba pacotes de imagens à vontade, elas serão padronizadas.
         </p>
         
         {masterDimensions && (
           <div style={{ padding: '10px', backgroundColor: 'rgba(176, 98, 235, 0.1)', borderRadius: '5px', marginBottom: '15px', color: '#b062eb' }}>
-            Regra de Ouro ativa: <strong>{masterDimensions.width}x{masterDimensions.height}px</strong>
+            Regra ativa: <strong>{masterDimensions.width}x{masterDimensions.height}px</strong>
           </div>
         )}
 
