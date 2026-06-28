@@ -1,7 +1,24 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import TierBoard from '../components/TierBoard';
+
+const initialRanksAvancado = [
+  { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
+  { id: 'group-2', titulo: "META CHARACTERS", ranks: [{ id: 'tier-3', l: "T1", c: "b-rank" }, { id: 'tier-4', l: "T1,5", c: "c-rank" }] },
+  { id: 'group-3', titulo: "OFF-META CHARACTERS", ranks: [{ id: 'tier-5', l: "T2", c: "d-rank" }, { id: 'tier-6', l: "T3", c: "f-rank" }] }
+];
+
+const initialRanksClassico = [
+  { id: 'group-1', titulo: "TIER LIST", ranks: [
+    { id: 'tier-1', l: "S", c: "s-rank" }, 
+    { id: 'tier-2', l: "A", c: "a-rank" },
+    { id: 'tier-3', l: "B", c: "b-rank" },
+    { id: 'tier-4', l: "C", c: "c-rank" },
+    { id: 'tier-5', l: "D", c: "d-rank" }
+  ]}
+];
 
 export default function TemplateMaker() {
   const { user } = useAuth();
@@ -13,6 +30,17 @@ export default function TemplateMaker() {
   const [masterDimensions, setMasterDimensions] = useState(null);
   const [items, setItems] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  const [layoutMode, setLayoutMode] = useState('classico');
+  const [ranksData, setRanksData] = useState(initialRanksClassico);
+  const colunas = layoutMode === 'classico' ? 1 : 3;
+
+  useEffect(() => {
+    if (!user) {
+      alert("Faça login para criar templates!");
+      navigate('/login');
+    }
+  }, [user, navigate]);
 
   const fileInputRef = useRef(null);
   const coverInputRef = useRef(null);
@@ -113,6 +141,60 @@ export default function TemplateMaker() {
     }
   };
 
+  const handleLayoutChange = (newMode) => {
+    if (layoutMode === newMode) return;
+    if (confirm('Atenção: Mudar o modo limpará a estrutura atual de Tiers. Deseja continuar?')) {
+      setLayoutMode(newMode);
+      setRanksData(newMode === 'classico' ? initialRanksClassico : initialRanksAvancado);
+    }
+  };
+
+  const handleAddRow = (groupId) => {
+    setRanksData(prev => prev.map(group => {
+      if (group.id !== groupId) return group;
+      return {
+        ...group,
+        ranks: [...group.ranks, { id: 'tier-' + Date.now(), l: "NEW", c: "f-rank" }]
+      };
+    }));
+  };
+
+  const handleUpdateRow = (rankId, updates) => {
+    setRanksData(prev => prev.map(group => ({
+      ...group,
+      ranks: group.ranks.map(r => r.id === rankId ? { ...r, ...updates } : r)
+    })));
+  };
+
+  const handleRemoveRow = (rankId) => {
+    setRanksData(prev => prev.map(group => ({
+      ...group,
+      ranks: group.ranks.filter(r => r.id !== rankId)
+    })));
+  };
+
+  const handleMoveRow = (rankId, direction) => {
+    setRanksData(prev => {
+      const newData = JSON.parse(JSON.stringify(prev));
+      for (const group of newData) {
+        const index = group.ranks.findIndex(r => r.id === rankId);
+        if (index !== -1) {
+          if (direction === 'up' && index > 0) {
+            const temp = group.ranks[index];
+            group.ranks[index] = group.ranks[index - 1];
+            group.ranks[index - 1] = temp;
+          } else if (direction === 'down' && index < group.ranks.length - 1) {
+            const temp = group.ranks[index];
+            group.ranks[index] = group.ranks[index + 1];
+            group.ranks[index + 1] = temp;
+          }
+          break;
+        }
+      }
+      return newData;
+    });
+  };
+
   const handleSaveTemplate = async () => {
     if (!user) return alert("Você precisa estar logado para publicar um template!");
     if (!name.trim()) return alert("Dê um nome para o template.");
@@ -120,11 +202,18 @@ export default function TemplateMaker() {
     if (items.length === 0) return alert("O template precisa de pelo menos 1 imagem.");
 
     try {
+      const templateDataPayload = {
+        items,
+        ranksData,
+        layoutMode,
+        colunas
+      };
+
       const { data, error } = await supabase.from('templates').insert([{
         user_id: user.id,
         name: name.trim(),
         cover_image: coverImage,
-        data: items
+        data: templateDataPayload
       }]).select();
 
       if (error) throw error;
@@ -167,6 +256,43 @@ export default function TemplateMaker() {
               <input type="file" accept="image/*" onChange={handleCoverUpload} ref={coverInputRef} style={{ display: 'none' }} />
             </label>
           )}
+        </div>
+      </div>
+
+      <div className="control-card" style={{ padding: '20px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <h3>Estrutura dos Tiers</h3>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              className={`mode-btn ${layoutMode === 'classico' ? 'active' : ''}`}
+              onClick={() => handleLayoutChange('classico')}
+              style={{ padding: '5px 15px' }}
+            >Modo Clássico</button>
+            <button 
+              className={`mode-btn ${layoutMode === 'avancado' ? 'active' : ''}`}
+              onClick={() => handleLayoutChange('avancado')}
+              style={{ padding: '5px 15px' }}
+            >Modo Avançado</button>
+          </div>
+        </div>
+        <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '20px' }}>Configure as cores, textos, adicione ou remova linhas. Este esqueleto será salvo no modelo!</p>
+        
+        {/* TierBoard disabled DND mode by not wrapping in DndContext, just for visual config */}
+        <div style={{ opacity: 0.9 }}>
+          <TierBoard 
+            ranksData={ranksData}
+            items={[]}
+            colunas={colunas}
+            layoutMode={layoutMode}
+            onRemoveRow={handleRemoveRow}
+            selectedItem={null}
+            setSelectedItem={() => {}}
+            onAreaClick={() => {}}
+            onDoubleClickItem={() => {}}
+            onMoveRow={handleMoveRow}
+            onAddRow={handleAddRow}
+            onUpdateRow={handleUpdateRow}
+          />
         </div>
       </div>
 

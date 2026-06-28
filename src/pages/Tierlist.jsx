@@ -143,9 +143,20 @@ function Tierlist() {
         try {
           const { data, error } = await supabase.from('templates').select('data').eq('id', templateId).single();
           if (data && data.data) {
-            if (confirm("Carregar este template irá substituir os itens atuais do seu inventário. Continuar?")) {
+            if (confirm("Carregar este template irá substituir a estrutura e os itens atuais. Continuar?")) {
               saveHistoryState(items, ranksData);
-              setItems(data.data);
+              
+              if (data.data.items && data.data.ranksData) {
+                // New template structure
+                setItems(data.data.items);
+                setRanksData(data.data.ranksData);
+                setLayoutMode(data.data.layoutMode || 'classico');
+                setColunas(data.data.colunas || 1);
+              } else {
+                // Legacy template structure (just array of items)
+                setItems(data.data);
+              }
+              
               localStorage.setItem('tierlist-api-loaded', 'true');
               
               // Remove the query param to avoid reloading on refresh
