@@ -26,6 +26,7 @@ export default function TemplateMaker() {
   
   const [name, setName] = useState('');
   const [coverImage, setCoverImage] = useState(null);
+  const [isPublic, setIsPublic] = useState(true);
   
   const [masterDimensions, setMasterDimensions] = useState(null);
   const [items, setItems] = useState([]);
@@ -213,6 +214,7 @@ export default function TemplateMaker() {
         user_id: user.id,
         name: name.trim(),
         cover_image: coverImage,
+        is_public: isPublic,
         data: templateDataPayload
       }]).select();
 
@@ -332,6 +334,27 @@ export default function TemplateMaker() {
           </div>
         </div>
       )}
+
+      <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '10px', padding: '20px', backgroundColor: '#212124', borderRadius: '8px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+            <input 
+              type="radio" 
+              name="visibility" 
+              checked={isPublic} 
+              onChange={() => setIsPublic(true)} 
+            />
+            Público (Aparece na Galeria Home)
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', marginLeft: '20px' }}>
+            <input 
+              type="radio" 
+              name="visibility" 
+              checked={!isPublic} 
+              onChange={() => setIsPublic(false)} 
+            />
+            Privado (Apenas no Meu Painel)
+          </label>
+      </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
         <button 

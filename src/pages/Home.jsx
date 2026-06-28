@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabaseClient';
+import { isAdmin } from '../utils/admin';
 import '../index.css';
 
 export default function Home() {
@@ -15,7 +16,8 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from('templates')
-          .select('id, name, cover_image, created_at')
+          .select('id, name, cover_image, created_at, user_id')
+          .eq('is_public', true)
           .order('created_at', { ascending: false });
         
         if (error) {
@@ -32,6 +34,19 @@ export default function Home() {
     };
     fetchTemplates();
   }, []);
+
+  const handleDeleteTemplate = async (templateId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm("Tem certeza que deseja deletar este template para sempre?")) {
+      const { error } = await supabase.from('templates').delete().eq('id', templateId);
+      if (!error) {
+        setTemplates(prev => prev.filter(t => t.id !== templateId));
+      } else {
+        alert("Erro ao deletar: " + error.message);
+      }
+    }
+  };
 
   const filteredTemplates = templates.filter(t => t.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -85,18 +100,33 @@ export default function Home() {
         ) : filteredTemplates.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
             {filteredTemplates.map(template => (
-              <Link to={`/tierlist?templateId=${template.id}`} key={template.id} style={{ textDecoration: 'none' }}>
-                <div className="template-card" style={{ backgroundColor: '#212124', borderRadius: '12px', overflow: 'hidden', border: '1px solid #3a3a40', transition: 'transform 0.2s', cursor: 'pointer' }}
-                     onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                     onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-                  <div style={{ width: '100%', aspectRatio: '16/9', backgroundImage: `url(${template.cover_image})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#111' }}>
-                    {!template.cover_image && <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555' }}>Sem Capa</div>}
+              <div key={template.id} style={{ position: 'relative' }}>
+                <Link to={`/tierlist?templateId=${template.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <div className="template-card" style={{ backgroundColor: '#212124', borderRadius: '12px', overflow: 'hidden', transition: 'transform 0.2s', border: '1px solid #333' }}>
+                    <div style={{ width: '100%', height: '160px', overflow: 'hidden', position: 'relative' }}>
+                      <img 
+                        src={template.cover_image} 
+                        alt={template.name} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/300x160?text=Sem+Capa' }}
+                      />
+                    </div>
+                    <div style={{ padding: '15px' }}>
+                      <h3 style={{ margin: '0 0 10px 0', fontSize: '1.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{template.name}</h3>
+                      <p style={{ margin: 0, color: '#aaa', fontSize: '0.9rem' }}>{new Date(template.created_at).toLocaleDateString()}</p>
+                    </div>
                   </div>
-                  <div style={{ padding: '15px', textAlign: 'left' }}>
-                    <h3 style={{ color: '#fff', margin: 0, fontSize: '1.1rem' }}>{template.name}</h3>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+                {user && (user.id === template.user_id || isAdmin(user)) && (
+                  <button 
+                    onClick={(e) => handleDeleteTemplate(template.id, e)}
+                    style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255,0,0,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Excluir Template"
+                  >
+                    🗑️
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         ) : (
