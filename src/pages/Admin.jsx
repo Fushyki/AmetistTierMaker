@@ -98,8 +98,8 @@ export default function Admin() {
   }
 
   const containerBg = isAdmin(user) ? '#2a1114' : '#161618'; // Dark wine for admin, dark grey for user
-  const cardBg = isAdmin(user) ? '#3b181d' : '#222';
-  const templateCardBg = isAdmin(user) ? '#3b181d' : '#212124';
+  const cardBg = '#222';
+  const templateCardBg = '#212124';
 
   return (
     <div className="tierlist-container" style={{ maxWidth: '800px', margin: '50px auto' }}>
