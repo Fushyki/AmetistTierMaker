@@ -143,26 +143,24 @@ function Tierlist() {
         try {
           const { data, error } = await supabase.from('templates').select('data').eq('id', templateId).single();
           if (data && data.data) {
-            if (confirm("Carregar este template irá substituir a estrutura e os itens atuais. Continuar?")) {
-              saveHistoryState(items, ranksData);
-              
-              if (data.data.items && data.data.ranksData) {
-                // New template structure
-                setItems(data.data.items);
-                setRanksData(data.data.ranksData);
-                setLayoutMode(data.data.layoutMode || 'classico');
-                setColunas(data.data.colunas || 1);
-              } else {
-                // Legacy template structure (just array of items)
-                setItems(data.data);
-              }
-              
-              localStorage.setItem('tierlist-api-loaded', 'true');
-              
-              // Remove the query param to avoid reloading on refresh
-              searchParams.delete('templateId');
-              setSearchParams(searchParams);
+            saveHistoryState(items, ranksData);
+            
+            if (data.data.items && data.data.ranksData) {
+              // New template structure
+              setItems(data.data.items);
+              setRanksData(data.data.ranksData);
+              setLayoutMode(data.data.layoutMode || 'classico');
+              setColunas(data.data.colunas || 1);
+            } else {
+              // Legacy template structure (just array of items)
+              setItems(data.data);
             }
+            
+            localStorage.setItem('tierlist-api-loaded', 'true');
+            
+            // Remove the query param to avoid reloading on refresh
+            searchParams.delete('templateId');
+            setSearchParams(searchParams);
           }
         } catch (err) {
           console.error("Erro ao carregar template:", err);
@@ -170,6 +168,22 @@ function Tierlist() {
       };
       loadTemplate();
       return;
+    }
+
+    // Carregamento Nova Tierlist Reset
+    if (searchParams.get('new') === 'true') {
+      localStorage.removeItem('tierlist-items');
+      localStorage.removeItem('tierlist-ranks');
+      localStorage.removeItem('tierlist-api-loaded');
+      
+      setItems([]);
+      setRanksData(initialRanksClassico);
+      setLayoutMode('classico');
+      
+      searchParams.delete('new');
+      setSearchParams(searchParams);
+      
+      // Allow fetchCharacters to run naturally below
     }
 
     // Carregamento inicial da API
