@@ -343,7 +343,7 @@ export default function TemplateMaker() {
             onClick={() => setIsPublic(true)}
             style={{ padding: '12px 25px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', width: '220px' }}
           >
-            <span style={{ fontSize: '1.2rem' }}>🌍 Público</span>
+            <span style={{ fontSize: '1.2rem' }}>Público</span>
             <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>Aparece na Galeria Home</span>
           </button>
           <button 
@@ -351,7 +351,7 @@ export default function TemplateMaker() {
             onClick={() => setIsPublic(false)}
             style={{ padding: '12px 25px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', width: '220px' }}
           >
-            <span style={{ fontSize: '1.2rem' }}>🔒 Privado</span>
+            <span style={{ fontSize: '1.2rem' }}>Privado</span>
             <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>Apenas no Meu Painel</span>
           </button>
         </div>
