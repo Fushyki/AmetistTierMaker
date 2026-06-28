@@ -467,6 +467,7 @@ function Tierlist() {
         if (error) throw error;
         localStorage.setItem('tierlist-current-id', data[0].id);
       }
+      alert('Tierlist salva na nuvem com sucesso!');
     } catch (err) {
       alert('Erro ao salvar: ' + err.message);
     }
