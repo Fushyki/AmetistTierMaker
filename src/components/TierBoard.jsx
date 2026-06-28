@@ -1,7 +1,7 @@
 import React from 'react';
 import TierRow from './TierRow';
 
-export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem }) {
+export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onAddRow }) {
   return (
     <div id="board">
       {ranksData.map((grupo, groupIndex) => (
@@ -40,9 +40,17 @@ export default function TierBoard({ ranksData, items, colunas, layoutMode, onRem
                 setSelectedItem={setSelectedItem}
                 onAreaClick={onAreaClick}
                 onDoubleClickItem={onDoubleClickItem}
+                onMoveRow={onMoveRow}
               />
             ))}
           </div>
+          <button 
+            className="btn-secondary add-tier-row-btn" 
+            onClick={() => onAddRow(grupo.id)}
+            style={{ width: '100%', marginTop: '5px', padding: '10px', display: 'flex', justifyContent: 'center', opacity: 0.8 }}
+          >
+            + Adicionar Nova Linha
+          </button>
         </div>
       ))}
     </div>

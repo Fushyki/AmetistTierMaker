@@ -38,6 +38,46 @@ function Tierlist() {
     return saved ? JSON.parse(saved) : [];
   });
   
+  // HISTORY STATE (Undo / Ctrl+Z)
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+
+  // Helper para salvar estado no histórico sempre que algo relevante acontecer
+  const saveHistoryState = (newItems, newRanks) => {
+    const snapshot = {
+      items: JSON.parse(JSON.stringify(newItems)),
+      ranksData: JSON.parse(JSON.stringify(newRanks))
+    };
+    
+    setHistory(prev => {
+      const past = prev.slice(0, historyIndex + 1);
+      return [...past, snapshot];
+    });
+    setHistoryIndex(prev => prev + 1);
+  };
+
+  const undo = () => {
+    if (historyIndex >= 0) {
+      const previousState = history[historyIndex];
+      setItems(previousState.items);
+      setRanksData(previousState.ranksData);
+      setHistoryIndex(prev => prev - 1);
+    }
+  };
+
+  // Escutar Ctrl+Z globalmente
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        undo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [history, historyIndex]); // Depende do histórico para pegar o estado mais recente no undo
+
+  
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const { user } = useAuth();
 
@@ -127,10 +167,12 @@ function Tierlist() {
   }, [items.length]);
 
   const handleUpload = (newItems) => {
+    saveHistoryState(items, ranksData);
     setItems(prev => [...prev, ...newItems]);
   };
 
   const handleClearInventory = () => {
+    saveHistoryState(items, ranksData);
     setItems(prev => prev.filter(item => item.tierId !== null));
     setSelectedItem(null);
   };
@@ -166,6 +208,7 @@ function Tierlist() {
   const handleLayoutChange = (newMode) => {
     if (layoutMode === newMode) return;
     if (confirm('Atenção: Mudar o modo de layout limpará sua montagem atual e devolverá os personagens ao inventário. Deseja continuar?')) {
+      saveHistoryState(items, ranksData);
       setLayoutMode(newMode);
       localStorage.setItem('tierlist-layout', newMode);
       setRanksData(newMode === 'classico' ? initialRanksClassico : initialRanksAvancado);
@@ -178,6 +221,7 @@ function Tierlist() {
 
   const resetarTierList = () => {
     if (confirm('Tem certeza que deseja resetar tudo? Todas as imagens no quadro serão perdidas.')) {
+      saveHistoryState(items, ranksData);
       setItems([]);
       setRanksData(layoutMode === 'classico' ? initialRanksClassico : initialRanksAvancado);
       setColunas(1);
@@ -186,19 +230,42 @@ function Tierlist() {
     }
   };
 
-  const adicionarLinha = () => {
+  const handleAddRow = (groupId) => {
+    saveHistoryState(items, ranksData);
+    setRanksData(prev => prev.map(group => {
+      if (group.id !== groupId) return group;
+      return {
+        ...group,
+        ranks: [...group.ranks, { id: 'tier-' + Date.now(), l: "NEW", c: "f-rank" }]
+      };
+    }));
+  };
+
+  const handleMoveRow = (rankId, direction) => {
+    saveHistoryState(items, ranksData);
     setRanksData(prev => {
       const newData = JSON.parse(JSON.stringify(prev));
-      newData[newData.length - 1].ranks.push({ 
-        id: 'tier-' + Date.now(), 
-        l: "?", 
-        c: "f-rank" 
-      });
+      for (const group of newData) {
+        const index = group.ranks.findIndex(r => r.id === rankId);
+        if (index !== -1) {
+          if (direction === 'up' && index > 0) {
+            const temp = group.ranks[index - 1];
+            group.ranks[index - 1] = group.ranks[index];
+            group.ranks[index] = temp;
+          } else if (direction === 'down' && index < group.ranks.length - 1) {
+            const temp = group.ranks[index + 1];
+            group.ranks[index + 1] = group.ranks[index];
+            group.ranks[index] = temp;
+          }
+          break;
+        }
+      }
       return newData;
     });
   };
 
   const handleRemoveRow = (rowId) => {
+    saveHistoryState(items, ranksData);
     setItems(prev => prev.map(item => 
       item.tierId === rowId ? { ...item, tierId: null, colIndex: null } : item
     ));
@@ -240,6 +307,7 @@ function Tierlist() {
       return;
     }
     
+    saveHistoryState(items, ranksData);
     setItems((prev) => {
       const activeIndex = prev.findIndex(i => i.id === activeId);
       const overIndex = prev.findIndex(i => i.id === overId);
@@ -290,6 +358,7 @@ function Tierlist() {
   };
 
   const moveItem = (itemId, targetTierId, targetColIndex) => {
+    saveHistoryState(items, ranksData);
     setItems(prev => {
       const activeIndex = prev.findIndex(i => i.id === itemId);
       if (activeIndex === -1) return prev;
@@ -316,6 +385,7 @@ function Tierlist() {
   };
 
   const handleColunasChange = (novaQuantidade) => {
+    saveHistoryState(items, ranksData);
     setColunas(novaQuantidade);
     setItems(prev => prev.map(item => {
       if (item.colIndex !== null && item.colIndex >= novaQuantidade) {
@@ -358,6 +428,7 @@ function Tierlist() {
       try {
         const data = JSON.parse(ev.target.result);
         if (data.items && data.ranksData) {
+          saveHistoryState(items, ranksData);
           setItems(data.items);
           setRanksData(data.ranksData);
           if (data.layoutMode) setLayoutMode(data.layoutMode);
@@ -395,6 +466,7 @@ function Tierlist() {
 
   const handleDuplicateSelected = () => {
     if (!selectedItem) return;
+    saveHistoryState(items, ranksData);
     const newItem = {
       ...selectedItem,
       id: selectedItem.id + '-copy-' + Date.now(),
@@ -407,6 +479,7 @@ function Tierlist() {
 
   const handleDeleteSelected = () => {
     if (!selectedItem) return;
+    saveHistoryState(items, ranksData);
     setItems(prev => prev.filter(item => item.id !== selectedItem.id));
     setSelectedItem(null);
   };
@@ -516,8 +589,13 @@ function Tierlist() {
           <div className="control-card">
             <h3>Edição</h3>
             <div className="btn-grid">
-              <button onClick={adicionarLinha} className="btn-secondary">
-                Adicionar Linha
+              <button 
+                onClick={undo} 
+                className="btn-secondary"
+                disabled={historyIndex < 0}
+                style={{ opacity: historyIndex < 0 ? 0.5 : 1 }}
+              >
+                Desfazer (Ctrl+Z)
               </button>
               <button onClick={resetarTierList} className="btn-danger outline">
                 Reset
@@ -541,6 +619,8 @@ function Tierlist() {
           setSelectedItem={setSelectedItem}
           onAreaClick={handleAreaClick}
           onDoubleClickItem={handleDoubleClickItem}
+          onMoveRow={handleMoveRow}
+          onAddRow={handleAddRow}
         />
 
         {!isPresentationMode && (
