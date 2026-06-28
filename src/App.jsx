@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Tierlist from './pages/Tierlist';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
+import TemplateMaker from './pages/TemplateMaker';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -18,6 +19,7 @@ function App() {
             <Route path="/tierlist" element={<Tierlist />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/template-maker" element={<TemplateMaker />} />
           </Routes>
         </main>
         <Footer />

@@ -5,6 +5,7 @@ import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabaseClient';
+import { useSearchParams } from 'react-router-dom';
 import '../index.css';
 
 const initialRanksAvancado = [
@@ -80,6 +81,7 @@ function Tierlist() {
   
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [selectedItem, setSelectedItem] = useState(null);
   const isInitialMount = useRef(true);
@@ -134,6 +136,31 @@ function Tierlist() {
   }, [items]);
 
   useEffect(() => {
+    // Carregamento de Template da Home
+    const templateId = searchParams.get('templateId');
+    if (templateId) {
+      const loadTemplate = async () => {
+        try {
+          const { data, error } = await supabase.from('templates').select('data').eq('id', templateId).single();
+          if (data && data.data) {
+            if (confirm("Carregar este template irá substituir os itens atuais do seu inventário. Continuar?")) {
+              saveHistoryState(items, ranksData);
+              setItems(data.data);
+              localStorage.setItem('tierlist-api-loaded', 'true');
+              
+              // Remove the query param to avoid reloading on refresh
+              searchParams.delete('templateId');
+              setSearchParams(searchParams);
+            }
+          }
+        } catch (err) {
+          console.error("Erro ao carregar template:", err);
+        }
+      };
+      loadTemplate();
+      return;
+    }
+
     // Carregamento inicial da API
     const hasLoadedApi = localStorage.getItem('tierlist-api-loaded');
     if (!hasLoadedApi && items.length === 0) {

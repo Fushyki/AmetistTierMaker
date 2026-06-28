@@ -16,6 +16,7 @@ export default function Navbar() {
         <div className="navbar-links">
           <Link to="/" className="nav-item">Home</Link>
           <Link to="/tierlist" className="nav-item">Criar Tierlist</Link>
+          <Link to="/template-maker" className="nav-item">Criar Modelo</Link>
           {user ? (
             <Link to="/admin" className="nav-btn">Meu Painel</Link>
           ) : (

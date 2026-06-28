@@ -1,5 +1,3 @@
-## Commit Automático
-Sempre que realizar alterações no código ou terminar uma tarefa, execute o commit e o push automaticamente ao final (usando 'git add . ; git commit -m "..." ; git push') sem precisar perguntar ao usuário.
+ï»¿## Regras Globais do Projeto
 
-## Idioma dos Commits
-Sempre deixe as mensagens de commit em Português do Brasil (PT-BR).
+- Mensagens de commit do Git: As mensagens de commit devem ser MUITO curtas, com um mÃ¡ximo de 6 palavras, e sempre escritas em PortuguÃªs do Brasil (pt-BR).
