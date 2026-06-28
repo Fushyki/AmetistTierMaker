@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabaseClient';
 import { confirmAction } from '../utils/alerts';
+import { isAdmin } from '../utils/admin';
 import '../index.css';
 
 export default function Admin() {
@@ -96,6 +97,10 @@ export default function Admin() {
     );
   }
 
+  const containerBg = isAdmin(user) ? '#2a1114' : '#161618'; // Dark wine for admin, dark grey for user
+  const cardBg = isAdmin(user) ? '#3b181d' : '#222';
+  const templateCardBg = isAdmin(user) ? '#3b181d' : '#212124';
+
   return (
     <div className="tierlist-container" style={{ maxWidth: '800px', margin: '50px auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', borderBottom: '1px solid #333', paddingBottom: '20px' }}>
@@ -108,7 +113,7 @@ export default function Admin() {
         </div>
       </div>
       
-      <div style={{ background: '#161618', padding: '20px', borderRadius: '12px', border: '1px solid #2a2a2a' }}>
+      <div style={{ background: containerBg, padding: '20px', borderRadius: '12px', border: '1px solid #2a2a2a' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h3>Suas Tier Lists Salvas na Nuvem</h3>
         </div>
@@ -120,7 +125,7 @@ export default function Admin() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {tierlists.map(t => (
-              <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#222', padding: '15px', borderRadius: '8px' }}>
+              <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: cardBg, padding: '15px', borderRadius: '8px' }}>
                 <span style={{ fontWeight: 'bold', color: 'white' }}>{t.name}</span>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button onClick={() => handleEdit(t)} style={{ padding: '8px 15px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
@@ -136,7 +141,7 @@ export default function Admin() {
         )}
       </div>
 
-      <div style={{ background: '#161618', padding: '20px', borderRadius: '12px', border: '1px solid #2a2a2a', marginTop: '30px' }}>
+      <div style={{ background: containerBg, padding: '20px', borderRadius: '12px', border: '1px solid #2a2a2a', marginTop: '30px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
           <h3>Seus Modelos Criados (Templates)</h3>
           
@@ -178,7 +183,7 @@ export default function Admin() {
               {filtered.map(template => (
                 <div key={template.id} style={{ position: 'relative' }}>
                   <Link to={`/tierlist?templateId=${template.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div className="template-card" style={{ backgroundColor: '#212124', borderRadius: '12px', overflow: 'hidden', transition: 'transform 0.2s', border: template.is_public ? '2px solid #4CAF50' : '2px solid #f44336' }}>
+                    <div className="template-card" style={{ backgroundColor: templateCardBg, borderRadius: '12px', overflow: 'hidden', transition: 'transform 0.2s', border: template.is_public ? '2px solid #4CAF50' : '2px solid #f44336' }}>
                       <div style={{ width: '100%', height: '160px', overflow: 'hidden', position: 'relative' }}>
                         <img 
                           src={template.cover_image} 
