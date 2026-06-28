@@ -264,14 +264,12 @@ export default function TemplateMaker() {
           <h3>Estrutura dos Tiers</h3>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button 
-              className={`mode-btn ${layoutMode === 'classico' ? 'active' : ''}`}
+              className={layoutMode === 'classico' ? 'btn-active' : 'btn-secondary'}
               onClick={() => handleLayoutChange('classico')}
-              style={{ padding: '5px 15px' }}
             >Modo Clássico</button>
             <button 
-              className={`mode-btn ${layoutMode === 'avancado' ? 'active' : ''}`}
+              className={layoutMode === 'avancado' ? 'btn-active' : 'btn-secondary'}
               onClick={() => handleLayoutChange('avancado')}
-              style={{ padding: '5px 15px' }}
             >Modo Avançado</button>
           </div>
         </div>
