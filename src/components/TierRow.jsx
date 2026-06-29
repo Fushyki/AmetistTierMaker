@@ -29,21 +29,28 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
 
   return (
     <div className="tier-row" id={rank.id}>
-      <div 
-        className={`tier-label ${rank.c || 'f-rank'}`} 
-        style={rank.bgColor ? { backgroundColor: rank.bgColor } : {}}
-        contentEditable={!isPresentationMode}
-        suppressContentEditableWarning
-        onContextMenu={isPresentationMode ? undefined : handleRightClick}
-        onBlur={(e) => {
-          if (isPresentationMode) return;
-          const newText = e.currentTarget.textContent.trim();
-          if (newText !== rank.l) onUpdateRow(rank.id, { l: newText });
-        }}
-      >
-        {rank.l || 'F'}
+      <div style={{ position: 'relative', display: 'flex' }}>
+        <div 
+          className={`tier-label ${rank.c || 'f-rank'}`} 
+          style={{
+            ...(rank.bgColor ? { backgroundColor: rank.bgColor } : {}),
+            wordBreak: 'break-word',
+            overflow: 'hidden'
+          }}
+          contentEditable={!isPresentationMode}
+          suppressContentEditableWarning
+          onContextMenu={isPresentationMode ? undefined : handleRightClick}
+          onBlur={(e) => {
+            if (isPresentationMode) return;
+            const newText = e.currentTarget.textContent.trim();
+            if (newText !== rank.l) onUpdateRow(rank.id, { l: newText });
+          }}
+        >
+          {rank.l || 'F'}
+        </div>
         {showColorPicker && (
           <div 
+            contentEditable={false}
             style={{ 
               position: 'absolute', 
               top: '100%', 
