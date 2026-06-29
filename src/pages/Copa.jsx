@@ -105,16 +105,17 @@ const createEmptyMatches = () => {
 
 // Draggable Item Component
 function DraggableTeam({ id, team, isSelected }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: id,
     data: { team },
     disabled: team.isAutoPlaced // disable dragging if auto-placed
   });
   
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    zIndex: 999
-  } : undefined;
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    zIndex: 999,
+    opacity: isDragging ? 0 : 1
+  };
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`team-flag-container ${isSelected ? 'selected' : ''}`} title={team.name} style={{ width: '100%', height: '100%', ...style }}>
