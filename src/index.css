@@ -306,6 +306,12 @@ h1 {
     pointer-events: auto;   
 }
 
+.storage-box .personagem-item {
+    width: 75px;
+    height: 75px;
+    flex: 0 0 75px;
+}
+
 .personagem-item:hover {
     transform: scale(1.1);
     border-color: #b062eb;
