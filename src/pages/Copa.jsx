@@ -622,8 +622,8 @@ export default function Copa() {
 
         <DragOverlay zIndex={9999}>
           {activeTeam ? (
-            <div style={{ width: '100px', height: '28px', overflow: 'hidden', border: '2px solid #3b82f6', borderRadius: '4px', boxShadow: '0 5px 15px rgba(0,0,0,0.5)' }}>
-              <img src={activeTeam.src} alt={activeTeam.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ width: '60px', height: '40px', overflow: 'hidden', border: '1px solid #3b82f6', borderRadius: '4px', boxShadow: '0 5px 15px rgba(0,0,0,0.5)', background: '#111' }}>
+              <img src={activeTeam.src} alt={activeTeam.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
           ) : null}
         </DragOverlay>
