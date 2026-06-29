@@ -209,9 +209,14 @@ export default function Copa() {
       if (saved) {
         let parsed = JSON.parse(saved);
         if (!parsed || typeof parsed !== 'object') return createEmptyMatches();
-        // Patch old saves that don't have the champion match
         if (!parsed.champion) {
           parsed.champion = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
+        }
+        if (!parsed.third_1) {
+          parsed.third_1 = { t1: null, t2: null, winner: null, nextMatch: 'third_winner', nextSlot: 't1' };
+        }
+        if (!parsed.third_winner) {
+          parsed.third_winner = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
         }
         if (parsed.final_1) {
           parsed.final_1.nextMatch = 'champion';
