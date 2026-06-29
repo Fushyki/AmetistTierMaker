@@ -296,20 +296,22 @@ h1 {
 }
 
 .personagem-item {
-    width: 50px;
     height: 50px;
-    object-fit: cover;
+    width: auto;
+    max-width: 120px; /* Prevents extremely wide images from breaking layout */
+    object-fit: contain;
     border-radius: 4px;
-    flex: 0 0 50px;
+    flex: none;
     transition: transform 0.1s; 
     touch-action: none;
     pointer-events: auto;   
 }
 
 .storage-box .personagem-item {
-    width: 100px;
     height: 100px;
-    flex: 0 0 100px;
+    width: auto;
+    max-width: 250px;
+    flex: none;
 }
 
 .personagem-item:hover {
