@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { Settings, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import DroppableArea from './DroppableArea';
@@ -7,14 +7,23 @@ import SortableItem from './SortableItem';
 export default function TierRow({ rank, items, colunas, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onUpdateRow, isPresentationMode }) {
   const isCustomTier = rank.id.startsWith('tier-') && rank.id.length > 10; 
   const colorInputRef = useRef(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  const presetColors = ['#ff7f7f', '#ffbf7f', '#ffdf7f', '#ffff7f', '#bfff7f', '#7fff7f', '#7ffff', '#7fbfff', '#7f7fff', '#ff7fff', '#bf7fbf', '#333333'];
 
   const handleRightClick = (e) => {
     e.preventDefault();
-    colorInputRef.current.click();
+    if (!isPresentationMode) {
+      setShowColorPicker(!showColorPicker);
+    }
   };
 
-  const handleColorChange = (e) => {
-    e.target.parentElement.style.backgroundColor = e.target.value;
+  const handleColorSelect = (color) => {
+    onUpdateRow(rank.id, { bgColor: color });
+    setShowColorPicker(false);
+  };
+
+  const handleCustomColorChange = (e) => {
     onUpdateRow(rank.id, { bgColor: e.target.value });
   };
 
@@ -33,12 +42,45 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
         }}
       >
         {rank.l || 'F'}
-        <input 
-          type="color" 
-          ref={colorInputRef} 
-          style={{ display: 'none' }} 
-          onChange={handleColorChange} 
-        />
+        {showColorPicker && (
+          <div 
+            style={{ 
+              position: 'absolute', 
+              top: '100%', 
+              left: '0', 
+              marginTop: '5px',
+              backgroundColor: '#1a1a1c', 
+              border: '1px solid #333', 
+              borderRadius: '8px', 
+              padding: '10px', 
+              zIndex: 100,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              minWidth: '150px'
+            }}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+              {presetColors.map(c => (
+                <div 
+                  key={c}
+                  onClick={() => handleColorSelect(c)}
+                  style={{ width: '24px', height: '24px', backgroundColor: c, borderRadius: '50%', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)' }}
+                />
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', borderTop: '1px solid #333', paddingTop: '10px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#aaa' }}>Custom:</span>
+              <input 
+                type="color" 
+                value={rank.bgColor || '#ff7f7f'}
+                onChange={handleCustomColorChange} 
+                style={{ width: '100%', height: '24px', border: 'none', cursor: 'pointer', background: 'none' }}
+              />
+            </div>
+          </div>
+        )}
       </div>
       
       <div className={`tier-drop-area grid-${colunas}`}>
