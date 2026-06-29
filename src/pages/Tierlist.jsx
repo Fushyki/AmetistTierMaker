@@ -659,7 +659,7 @@ function Tierlist() {
           </div>
         )}
 
-        {!isPresentationMode && <h1>Minha Lista de Personagens</h1>}
+        {!isPresentationMode && <h1>Minha Tier List</h1>}
 
         {!isPresentationMode && (
         <div className="controls-wrapper">
