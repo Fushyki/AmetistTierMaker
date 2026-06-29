@@ -72,6 +72,9 @@ const createEmptyMatches = () => {
   matches['third_1'] = { t1: null, t2: null, winner: null, nextMatch: 'third_winner', nextSlot: 't1' };
   matches['third_winner'] = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
 
+  // Fix right semifinal feeding into final_1 t2
+  matches['r4_1'].nextSlot = 't2';
+
   // Note: Semi final losers go to third_1. This requires manual routing in code.
   return matches;
 };
@@ -156,6 +159,9 @@ export default function Copa() {
       if (parsed.final_1) {
         parsed.final_1.nextMatch = 'champion';
         parsed.final_1.nextSlot = 't1';
+      }
+      if (parsed.r4_1) {
+        parsed.r4_1.nextSlot = 't2';
       }
       return parsed;
     }
