@@ -134,9 +134,11 @@ h1 {
 }
 
 .tier-label {
-    width: 55px;
-    min-width: 55px;
+    min-width: 70px;
+    max-width: 140px;
     min-height: 55px;
+    width: auto;
+    padding: 5px;
     display: flex;
     align-items: center;
     position: relative;
