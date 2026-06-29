@@ -6,38 +6,38 @@ import '../styles/copa.css';
 
 // 32 Popular Football Nations
 const defaultTeams = [
-  { id: 't_br', name: 'Brasil', img: 'https://flagcdn.com/w160/br.png' },
-  { id: 't_ar', name: 'Argentina', img: 'https://flagcdn.com/w160/ar.png' },
-  { id: 't_fr', name: 'França', img: 'https://flagcdn.com/w160/fr.png' },
-  { id: 't_de', name: 'Alemanha', img: 'https://flagcdn.com/w160/de.png' },
-  { id: 't_it', name: 'Itália', img: 'https://flagcdn.com/w160/it.png' },
-  { id: 't_es', name: 'Espanha', img: 'https://flagcdn.com/w160/es.png' },
-  { id: 't_gb', name: 'Inglaterra', img: 'https://flagcdn.com/w160/gb-eng.png' },
-  { id: 't_pt', name: 'Portugal', img: 'https://flagcdn.com/w160/pt.png' },
-  { id: 't_nl', name: 'Holanda', img: 'https://flagcdn.com/w160/nl.png' },
-  { id: 't_be', name: 'Bélgica', img: 'https://flagcdn.com/w160/be.png' },
-  { id: 't_uy', name: 'Uruguai', img: 'https://flagcdn.com/w160/uy.png' },
-  { id: 't_hr', name: 'Croácia', img: 'https://flagcdn.com/w160/hr.png' },
-  { id: 't_ma', name: 'Marrocos', img: 'https://flagcdn.com/w160/ma.png' },
-  { id: 't_sn', name: 'Senegal', img: 'https://flagcdn.com/w160/sn.png' },
-  { id: 't_us', name: 'EUA', img: 'https://flagcdn.com/w160/us.png' },
-  { id: 't_mx', name: 'México', img: 'https://flagcdn.com/w160/mx.png' },
-  { id: 't_jp', name: 'Japão', img: 'https://flagcdn.com/w160/jp.png' },
-  { id: 't_kr', name: 'Coreia do Sul', img: 'https://flagcdn.com/w160/kr.png' },
-  { id: 't_au', name: 'Austrália', img: 'https://flagcdn.com/w160/au.png' },
-  { id: 't_ch', name: 'Suíça', img: 'https://flagcdn.com/w160/ch.png' },
-  { id: 't_pl', name: 'Polônia', img: 'https://flagcdn.com/w160/pl.png' },
-  { id: 't_dk', name: 'Dinamarca', img: 'https://flagcdn.com/w160/dk.png' },
-  { id: 't_se', name: 'Suécia', img: 'https://flagcdn.com/w160/se.png' },
-  { id: 't_co', name: 'Colômbia', img: 'https://flagcdn.com/w160/co.png' },
-  { id: 't_cl', name: 'Chile', img: 'https://flagcdn.com/w160/cl.png' },
-  { id: 't_pe', name: 'Peru', img: 'https://flagcdn.com/w160/pe.png' },
-  { id: 't_ec', name: 'Equador', img: 'https://flagcdn.com/w160/ec.png' },
-  { id: 't_dz', name: 'Argélia', img: 'https://flagcdn.com/w160/dz.png' },
-  { id: 't_ng', name: 'Nigéria', img: 'https://flagcdn.com/w160/ng.png' },
-  { id: 't_cm', name: 'Camarões', img: 'https://flagcdn.com/w160/cm.png' },
-  { id: 't_ci', name: 'Costa do Marfim', img: 'https://flagcdn.com/w160/ci.png' },
-  { id: 't_gh', name: 'Gana', img: 'https://flagcdn.com/w160/gh.png' }
+  { id: 't_br', name: 'Brasil', src: 'https://flagcdn.com/w160/br.png' },
+  { id: 't_ar', name: 'Argentina', src: 'https://flagcdn.com/w160/ar.png' },
+  { id: 't_fr', name: 'França', src: 'https://flagcdn.com/w160/fr.png' },
+  { id: 't_de', name: 'Alemanha', src: 'https://flagcdn.com/w160/de.png' },
+  { id: 't_it', name: 'Itália', src: 'https://flagcdn.com/w160/it.png' },
+  { id: 't_es', name: 'Espanha', src: 'https://flagcdn.com/w160/es.png' },
+  { id: 't_gb', name: 'Inglaterra', src: 'https://flagcdn.com/w160/gb-eng.png' },
+  { id: 't_pt', name: 'Portugal', src: 'https://flagcdn.com/w160/pt.png' },
+  { id: 't_nl', name: 'Holanda', src: 'https://flagcdn.com/w160/nl.png' },
+  { id: 't_be', name: 'Bélgica', src: 'https://flagcdn.com/w160/be.png' },
+  { id: 't_uy', name: 'Uruguai', src: 'https://flagcdn.com/w160/uy.png' },
+  { id: 't_hr', name: 'Croácia', src: 'https://flagcdn.com/w160/hr.png' },
+  { id: 't_ma', name: 'Marrocos', src: 'https://flagcdn.com/w160/ma.png' },
+  { id: 't_sn', name: 'Senegal', src: 'https://flagcdn.com/w160/sn.png' },
+  { id: 't_us', name: 'EUA', src: 'https://flagcdn.com/w160/us.png' },
+  { id: 't_mx', name: 'México', src: 'https://flagcdn.com/w160/mx.png' },
+  { id: 't_jp', name: 'Japão', src: 'https://flagcdn.com/w160/jp.png' },
+  { id: 't_kr', name: 'Coreia do Sul', src: 'https://flagcdn.com/w160/kr.png' },
+  { id: 't_au', name: 'Austrália', src: 'https://flagcdn.com/w160/au.png' },
+  { id: 't_ch', name: 'Suíça', src: 'https://flagcdn.com/w160/ch.png' },
+  { id: 't_pl', name: 'Polônia', src: 'https://flagcdn.com/w160/pl.png' },
+  { id: 't_dk', name: 'Dinamarca', src: 'https://flagcdn.com/w160/dk.png' },
+  { id: 't_se', name: 'Suécia', src: 'https://flagcdn.com/w160/se.png' },
+  { id: 't_co', name: 'Colômbia', src: 'https://flagcdn.com/w160/co.png' },
+  { id: 't_cl', name: 'Chile', src: 'https://flagcdn.com/w160/cl.png' },
+  { id: 't_pe', name: 'Peru', src: 'https://flagcdn.com/w160/pe.png' },
+  { id: 't_ec', name: 'Equador', src: 'https://flagcdn.com/w160/ec.png' },
+  { id: 't_dz', name: 'Argélia', src: 'https://flagcdn.com/w160/dz.png' },
+  { id: 't_ng', name: 'Nigéria', src: 'https://flagcdn.com/w160/ng.png' },
+  { id: 't_cm', name: 'Camarões', src: 'https://flagcdn.com/w160/cm.png' },
+  { id: 't_ci', name: 'Costa do Marfim', src: 'https://flagcdn.com/w160/ci.png' },
+  { id: 't_gh', name: 'Gana', src: 'https://flagcdn.com/w160/gh.png' }
 ];
 
 const createEmptyMatches = () => {
@@ -68,14 +68,15 @@ const createEmptyMatches = () => {
 
   // Center matches
   matches['final_1'] = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
-  matches['third_1'] = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
+  matches['third_1'] = { t1: null, t2: null, winner: null, nextMatch: 'third_winner', nextSlot: 't1' };
+  matches['third_winner'] = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
 
   // Note: Semi final losers go to third_1. This requires manual routing in code.
   return matches;
 };
 
 // Draggable Item Component
-function DraggableTeam({ id, team }) {
+function DraggableTeam({ id, team, isSelected }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id,
     data: { team }
@@ -87,8 +88,8 @@ function DraggableTeam({ id, team }) {
   } : undefined;
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="team-flag-container" title={team.name} style={{ width: '100%', height: '100%' }}>
-      <img src={team.img} alt={team.name} className="team-flag" draggable="false" />
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`team-flag-container ${isSelected ? 'selected' : ''}`} title={team.name} style={{ width: '100%', height: '100%', ...style }}>
+      <img src={team.src} alt={team.name} className="team-flag" draggable="false" />
     </div>
   );
 }
@@ -113,14 +114,25 @@ function MatchSlot({ matchId, slotId, team, winner, onClickSlot }) {
   }
 
   return (
-    <div ref={setNodeRef} className={className} onClick={() => team && onClickSlot(matchId, slotId, team)}>
+    <div ref={setNodeRef} className={className} onClick={(e) => { e.stopPropagation(); onClickSlot(matchId, slotId, team); }}>
       {team ? (
-        <DraggableTeam id={`drag-${matchId}-${slotId}-${team.id}`} team={team} />
+        <>
+          <DraggableTeam id={`drag-${matchId}-${slotId}-${team.id}`} team={team} isSelected={false} />
+          <button className="winner-btn" onClick={(e) => { e.stopPropagation(); onClickSlot(matchId, slotId, team, true); }} title="Definir Vencedor">✔️</button>
+        </>
       ) : (
         <span className="team-placeholder">?</span>
       )}
     </div>
   );
+}
+
+function InventoryDroppable({ children }) {
+  const { setNodeRef } = useDroppable({
+    id: 'inventory-drop',
+    data: { matchId: 'inventory', slotId: 'inventory' }
+  });
+  return <div ref={setNodeRef} className="copa-inventory-scroll">{children}</div>;
 }
 
 export default function Copa() {
@@ -135,6 +147,7 @@ export default function Copa() {
   });
 
   const [isPresentationMode, setIsPresentationMode] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const boardRef = useRef(null);
 
   useEffect(() => {
@@ -147,15 +160,33 @@ export default function Copa() {
     if (!over) return;
 
     const team = active.data.current.team;
-    const sourceId = active.id.toString(); // format could be 'drag-inventory-tx' or 'drag-l1_1-t1-tx'
+    const sourceId = active.id.toString(); // format could be 'drag-inventory-tx' ou 'drag-l1_1-t1-tx'
     const targetMatchId = over.data.current.matchId;
     const targetSlotId = over.data.current.slotId;
+
+    if (targetMatchId === 'inventory') {
+      if (sourceId.startsWith('drag-') && !sourceId.includes('inventory')) {
+        const parts = sourceId.split('-');
+        const srcMatchId = parts[1];
+        const srcSlotId = parts[2];
+        setInventory(inv => [...inv.filter(t => t.id !== team.id), team]);
+        setMatches(prev => {
+          const newMatches = { ...prev };
+          newMatches[srcMatchId] = {
+            ...newMatches[srcMatchId],
+            [srcSlotId]: null,
+            winner: null
+          };
+          return newMatches;
+        });
+      }
+      return;
+    }
 
     setMatches(prev => {
       const newMatches = { ...prev };
       
-      // Se tiver algo no target, vamos jogar de volta pro inventário?
-      // Ou trocar? Vamos simplificar: apenas sobrepõe, e se tinha, volta pro inventário.
+      // Se tiver algo no target, vamos jogar de volta pro inventário
       const existingTeamInTarget = newMatches[targetMatchId][targetSlotId];
       if (existingTeamInTarget && existingTeamInTarget.id !== team.id) {
         setInventory(inv => [...inv.filter(t => t.id !== existingTeamInTarget.id), existingTeamInTarget]);
@@ -189,32 +220,71 @@ export default function Copa() {
     });
   };
 
-  const handleSetWinner = (matchId, slotId, team) => {
+  const handleSetWinner = (matchId, slotId, team, isWinnerClick = false) => {
+    // Select and Place Logic se não foi clique no botão de vencedor especificamente
+    if (!isWinnerClick && selectedTeam) {
+      const isFromInventory = selectedTeam.sourceId === 'inventory';
+      
+      setMatches(prev => {
+        const newMatches = { ...prev };
+        const existingTeamInTarget = newMatches[matchId][slotId];
+        
+        if (existingTeamInTarget) {
+          setInventory(inv => [...inv.filter(t => t.id !== existingTeamInTarget.id), existingTeamInTarget]);
+        }
+        
+        newMatches[matchId][slotId] = selectedTeam.team;
+        newMatches[matchId].winner = null;
+        
+        if (!isFromInventory) {
+          const parts = selectedTeam.sourceId.split('-');
+          const srcMatchId = parts[1];
+          const srcSlotId = parts[2];
+          if (srcMatchId !== matchId || srcSlotId !== slotId) {
+            newMatches[srcMatchId][srcSlotId] = null;
+            newMatches[srcMatchId].winner = null;
+          }
+        } else {
+          setInventory(inv => inv.filter(t => t.id !== selectedTeam.team.id));
+        }
+        
+        return newMatches;
+      });
+      setSelectedTeam(null);
+      return;
+    }
+
+    if (!isWinnerClick && !team) return;
+    
+    // Select the existing team in the slot if not placing and not clicking winner
+    if (!isWinnerClick && team && !selectedTeam) {
+      setSelectedTeam({ team, sourceId: `drag-${matchId}-${slotId}-${team.id}` });
+      return;
+    }
+
+    // Se foi clique no botão de vencedor (isWinnerClick)
     setMatches(prev => {
       const match = prev[matchId];
       if (!match.t1 || !match.t2) {
-        toast.error('A partida precisa de 2 times para ter um vencedor!');
+        if (matchId !== 'third_winner') toast.error('A partida precisa de 2 times para ter um vencedor!');
         return prev;
       }
 
       const newMatches = { ...prev };
       
-      // Toggle winner (se clicar de novo, desfaz)
+      // Toggle winner
       if (match.winner === slotId) {
         newMatches[matchId].winner = null;
-        // Limpar da próxima chave
         if (match.nextMatch) {
           newMatches[match.nextMatch][match.nextSlot] = null;
         }
       } else {
         newMatches[matchId].winner = slotId;
-        // Avançar para a próxima chave
         if (match.nextMatch) {
           newMatches[match.nextMatch][match.nextSlot] = team;
           newMatches[match.nextMatch].winner = null;
         }
 
-        // Lógica especial para semifinal: perdedor vai pro terceiro lugar
         if (matchId === 'l4_1' || matchId === 'r4_1') {
           const loserSlot = slotId === 't1' ? 't2' : 't1';
           const loserTeam = match[loserSlot];
@@ -371,6 +441,12 @@ export default function Copa() {
                   <MatchSlot matchId="third_1" slotId="t1" team={matches.third_1.t1} winner={matches.third_1.winner} onClickSlot={handleSetWinner} />
                   <MatchSlot matchId="third_1" slotId="t2" team={matches.third_1.t2} winner={matches.third_1.winner} onClickSlot={handleSetWinner} />
                 </div>
+                <div style={{ marginTop: '10px' }}>
+                  <h4 style={{ color: '#94a3b8', margin: '0 0 5px 0', fontSize: '0.9rem' }}>Vencedor 3º Lugar</h4>
+                  <div className="match-box" style={{ margin: '0 auto', background: 'rgba(255, 255, 255, 0.1)', borderColor: '#cbd5e1', width: '100px' }}>
+                    <MatchSlot matchId="third_winner" slotId="t1" team={matches.third_winner.t1} winner={null} onClickSlot={() => {}} />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -387,15 +463,20 @@ export default function Copa() {
           <div className="copa-inventory-wrapper">
             <h3 className="copa-inventory-title">
               Inventário de Seleções ({inventory.length})
-              <span style={{ fontSize: '0.8rem', color: '#999' }}>Arraste para os slots do chaveamento.</span>
+              <span style={{ fontSize: '0.8rem', color: '#999' }}>Arraste para as chaves ou clique para selecionar.</span>
             </h3>
-            <div className="copa-inventory-scroll">
+            <InventoryDroppable>
               {inventory.map(team => (
-                <div key={team.id} className="inventory-flag-item">
-                  <DraggableTeam id={`drag-inventory-${team.id}`} team={team} />
+                <div 
+                  key={team.id} 
+                  className={`inventory-item ${selectedTeam?.team?.id === team.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedTeam({ team, sourceId: 'inventory' })}
+                  style={{ width: '80px', height: '60px', flexShrink: 0, padding: 0 }}
+                >
+                  <DraggableTeam id={`drag-inventory-${team.id}`} team={team} isSelected={selectedTeam?.team?.id === team.id} />
                 </div>
               ))}
-            </div>
+            </InventoryDroppable>
           </div>
         )}
 

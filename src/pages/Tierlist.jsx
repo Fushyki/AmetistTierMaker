@@ -179,6 +179,9 @@ function Tierlist() {
               if (data.data.apiConfig) {
                 try {
                   const apiItems = await fetchAndParseAPI(data.data.apiConfig);
+                  if (apiItems.length === 0) {
+                    toast.error('A API não retornou nenhuma imagem. Verifique bloqueios (CORS).');
+                  }
                   setItems(apiItems);
                   if (data.data.apiConfig.pagesToFetch > 1) {
                     setTimeout(() => {
@@ -293,6 +296,11 @@ function Tierlist() {
             templateItems = await fetchAndParseAPI(data.data.apiConfig);
           } else {
             templateItems = data.data.items || data.data; // Handles both new and legacy template structures
+          }
+
+          if (templateItems.length === 0) {
+            toast.error('A API não retornou nenhuma imagem. Pode haver um erro de conexão (CORS) ou a API falhou.');
+            return;
           }
 
           const missingItems = templateItems.filter(item => !existingIds.has(item.id));
