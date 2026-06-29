@@ -5,6 +5,8 @@ import { supabase } from '../supabaseClient';
 import { confirmAction } from '../utils/alerts';
 import { isAdmin } from '../utils/admin';
 import { Trash2, Pencil } from 'lucide-react';
+import Swal from 'sweetalert2';
+import toast from 'react-hot-toast';
 import '../index.css';
 
 export default function Admin() {
@@ -58,6 +60,38 @@ export default function Admin() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
+  };
+
+  const handleRename = async (id, currentName) => {
+    const { value: newName } = await Swal.fire({
+      title: 'Renomear Tier List',
+      input: 'text',
+      inputValue: currentName,
+      showCancelButton: true,
+      confirmButtonText: 'Salvar',
+      cancelButtonText: 'Cancelar',
+      background: '#1a1a1c',
+      color: '#ffffff',
+      confirmButtonColor: '#b062eb',
+      inputValidator: (value) => {
+        if (!value) return 'O nome não pode ser vazio!';
+      }
+    });
+
+    if (newName && newName !== currentName) {
+      const { error } = await supabase
+        .from('tierlists')
+        .update({ name: newName })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao renomear:', error);
+        toast.error('Erro ao renomear a Tier List.');
+      } else {
+        toast.success('Tier List renomeada!');
+        fetchTierlists();
+      }
+    }
   };
 
   const handleEdit = (tierlist) => {
@@ -129,6 +163,9 @@ export default function Admin() {
               <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: cardBg, padding: '15px', borderRadius: '8px' }}>
                 <span style={{ fontWeight: 'bold', color: 'white' }}>{t.name}</span>
                 <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={() => handleRename(t.id, t.name)} style={{ padding: '8px 15px', backgroundColor: '#555', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                    Renomear
+                  </button>
                   <button onClick={() => handleEdit(t)} style={{ padding: '8px 15px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     Editar
                   </button>

@@ -421,7 +421,9 @@ h1 {
 
 /* Modos Especiais: Exportação Limpa e Modo Apresentação */
 .clean-mode .tier-settings,
-.presentation-mode .tier-settings {
+.presentation-mode .tier-settings,
+.clean-mode .add-tier-row-btn,
+.presentation-mode .add-tier-row-btn {
     display: none !important;
 }
 
