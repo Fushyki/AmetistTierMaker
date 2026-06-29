@@ -170,9 +170,11 @@ export default function Copa() {
   const [inventory, setInventory] = useState(() => {
     const saved = localStorage.getItem('copa-inventory');
     if (saved) {
-      const parsed = JSON.parse(saved);
+      let parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) parsed = [];
       const matchesSaved = localStorage.getItem('copa-matches');
       let matchesParsed = matchesSaved ? JSON.parse(matchesSaved) : {};
+      if (!matchesParsed || typeof matchesParsed !== 'object') matchesParsed = {};
       
       // Merge missing teams from defaultTeams (if they are not in inventory AND not in matches)
       const existingTeamIds = new Set(parsed.map(t => t.id));
@@ -192,7 +194,8 @@ export default function Copa() {
   const [matches, setMatches] = useState(() => {
     const saved = localStorage.getItem('copa-matches');
     if (saved) {
-      const parsed = JSON.parse(saved);
+      let parsed = JSON.parse(saved);
+      if (!parsed || typeof parsed !== 'object') return createEmptyMatches();
       // Patch old saves that don't have the champion match
       if (!parsed.champion) {
         parsed.champion = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
@@ -490,7 +493,7 @@ export default function Copa() {
   );
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel} autoScroll={false}>
       <div className={`copa-container ${isPresentationMode ? 'presentation-mode' : ''}`}>
         
         <div className="rotate-screen-overlay">
