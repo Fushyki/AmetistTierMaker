@@ -123,7 +123,7 @@ function MatchSlot({ matchId, slotId, team, winner, onClickSlot }) {
       {team ? (
         <>
           <DraggableTeam id={`drag-${matchId}-${slotId}-${team.id}`} team={team} isSelected={false} />
-          {!team.isAutoPlaced && matchId !== 'champion' && matchId !== 'third_winner' && (
+          {matchId !== 'champion' && matchId !== 'third_winner' && (
              <button className="winner-btn" onClick={(e) => { e.stopPropagation(); onClickSlot(matchId, slotId, team, true); }} title="Definir Vencedor">✔️</button>
           )}
         </>
@@ -291,48 +291,51 @@ export default function Copa() {
     // Select the existing team in the slot if not placing and not clicking winner
     if (!isWinnerClick && team && !selectedTeam) {
       if (team.isAutoPlaced) {
-        toast.error('Este time avançou por vitória. Desfaça a vitória na chave anterior para alterá-lo.');
+        // Se a imagem é auto-placed, ela não pode ser movida, então um clique direto nela vai marcar/desmarcar vitória!
+        isWinnerClick = true;
+      } else {
+        setSelectedTeam({ team, sourceId: `drag-${matchId}-${slotId}-${team.id}` });
         return;
       }
-      setSelectedTeam({ team, sourceId: `drag-${matchId}-${slotId}-${team.id}` });
-      return;
     }
 
-    // Se foi clique no botão de vencedor (isWinnerClick)
-    setMatches(prev => {
-      const match = prev[matchId];
-      if (!match.t1 || !match.t2) {
-        if (matchId !== 'third_winner') toast.error('A partida precisa de 2 times para ter um vencedor!');
-        return prev;
-      }
-
-      const newMatches = { ...prev };
-      
-      // Toggle winner
-      if (match.winner === slotId) {
-        newMatches[matchId].winner = null;
-        if (match.nextMatch) {
-          newMatches[match.nextMatch][match.nextSlot] = null;
-          newMatches[match.nextMatch].winner = null; // cascade clearing winner
-        }
-      } else {
-        newMatches[matchId].winner = slotId;
-        if (match.nextMatch) {
-          newMatches[match.nextMatch][match.nextSlot] = { ...team, isAutoPlaced: true, lockedFrom: matchId };
-          newMatches[match.nextMatch].winner = null;
+    // Se foi clique no botão de vencedor (ou clique direto numa imagem auto-placed)
+    if (isWinnerClick) {
+      setMatches(prev => {
+        const match = prev[matchId];
+        if (!match.t1 || !match.t2) {
+          if (matchId !== 'third_winner') toast.error('A partida precisa de 2 times para ter um vencedor!');
+          return prev;
         }
 
-        if (matchId === 'l4_1' || matchId === 'r4_1') {
-          const loserSlot = slotId === 't1' ? 't2' : 't1';
-          const loserTeam = match[loserSlot];
-          const thirdPlaceSlot = matchId === 'l4_1' ? 't1' : 't2';
-          newMatches['third_1'][thirdPlaceSlot] = { ...loserTeam, isAutoPlaced: true, lockedFrom: matchId };
-          newMatches['third_1'].winner = null;
-        }
-      }
+        const newMatches = { ...prev };
+        
+        // Toggle winner
+        if (match.winner === slotId) {
+          newMatches[matchId].winner = null;
+          if (match.nextMatch) {
+            newMatches[match.nextMatch][match.nextSlot] = null;
+            newMatches[match.nextMatch].winner = null; // cascade clearing winner
+          }
+        } else {
+          newMatches[matchId].winner = slotId;
+          if (match.nextMatch) {
+            newMatches[match.nextMatch][match.nextSlot] = { ...team, isAutoPlaced: true, lockedFrom: matchId };
+            newMatches[match.nextMatch].winner = null;
+          }
 
-      return newMatches;
-    });
+          if (matchId === 'l4_1' || matchId === 'r4_1') {
+            const loserSlot = slotId === 't1' ? 't2' : 't1';
+            const loserTeam = match[loserSlot];
+            const thirdPlaceSlot = matchId === 'l4_1' ? 't1' : 't2';
+            newMatches['third_1'][thirdPlaceSlot] = { ...loserTeam, isAutoPlaced: true, lockedFrom: matchId };
+            newMatches['third_1'].winner = null;
+          }
+        }
+
+        return newMatches;
+      });
+    }
   };
 
   const handleExportImage = async () => {
