@@ -133,6 +133,16 @@ h1 {
     gap: 10px;
 }
 
+@media (max-width: 768px) {
+    .avancado-board {
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    .avancado-board .tier-section-group {
+        min-width: 600px;
+    }
+}
+
 .tier-label {
     min-width: 70px;
     max-width: 140px;
@@ -291,6 +301,7 @@ h1 {
     border-radius: 4px;
     flex: 0 0 50px;
     transition: transform 0.1s; 
+    touch-action: none;
     pointer-events: auto;   
 }
 
@@ -342,13 +353,26 @@ h1 {
 
 /* Ametist Navbar & Footer */
 .ametist-navbar { position: fixed; top: 0; left: 0; right: 0; background: rgba(22, 22, 24, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid #333; z-index: 1000; padding: 15px 0; }
-.navbar-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-.navbar-logo a { color: #b062eb; font-size: 1.5rem; font-weight: 900; text-decoration: none; letter-spacing: 1px; }
-.navbar-links { display: flex; gap: 20px; align-items: center; }
-.nav-item { color: #fff; text-decoration: none; font-weight: 500; transition: color 0.2s; }
+.navbar-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; width: 100%; box-sizing: border-box; }
+.navbar-logo { display: flex; align-items: center; gap: 8px; flex: 1; text-decoration: none; }
+.navbar-icon { width: 30px; height: 30px; object-fit: contain; }
+.navbar-text { height: 22px; object-fit: contain; }
+.navbar-links { display: flex; gap: 20px; justify-content: center; flex: 1; }
+.navbar-auth { display: flex; justify-content: flex-end; flex: 1; }
+.nav-item { color: #fff; text-decoration: none; font-weight: 500; transition: color 0.2s; white-space: nowrap; }
 .nav-item:hover { color: #b062eb; }
-.nav-btn { background: #b062eb; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: opacity 0.2s; }
+.nav-btn { background: #b062eb; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: opacity 0.2s; white-space: nowrap; }
 .nav-btn:hover { opacity: 0.9; }
+
+@media (max-width: 768px) {
+    .navbar-container { padding: 0 10px; }
+    .navbar-text { display: none; }
+    .navbar-logo { flex: 0; }
+    .navbar-links { gap: 10px; flex: auto; }
+    .nav-item { font-size: 0.85rem; }
+    .nav-btn { padding: 6px 10px; font-size: 0.8rem; }
+    .navbar-auth { flex: 0; }
+}
 .ametist-footer { background: #111; padding: 30px 0; border-top: 1px solid #222; text-align: center; margin-top: auto; }
 .footer-content { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 .footer-content p { color: #888; margin: 5px 0; }

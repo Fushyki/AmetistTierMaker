@@ -138,10 +138,10 @@ export default function Admin() {
 
   return (
     <div className="tierlist-container" style={{ maxWidth: '800px', margin: '50px auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', borderBottom: '1px solid #333', paddingBottom: '20px' }}>
-        <h1>Painel do Usuário</h1>
-        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-          <span style={{ color: '#888' }}>{user.email}</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', borderBottom: '1px solid #333', paddingBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
+        <h1 style={{ margin: 0 }}>Painel do Usuário</h1>
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ color: '#888', wordBreak: 'break-all' }}>{user.email}</span>
           <button onClick={handleLogout} style={{ padding: '8px 16px', backgroundColor: '#ff4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
             Sair
           </button>
@@ -160,16 +160,16 @@ export default function Admin() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {tierlists.map(t => (
-              <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: cardBg, padding: '15px', borderRadius: '8px' }}>
-                <span style={{ fontWeight: 'bold', color: 'white' }}>{t.name}</span>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={() => handleRename(t.id, t.name)} style={{ padding: '8px 15px', backgroundColor: '#555', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+              <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: cardBg, padding: '15px', borderRadius: '8px', flexWrap: 'wrap', gap: '10px' }}>
+                <span style={{ fontWeight: 'bold', color: 'white', wordBreak: 'break-word' }}>{t.name}</span>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <button onClick={() => handleRename(t.id, t.name)} style={{ padding: '8px 15px', backgroundColor: '#555', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', flex: 1 }}>
                     Renomear
                   </button>
-                  <button onClick={() => handleEdit(t)} style={{ padding: '8px 15px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                  <button onClick={() => handleEdit(t)} style={{ padding: '8px 15px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', flex: 1 }}>
                     Editar
                   </button>
-                  <button onClick={() => handleDelete(t.id)} style={{ padding: '8px 15px', backgroundColor: 'transparent', color: '#ff4444', border: '1px solid #ff4444', borderRadius: '4px', cursor: 'pointer' }}>
+                  <button onClick={() => handleDelete(t.id)} style={{ padding: '8px 15px', backgroundColor: 'transparent', color: '#ff4444', border: '1px solid #ff4444', borderRadius: '4px', cursor: 'pointer', flex: 1 }}>
                     Deletar
                   </button>
                 </div>

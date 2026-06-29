@@ -493,9 +493,9 @@ export default function TemplateMaker() {
       </div>
 
       <div className="control-card" style={{ padding: '20px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-          <h3>Banco de Imagens</h3>
-          <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap', gap: '15px' }}>
+          <h3 style={{ margin: 0 }}>Banco de Imagens</h3>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button 
               className={dataSourceType === 'manual' ? 'btn-active' : 'btn-secondary'}
               onClick={() => setDataSourceType('manual')}
