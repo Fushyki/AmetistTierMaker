@@ -182,6 +182,7 @@ function Tierlist() {
             }
             
             localStorage.setItem('tierlist-api-loaded', 'true');
+            localStorage.setItem('tierlist-active-template-id', templateId); // RESTORE THIS LINE
             // FIX 5: CLEAR current id to avoid overwriting previous cloud saves
             localStorage.removeItem('tierlist-current-id');
             
@@ -238,6 +239,7 @@ function Tierlist() {
 
           setItems(newItems);
           localStorage.setItem('tierlist-api-loaded', 'true');
+          localStorage.removeItem('tierlist-active-template-id'); // FIX: Ensure no ghost template ID is left when loading default
         } catch (err) {
           console.error("Erro ao carregar API:", err);
         }
