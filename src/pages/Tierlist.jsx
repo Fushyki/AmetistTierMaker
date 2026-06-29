@@ -46,6 +46,9 @@ function Tierlist() {
     const saved = localStorage.getItem('tierlist-items');
     return saved ? JSON.parse(saved) : [];
   });
+  const [tierlistName, setTierlistName] = useState(() => {
+    return localStorage.getItem('tierlist-name') || 'Minha Tier List';
+  });
   
   // HISTORY STATE (Undo / Ctrl+Z)
   const [history, setHistory] = useState([]);
@@ -118,8 +121,12 @@ function Tierlist() {
     const currentId = localStorage.getItem('tierlist-current-id');
     if (currentId) {
       const loadCloudData = async () => {
-        const { data, error } = await supabase.from('tierlists').select('data').eq('id', currentId).single();
+        const { data, error } = await supabase.from('tierlists').select('name, data').eq('id', currentId).single();
         if (data) {
+          if (data.name) {
+            setTierlistName(data.name);
+            localStorage.setItem('tierlist-name', data.name);
+          }
           setItems(data.data.items || []);
           setRanksData(data.data.ranksData || []);
           if (data.data.layoutMode) setLayoutMode(data.data.layoutMode);
@@ -154,8 +161,12 @@ function Tierlist() {
     if (templateId) {
       const loadTemplate = async () => {
         try {
-          const { data, error } = await supabase.from('templates').select('data').eq('id', templateId).single();
+          const { data, error } = await supabase.from('templates').select('name, data').eq('id', templateId).single();
           if (data && data.data) {
+            if (data.name) {
+              setTierlistName(data.name);
+              localStorage.setItem('tierlist-name', data.name);
+            }
             saveHistoryState(items, ranksData);
             
             if (data.data.items && data.data.ranksData) {
@@ -210,7 +221,9 @@ function Tierlist() {
       localStorage.removeItem('tierlist-api-loaded');
       localStorage.removeItem('tierlist-active-template-id');
       localStorage.removeItem('tierlist-current-id'); // FIX 5: CLEAR current ID
+      localStorage.removeItem('tierlist-name');
       
+      setTierlistName('Minha Tier List');
       setItems([]);
       setRanksData(initialRanksClassico);
       setLayoutMode('classico');
@@ -664,7 +677,7 @@ function Tierlist() {
           </div>
         )}
 
-        {!isPresentationMode && <h1>Minha Tier List</h1>}
+        {!isPresentationMode && <h1>{tierlistName}</h1>}
 
         {!isPresentationMode && (
         <div className="controls-wrapper">
