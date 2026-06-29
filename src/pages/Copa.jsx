@@ -67,7 +67,8 @@ const createEmptyMatches = () => {
   addMatches('r4', 1, 'final');
 
   // Center matches
-  matches['final_1'] = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
+  matches['final_1'] = { t1: null, t2: null, winner: null, nextMatch: 'champion', nextSlot: 't1' };
+  matches['champion'] = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
   matches['third_1'] = { t1: null, t2: null, winner: null, nextMatch: 'third_winner', nextSlot: 't1' };
   matches['third_winner'] = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
 
@@ -79,7 +80,8 @@ const createEmptyMatches = () => {
 function DraggableTeam({ id, team, isSelected }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id,
-    data: { team }
+    data: { team },
+    disabled: team.isAutoPlaced // disable dragging if auto-placed
   });
   
   const style = transform ? {
@@ -118,7 +120,9 @@ function MatchSlot({ matchId, slotId, team, winner, onClickSlot }) {
       {team ? (
         <>
           <DraggableTeam id={`drag-${matchId}-${slotId}-${team.id}`} team={team} isSelected={false} />
-          <button className="winner-btn" onClick={(e) => { e.stopPropagation(); onClickSlot(matchId, slotId, team, true); }} title="Definir Vencedor">✔️</button>
+          {!team.isAutoPlaced && matchId !== 'champion' && matchId !== 'third_winner' && (
+             <button className="winner-btn" onClick={(e) => { e.stopPropagation(); onClickSlot(matchId, slotId, team, true); }} title="Definir Vencedor">✔️</button>
+          )}
         </>
       ) : (
         <span className="team-placeholder">?</span>
@@ -188,6 +192,11 @@ export default function Copa() {
       
       // Se tiver algo no target, vamos jogar de volta pro inventário
       const existingTeamInTarget = newMatches[targetMatchId][targetSlotId];
+      if (existingTeamInTarget?.isAutoPlaced) {
+        toast.error('Você não pode substituir um time que avançou por vitória. Desfaça a vitória na chave anterior!');
+        return prev;
+      }
+      
       if (existingTeamInTarget && existingTeamInTarget.id !== team.id) {
         setInventory(inv => [...inv.filter(t => t.id !== existingTeamInTarget.id), existingTeamInTarget]);
       }
@@ -229,6 +238,11 @@ export default function Copa() {
         const newMatches = { ...prev };
         const existingTeamInTarget = newMatches[matchId][slotId];
         
+        if (existingTeamInTarget?.isAutoPlaced) {
+          toast.error('Você não pode substituir um time que avançou por vitória. Desfaça a vitória na chave anterior!');
+          return prev;
+        }
+
         if (existingTeamInTarget) {
           setInventory(inv => [...inv.filter(t => t.id !== existingTeamInTarget.id), existingTeamInTarget]);
         }
@@ -258,6 +272,10 @@ export default function Copa() {
     
     // Select the existing team in the slot if not placing and not clicking winner
     if (!isWinnerClick && team && !selectedTeam) {
+      if (team.isAutoPlaced) {
+        toast.error('Este time avançou por vitória. Desfaça a vitória na chave anterior para alterá-lo.');
+        return;
+      }
       setSelectedTeam({ team, sourceId: `drag-${matchId}-${slotId}-${team.id}` });
       return;
     }
@@ -277,11 +295,12 @@ export default function Copa() {
         newMatches[matchId].winner = null;
         if (match.nextMatch) {
           newMatches[match.nextMatch][match.nextSlot] = null;
+          newMatches[match.nextMatch].winner = null; // cascade clearing winner
         }
       } else {
         newMatches[matchId].winner = slotId;
         if (match.nextMatch) {
-          newMatches[match.nextMatch][match.nextSlot] = team;
+          newMatches[match.nextMatch][match.nextSlot] = { ...team, isAutoPlaced: true, lockedFrom: matchId };
           newMatches[match.nextMatch].winner = null;
         }
 
@@ -289,7 +308,7 @@ export default function Copa() {
           const loserSlot = slotId === 't1' ? 't2' : 't1';
           const loserTeam = match[loserSlot];
           const thirdPlaceSlot = matchId === 'l4_1' ? 't1' : 't2';
-          newMatches['third_1'][thirdPlaceSlot] = loserTeam;
+          newMatches['third_1'][thirdPlaceSlot] = { ...loserTeam, isAutoPlaced: true, lockedFrom: matchId };
           newMatches['third_1'].winner = null;
         }
       }
@@ -425,16 +444,21 @@ export default function Copa() {
             {renderColumn('l3', 2, 'Quartas')}
             {renderColumn('l4', 1, 'Semi')}
             
-            {/* Centro (Final e 3o Lugar) */}
+            {/* GRANDE FINAL E TROFÉU */}
             <div className="bracket-center">
               <div style={{ textAlign: 'center' }}>
-                <h2 style={{ color: '#fbbf24', margin: '0 0 10px 0', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>🏆 FINAL</h2>
-                <div className="match-box final-match">
-                  <MatchSlot matchId="final_1" slotId="t1" team={matches.final_1.t1} winner={matches.final_1.winner} onClickSlot={handleSetWinner} />
-                  <MatchSlot matchId="final_1" slotId="t2" team={matches.final_1.t2} winner={matches.final_1.winner} onClickSlot={handleSetWinner} />
+                <h2 style={{ color: '#fbbf24', fontSize: '1.8rem', margin: '0 0 10px 0', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>🏆 CAMPEÃO 🏆</h2>
+                <div className="match-box final-match" style={{ margin: '0 auto', background: 'rgba(255, 255, 255, 0.1)', borderColor: '#fbbf24', width: '120px' }}>
+                  <MatchSlot matchId="champion" slotId="t1" team={matches.champion.t1} winner={null} onClickSlot={() => {}} />
                 </div>
               </div>
-              
+
+              <div className="match-box final-match">
+                <h3 style={{ color: '#fbbf24', textAlign: 'center', margin: '0 0 10px 0' }}>GRANDE FINAL</h3>
+                <MatchSlot matchId="final_1" slotId="t1" team={matches.final_1.t1} winner={matches.final_1.winner} onClickSlot={handleSetWinner} />
+                <MatchSlot matchId="final_1" slotId="t2" team={matches.final_1.t2} winner={matches.final_1.winner} onClickSlot={handleSetWinner} />
+              </div>
+
               <div style={{ textAlign: 'center', marginTop: '30px' }}>
                 <h3 style={{ color: '#cbd5e1', margin: '0 0 10px 0' }}>🥉 3º LUGAR</h3>
                 <div className="match-box">
