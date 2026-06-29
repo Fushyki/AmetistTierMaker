@@ -159,6 +159,15 @@ function Tierlist() {
     // Carregamento de Template da Home
     const templateId = searchParams.get('templateId');
     if (templateId) {
+      // OTIMIZAÇÃO DE CACHE E PRESERVAÇÃO DE ESTADO
+      // Se o usuário clicou no mesmo template que já está salvo na memória local,
+      // não puxa tudo de novo! Apenas limpa a URL e mantém o progresso atual na tela instantaneamente.
+      if (templateId === localStorage.getItem('tierlist-active-template-id') && localStorage.getItem('tierlist-api-loaded') === 'true') {
+        searchParams.delete('templateId');
+        setSearchParams(searchParams);
+        return;
+      }
+
       const loadTemplate = async () => {
         try {
           const { data, error } = await supabase.from('templates').select('name, data').eq('id', templateId).single();
