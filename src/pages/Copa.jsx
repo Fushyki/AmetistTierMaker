@@ -147,7 +147,19 @@ export default function Copa() {
   
   const [matches, setMatches] = useState(() => {
     const saved = localStorage.getItem('copa-matches');
-    return saved ? JSON.parse(saved) : createEmptyMatches();
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Patch old saves that don't have the champion match
+      if (!parsed.champion) {
+        parsed.champion = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
+      }
+      if (parsed.final_1) {
+        parsed.final_1.nextMatch = 'champion';
+        parsed.final_1.nextSlot = 't1';
+      }
+      return parsed;
+    }
+    return createEmptyMatches();
   });
 
   const [isPresentationMode, setIsPresentationMode] = useState(false);
@@ -449,7 +461,7 @@ export default function Copa() {
               <div style={{ textAlign: 'center' }}>
                 <h2 style={{ color: '#fbbf24', fontSize: '1.8rem', margin: '0 0 10px 0', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>🏆 CAMPEÃO 🏆</h2>
                 <div className="match-box final-match" style={{ margin: '0 auto', background: 'rgba(255, 255, 255, 0.1)', borderColor: '#fbbf24', width: '120px' }}>
-                  <MatchSlot matchId="champion" slotId="t1" team={matches.champion.t1} winner={null} onClickSlot={() => {}} />
+                  <MatchSlot matchId="champion" slotId="t1" team={matches.champion?.t1} winner={null} onClickSlot={() => {}} />
                 </div>
               </div>
 
