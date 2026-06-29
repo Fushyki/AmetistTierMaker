@@ -168,46 +168,62 @@ function InventoryDroppable({ children }) {
 
 export default function Copa() {
   const [inventory, setInventory] = useState(() => {
-    const saved = localStorage.getItem('copa-inventory');
-    if (saved) {
-      let parsed = JSON.parse(saved);
-      if (!Array.isArray(parsed)) parsed = [];
-      const matchesSaved = localStorage.getItem('copa-matches');
-      let matchesParsed = matchesSaved ? JSON.parse(matchesSaved) : {};
-      if (!matchesParsed || typeof matchesParsed !== 'object') matchesParsed = {};
-      
-      // Merge missing teams from defaultTeams (if they are not in inventory AND not in matches)
-      const existingTeamIds = new Set(parsed.map(t => t.id));
-      
-      // Also collect team ids from matches so we don't duplicate them in inventory if they are already on the board
-      Object.values(matchesParsed).forEach(m => {
-        if (m.t1) existingTeamIds.add(m.t1.id);
-        if (m.t2) existingTeamIds.add(m.t2.id);
-      });
+    try {
+      const saved = localStorage.getItem('copa-inventory');
+      if (saved) {
+        let parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed)) parsed = [];
+        
+        let matchesParsed = {};
+        try {
+          const matchesSaved = localStorage.getItem('copa-matches');
+          if (matchesSaved) {
+            matchesParsed = JSON.parse(matchesSaved);
+            if (!matchesParsed || typeof matchesParsed !== 'object') matchesParsed = {};
+          }
+        } catch (err) {
+          console.warn("Failed to parse matches for inventory merge", err);
+        }
+        
+        // Merge missing teams from defaultTeams (if they are not in inventory AND not in matches)
+        const existingTeamIds = new Set(parsed.map(t => t?.id).filter(Boolean));
+        
+        // Also collect team ids from matches so we don't duplicate them in inventory if they are already on the board
+        Object.values(matchesParsed).forEach(m => {
+          if (m?.t1?.id) existingTeamIds.add(m.t1.id);
+          if (m?.t2?.id) existingTeamIds.add(m.t2.id);
+        });
 
-      const missingTeams = defaultTeams.filter(t => !existingTeamIds.has(t.id));
-      return [...parsed, ...missingTeams];
+        const missingTeams = defaultTeams.filter(t => !existingTeamIds.has(t.id));
+        return [...parsed, ...missingTeams];
+      }
+    } catch (e) {
+      console.error("Erro ao ler copa-inventory", e);
     }
     return defaultTeams;
   });
   
   const [matches, setMatches] = useState(() => {
-    const saved = localStorage.getItem('copa-matches');
-    if (saved) {
-      let parsed = JSON.parse(saved);
-      if (!parsed || typeof parsed !== 'object') return createEmptyMatches();
-      // Patch old saves that don't have the champion match
-      if (!parsed.champion) {
-        parsed.champion = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
+    try {
+      const saved = localStorage.getItem('copa-matches');
+      if (saved) {
+        let parsed = JSON.parse(saved);
+        if (!parsed || typeof parsed !== 'object') return createEmptyMatches();
+        // Patch old saves that don't have the champion match
+        if (!parsed.champion) {
+          parsed.champion = { t1: null, t2: null, winner: null, nextMatch: null, nextSlot: null };
+        }
+        if (parsed.final_1) {
+          parsed.final_1.nextMatch = 'champion';
+          parsed.final_1.nextSlot = 't1';
+        }
+        if (parsed.r4_1) {
+          parsed.r4_1.nextSlot = 't2';
+        }
+        return parsed;
       }
-      if (parsed.final_1) {
-        parsed.final_1.nextMatch = 'champion';
-        parsed.final_1.nextSlot = 't1';
-      }
-      if (parsed.r4_1) {
-        parsed.r4_1.nextSlot = 't2';
-      }
-      return parsed;
+    } catch (e) {
+      console.error("Erro ao ler copa-matches", e);
     }
     return createEmptyMatches();
   });
