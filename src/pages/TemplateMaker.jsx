@@ -278,6 +278,31 @@ export default function TemplateMaker() {
     }
   };
 
+  const handleItemUrl = async () => {
+    const { value: url } = await Swal.fire({
+      title: 'URL da Imagem (Item)',
+      input: 'url',
+      inputPlaceholder: 'https://...',
+      background: '#1a1a1c',
+      color: '#ffffff',
+      showCancelButton: true,
+      confirmButtonText: 'Adicionar',
+      cancelButtonText: 'Cancelar'
+    });
+    
+    if (url) {
+      const newItem = {
+        id: 'manual-' + Date.now(),
+        src: url,
+        nome: 'Item Customizado',
+        tierId: null,
+        colIndex: null,
+        uploadIndex: Date.now()
+      };
+      setItems(prev => [...prev, newItem]);
+    }
+  };
+
   const handleSaveTemplate = async () => {
     if (!user) return toast.error("Você precisa estar logado para publicar um template!");
     if (!name.trim()) return toast.error("Dê um nome para o template.");
@@ -447,7 +472,7 @@ export default function TemplateMaker() {
                 <div style={{ color: '#b062eb', fontWeight: 'bold' }}>Processando imagens...</div>
               ) : (
                 <>
-                  <div style={{ color: '#ddd' }}>Clique aqui para selecionar múltiplas imagens</div>
+                  <div style={{ color: '#ddd' }}>Clique aqui para selecionar múltiplas imagens do seu PC</div>
                 </>
               )}
               <input 
@@ -458,6 +483,11 @@ export default function TemplateMaker() {
                 ref={fileInputRef} 
                 style={{ display: 'none' }} 
               />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <button className="btn-secondary" onClick={handleItemUrl}>
+                Ou adicionar Item por URL
+              </button>
             </div>
           </div>
         ) : (
