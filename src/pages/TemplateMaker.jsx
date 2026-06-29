@@ -49,7 +49,8 @@ export default function TemplateMaker() {
     imageBaseUrl: '',
     replaceFrom: '',
     replaceTo: '',
-    imageSuffix: ''
+    imageSuffix: '',
+    pagesToFetch: 1
   });
   const [isTestingApi, setIsTestingApi] = useState(false);
   
@@ -556,7 +557,10 @@ export default function TemplateMaker() {
               Conecte a uma API JSON externa. As imagens não serão salvas no seu banco, e sim carregadas diretamente da API toda vez que a Tier List for aberta.
             </p>
             <div style={{ display: 'grid', gap: '10px' }}>
-              <input type="text" placeholder="URL da API (ex: https://api.exemplo.com/dados.json)" value={apiConfig.url} onChange={e => setApiConfig({...apiConfig, url: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <input type="text" placeholder="URL da API (ex: ...anime?page=[PAGE])" value={apiConfig.url} onChange={e => setApiConfig({...apiConfig, url: e.target.value})} style={{ flex: 1, minWidth: '300px', padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+                <input type="number" title="Quantas páginas buscar consecutivamente? (Use [PAGE] na URL)" placeholder="Páginas (Máx 20)" min="1" max="20" value={apiConfig.pagesToFetch || 1} onChange={e => setApiConfig({...apiConfig, pagesToFetch: parseInt(e.target.value) || 1})} style={{ width: '150px', padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
+              </div>
               
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <input type="text" placeholder="Caminho para a Lista (ex: data.items) [Deixe vazio se for na raiz]" value={apiConfig.arrayPath} onChange={e => setApiConfig({...apiConfig, arrayPath: e.target.value})} style={{ flex: 1, padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
