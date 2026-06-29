@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabaseClient';
 import { confirmAction } from '../utils/alerts';
 import { isAdmin } from '../utils/admin';
+import { Trash2, Pencil } from 'lucide-react';
 import '../index.css';
 
 export default function Admin() {
@@ -206,14 +207,14 @@ export default function Admin() {
                     style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255,0,0,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     title="Excluir Template"
                   >
-                    🗑️
+                    <Trash2 size={18} />
                   </button>
                   <Link to={`/template-maker?editTemplateId=${template.id}`}>
                     <button 
                       style={{ position: 'absolute', top: '10px', right: '55px', backgroundColor: 'rgba(33, 150, 243, 0.9)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       title="Editar Template"
                     >
-                      ✏️
+                      <Pencil size={18} />
                     </button>
                   </Link>
                 </div>

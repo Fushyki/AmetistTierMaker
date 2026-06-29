@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
+import { Settings, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import DroppableArea from './DroppableArea';
 import SortableItem from './SortableItem';
 
@@ -69,15 +70,15 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
       </div>
       
       {!isPresentationMode && (
-        <div className="tier-settings" style={{ display: 'flex', flexDirection: 'column', gap: '2px', padding: '5px' }}>
-          <button onClick={() => onMoveRow(rank.id, 'up')} title="Mover para Cima" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#fff' }}>▲</button>
-          <button onClick={() => onMoveRow(rank.id, 'down')} title="Mover para Baixo" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#fff' }}>▼</button>
+        <div className="tier-settings" style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '5px' }}>
+          <button onClick={() => onMoveRow(rank.id, 'up')} title="Mover para Cima" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center' }}><ArrowUp size={16} /></button>
+          <button onClick={() => onMoveRow(rank.id, 'down')} title="Mover para Baixo" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center' }}><ArrowDown size={16} /></button>
           {isCustomTier && (
-            <button className="remove-row-btn" onClick={() => onRemoveRow(rank.id)} title="Excluir Linha" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginTop: '2px' }}>
-              🗑️
+            <button className="remove-row-btn" onClick={() => onRemoveRow(rank.id)} title="Excluir Linha" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ff4444', display: 'flex', alignItems: 'center' }}>
+              <Trash2 size={16} />
             </button>
           )}
-          <button className="config-btn" title="Configurar Cor" onClick={handleRightClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginTop: '2px' }}>⚙️</button>
+          <button className="config-btn" title="Configurar Cor" onClick={handleRightClick} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', display: 'flex', alignItems: 'center' }}><Settings size={16} /></button>
         </div>
       )}
     </div>

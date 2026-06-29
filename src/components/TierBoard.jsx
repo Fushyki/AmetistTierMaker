@@ -1,4 +1,5 @@
 import React from 'react';
+import { Settings } from 'lucide-react';
 import TierRow from './TierRow';
 
 export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onAddRow, onUpdateRow, isPresentationMode }) {
@@ -24,7 +25,7 @@ export default function TierBoard({ ranksData, items, colunas, layoutMode, onRem
               </div>
               {!isPresentationMode && (
                 <div className="tier-settings" style={{ visibility: 'hidden', padding: '5px', display: 'flex', flexDirection: 'column' }}>
-                  <button style={{ fontSize: '1.2rem', padding: '5px' }}>⚙️</button>
+                  <button style={{ color: '#aaa', padding: '5px', background: 'none', border: 'none', display: 'flex', alignItems: 'center' }}><Settings size={16} /></button>
                 </div>
               )}
             </div>
