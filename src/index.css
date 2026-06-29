@@ -134,9 +134,9 @@ h1 {
 }
 
 .tier-label {
-    width: 65px;
-    min-width: 65px;
-    min-height: 65px;
+    width: 55px;
+    min-width: 55px;
+    min-height: 55px;
     display: flex;
     align-items: center;
     position: relative;
@@ -283,11 +283,11 @@ h1 {
 }
 
 .personagem-item {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     object-fit: cover;
     border-radius: 4px;
-    flex: 0 0 60px;
+    flex: 0 0 50px;
     transition: transform 0.1s; 
     pointer-events: auto;   
 }
@@ -307,19 +307,19 @@ h1 {
 }
 .inventory-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 60px);
+    grid-template-columns: repeat(auto-fill, 50px);
     gap: 12px;
     justify-content: start;
 }
 .tier-items {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 60px);
+    grid-template-columns: repeat(auto-fill, 50px);
     justify-content: start;
     align-content: start;
     gap: 10px;
     padding: 12px;
     background: #272729;
-    min-height: 80px;
+    min-height: 65px;
 }
 
 .grid-1 .tier-items {

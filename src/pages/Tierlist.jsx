@@ -333,17 +333,14 @@ function Tierlist() {
 
   const resetarTierList = async () => {
     const isConfirmed = await confirmAction(
-      'Resetar Tudo',
-      'Tem certeza que deseja resetar tudo? Todas as imagens no quadro serão perdidas.',
-      'Sim, resetar'
+      'Limpar Quadro',
+      'Tem certeza que deseja limpar a tier list? Todas as imagens voltarão para o inventário.',
+      'Sim, limpar'
     );
     if (isConfirmed) {
       saveHistoryState(items, ranksData);
-      setItems([]);
-      setRanksData(layoutMode === 'classico' ? initialRanksClassico : initialRanksAvancado);
-      setColunas(1);
+      setItems(prev => prev.map(item => ({ ...item, tierId: null, colIndex: null })));
       setSelectedItem(null);
-      localStorage.removeItem('tierlist-api-loaded');
     }
   };
 
