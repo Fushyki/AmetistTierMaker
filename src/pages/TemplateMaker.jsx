@@ -134,6 +134,24 @@ export default function TemplateMaker() {
     }
   };
 
+  const handleCoverUrl = async () => {
+    const { value: url } = await Swal.fire({
+      title: 'URL da Capa',
+      input: 'url',
+      inputPlaceholder: 'https://exemplo.com/imagem.png',
+      background: '#1a1a1c',
+      color: '#ffffff',
+      confirmButtonColor: '#b062eb',
+      showCancelButton: true,
+      confirmButtonText: 'Adicionar',
+      cancelButtonText: 'Cancelar'
+    });
+    
+    if (url) {
+      setCoverImage(url);
+    }
+  };
+
   const handleItemsUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
@@ -353,10 +371,15 @@ export default function TemplateMaker() {
               >✕</button>
             </div>
           ) : (
-            <label className="btn-secondary" style={{ display: 'inline-block', cursor: 'pointer', marginTop: '10px' }}>
-              Fazer Upload da Capa (16:9)
-              <input type="file" accept="image/*" onChange={handleCoverUpload} ref={coverInputRef} style={{ display: 'none' }} />
-            </label>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <label className="btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
+                Fazer Upload (16:9)
+                <input type="file" accept="image/*" onChange={handleCoverUpload} ref={coverInputRef} style={{ display: 'none' }} />
+              </label>
+              <button className="btn-secondary" onClick={handleCoverUrl}>
+                Usar URL
+              </button>
+            </div>
           )}
         </div>
       </div>
