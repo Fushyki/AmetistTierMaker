@@ -317,6 +317,11 @@ export default function TemplateMaker() {
       const apiItems = await fetchAndParseAPI(apiConfig);
       setItems(apiItems);
       toast.success(`Sucesso! API retornou ${apiItems.length} itens.`);
+      if (apiConfig.pagesToFetch > 1) {
+        setTimeout(() => {
+          toast.info("💡 Dica: Se a API não trouxe todos os itens, você poderá usar o botão 'Restaurar' na Tier List para continuar buscando.", { autoClose: 7000 });
+        }, 1500);
+      }
     } catch (error) {
       toast.error(`Erro ao ler API: ${error.message}`);
     } finally {

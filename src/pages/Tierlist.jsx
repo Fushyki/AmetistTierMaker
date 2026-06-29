@@ -169,6 +169,11 @@ function Tierlist() {
                 try {
                   const apiItems = await fetchAndParseAPI(data.data.apiConfig);
                   setItems(apiItems);
+                  if (data.data.apiConfig.pagesToFetch > 1) {
+                    setTimeout(() => {
+                      toast.info("💡 Dica: Se a API não trouxe todas as imagens de uma vez, clique em 'Restaurar' no inventário para continuar buscando.", { autoClose: 7000 });
+                    }, 1000);
+                  }
                 } catch (apiErr) {
                   console.error("Erro ao puxar API do template:", apiErr);
                   toast.error("Erro ao puxar imagens da API do Template.");
