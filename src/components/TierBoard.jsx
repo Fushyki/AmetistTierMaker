@@ -2,13 +2,22 @@ import React from 'react';
 import { Settings } from 'lucide-react';
 import TierRow from './TierRow';
 
-export default function TierBoard({ ranksData, items, colunas, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onAddRow, onUpdateRow, isPresentationMode }) {
+export default function TierBoard({ ranksData, items, colunas, columnTitles, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onAddRow, onUpdateRow, onUpdateGroupTitle, onUpdateColumnTitle, isPresentationMode }) {
   return (
     <div id="board">
       {ranksData.map((grupo, groupIndex) => (
         <div key={grupo.id} className="tier-section-group">
           {layoutMode === 'avancado' && (
-            <div className="group-header" contentEditable={!isPresentationMode} suppressContentEditableWarning>
+            <div 
+              className="group-header" 
+              contentEditable={!isPresentationMode} 
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                if (isPresentationMode || !onUpdateGroupTitle) return;
+                const newText = e.currentTarget.textContent.trim();
+                if (newText !== grupo.titulo) onUpdateGroupTitle(grupo.id, newText);
+              }}
+            >
               {grupo.titulo}
             </div>
           )}
@@ -18,8 +27,18 @@ export default function TierBoard({ ranksData, items, colunas, layoutMode, onRem
               <div className="tier-label" style={{ background: 'transparent', minHeight: 'auto', height: 'auto', opacity: 0 }}></div>
               <div className={`tier-drop-area grid-${colunas}`}>
                 {Array.from({ length: colunas }).map((_, i) => (
-                  <div key={i} className="col-title-box" contentEditable={!isPresentationMode} suppressContentEditableWarning>
-                    {i === 0 ? 'DPS' : i === 1 ? 'SUPPORT' : 'SUSTAIN'}
+                  <div 
+                    key={i} 
+                    className="col-title-box" 
+                    contentEditable={!isPresentationMode} 
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      if (isPresentationMode || !onUpdateColumnTitle) return;
+                      const newText = e.currentTarget.textContent.trim();
+                      if (newText !== (columnTitles && columnTitles[i])) onUpdateColumnTitle(i, newText);
+                    }}
+                  >
+                    {columnTitles && columnTitles[i] ? columnTitles[i] : (i === 0 ? 'DPS' : i === 1 ? 'SUPPORT' : 'SUSTAIN')}
                   </div>
                 ))}
               </div>

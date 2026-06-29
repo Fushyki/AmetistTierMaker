@@ -38,6 +38,7 @@ export default function TemplateMaker() {
   const [masterDimensions, setMasterDimensions] = useState(null);
   const [items, setItems] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [dataSourceType, setDataSourceType] = useState('manual'); // 'manual' ou 'api'
   const [apiConfig, setApiConfig] = useState({
@@ -55,6 +56,7 @@ export default function TemplateMaker() {
   const [layoutMode, setLayoutMode] = useState('classico');
   const [ranksData, setRanksData] = useState(initialRanksClassico);
   const colunas = layoutMode === 'classico' ? 1 : 3;
+  const [columnTitles, setColumnTitles] = useState(['DPS', 'SUPPORT', 'SUSTAIN']);
 
   useEffect(() => {
     if (editTemplateId) {
@@ -69,6 +71,7 @@ export default function TemplateMaker() {
           setRanksData(tData.ranksData || initialRanksClassico);
           setItems(tData.items || []);
           setLayoutMode(tData.layoutMode || 'classico');
+          if (tData.columnTitles) setColumnTitles(tData.columnTitles);
           
           if (tData.apiConfig) {
             setDataSourceType('api');
@@ -154,7 +157,13 @@ export default function TemplateMaker() {
   };
 
   const handleItemsUpload = async (e) => {
-    const files = Array.from(e.target.files);
+    let files = [];
+    if (e.dataTransfer && e.dataTransfer.files) {
+      files = Array.from(e.dataTransfer.files);
+    } else if (e.target && e.target.files) {
+      files = Array.from(e.target.files);
+    }
+    
     if (!files.length) return;
     
     setIsProcessing(true);
@@ -164,6 +173,8 @@ export default function TemplateMaker() {
       const newProcessedItems = [];
       
       for (const file of files) {
+        if (!file.type.startsWith('image/')) continue; // skip non-images
+        
         let targetW = currentMaster ? currentMaster.width : null;
         let targetH = currentMaster ? currentMaster.height : null;
         
@@ -191,7 +202,25 @@ export default function TemplateMaker() {
       setIsProcessing(false);
     }
     
-    e.target.value = '';
+    if (e.target && e.target.value) {
+      e.target.value = '';
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleItemsUpload(e);
   };
 
   const handleReset = async () => {
@@ -234,6 +263,21 @@ export default function TemplateMaker() {
       ...group,
       ranks: group.ranks.map(r => r.id === rankId ? { ...r, ...updates } : r)
     })));
+  };
+
+  const handleUpdateGroupTitle = (groupId, newTitle) => {
+    setRanksData(prev => prev.map(group => {
+      if (group.id !== groupId) return group;
+      return { ...group, titulo: newTitle };
+    }));
+  };
+
+  const handleUpdateColumnTitle = (colIndex, newTitle) => {
+    setColumnTitles(prev => {
+      const newTitles = [...prev];
+      newTitles[colIndex] = newTitle;
+      return newTitles;
+    });
   };
 
   const handleRemoveRow = (rankId) => {
@@ -317,7 +361,8 @@ export default function TemplateMaker() {
         apiConfig: dataSourceType === 'api' ? apiConfig : null,
         ranksData,
         layoutMode,
-        colunas
+        colunas,
+        columnTitles
       };
 
       if (editTemplateId) {
@@ -432,6 +477,7 @@ export default function TemplateMaker() {
             ranksData={ranksData}
             items={[]}
             colunas={colunas}
+            columnTitles={columnTitles}
             layoutMode={layoutMode}
             onRemoveRow={handleRemoveRow}
             selectedItem={null}
@@ -441,6 +487,8 @@ export default function TemplateMaker() {
             onMoveRow={handleMoveRow}
             onAddRow={handleAddRow}
             onUpdateRow={handleUpdateRow}
+            onUpdateGroupTitle={handleUpdateGroupTitle}
+            onUpdateColumnTitle={handleUpdateColumnTitle}
           />
         </div>
       </div>
@@ -466,14 +514,26 @@ export default function TemplateMaker() {
               Faça upload de todas as imagens que compõem este template. Elas serão salvas no banco de dados.
             </p>
             <div 
-              style={{ border: '2px dashed #b062eb', padding: '40px 20px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', backgroundColor: 'rgba(176,98,235,0.05)', marginBottom: '15px' }}
+              style={{ 
+                border: isDragging ? '2px dashed #4CAF50' : '2px dashed #b062eb', 
+                padding: '40px 20px', 
+                textAlign: 'center', 
+                borderRadius: '12px', 
+                cursor: 'pointer', 
+                backgroundColor: isDragging ? 'rgba(76,175,80,0.1)' : 'rgba(176,98,235,0.05)', 
+                marginBottom: '15px',
+                transition: 'all 0.2s ease'
+              }}
               onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
               {isProcessing ? (
                 <div style={{ color: '#b062eb', fontWeight: 'bold' }}>Processando imagens...</div>
               ) : (
                 <>
-                  <div style={{ color: '#ddd' }}>Clique aqui para selecionar múltiplas imagens do seu PC</div>
+                  <div style={{ color: '#ddd' }}>Clique aqui ou arraste múltiplas imagens do seu PC para cá</div>
                 </>
               )}
               <input 

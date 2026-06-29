@@ -32,6 +32,11 @@ function Tierlist() {
     return localStorage.getItem('tierlist-layout') || 'avancado';
   });
   const [colunas, setColunas] = useState(1);
+  const [columnTitles, setColumnTitles] = useState(() => {
+    const saved = localStorage.getItem('tierlist-column-titles');
+    if (saved) return JSON.parse(saved);
+    return ['DPS', 'SUPPORT', 'SUSTAIN'];
+  });
   const [ranksData, setRanksData] = useState(() => {
     const saved = localStorage.getItem('tierlist-ranks');
     if (saved) return JSON.parse(saved);
@@ -119,6 +124,7 @@ function Tierlist() {
           setRanksData(data.data.ranksData || []);
           if (data.data.layoutMode) setLayoutMode(data.data.layoutMode);
           if (data.data.colunas) setColunas(data.data.colunas);
+          if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
         }
       };
       loadCloudData();
@@ -133,6 +139,10 @@ function Tierlist() {
   useEffect(() => {
     localStorage.setItem('tierlist-ranks', JSON.stringify(ranksData));
   }, [ranksData]);
+
+  useEffect(() => {
+    localStorage.setItem('tierlist-column-titles', JSON.stringify(columnTitles));
+  }, [columnTitles]);
 
   useEffect(() => {
     localStorage.setItem('tierlist-items', JSON.stringify(items));
@@ -153,6 +163,7 @@ function Tierlist() {
               setRanksData(data.data.ranksData);
               setLayoutMode(data.data.layoutMode || 'classico');
               setColunas(data.data.colunas || 1);
+              if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
 
               if (data.data.apiConfig) {
                 try {
@@ -171,7 +182,8 @@ function Tierlist() {
             }
             
             localStorage.setItem('tierlist-api-loaded', 'true');
-            localStorage.setItem('tierlist-active-template-id', templateId);
+            // FIX 5: CLEAR current id to avoid overwriting previous cloud saves
+            localStorage.removeItem('tierlist-current-id');
             
             // Remove the query param to avoid reloading on refresh
             searchParams.delete('templateId');
@@ -191,6 +203,7 @@ function Tierlist() {
       localStorage.removeItem('tierlist-ranks');
       localStorage.removeItem('tierlist-api-loaded');
       localStorage.removeItem('tierlist-active-template-id');
+      localStorage.removeItem('tierlist-current-id'); // FIX 5: CLEAR current ID
       
       setItems([]);
       setRanksData(initialRanksClassico);
@@ -351,6 +364,23 @@ function Tierlist() {
       ...group,
       ranks: group.ranks.map(r => r.id === rankId ? { ...r, ...updates } : r)
     })));
+  };
+
+  const handleUpdateGroupTitle = (groupId, newTitle) => {
+    saveHistoryState(items, ranksData);
+    setRanksData(prev => prev.map(group => {
+      if (group.id !== groupId) return group;
+      return { ...group, titulo: newTitle };
+    }));
+  };
+
+  const handleUpdateColumnTitle = (colIndex, newTitle) => {
+    saveHistoryState(items, ranksData);
+    setColumnTitles(prev => {
+      const newTitles = [...prev];
+      newTitles[colIndex] = newTitle;
+      return newTitles;
+    });
   };
 
   const handleMoveRow = (rankId, direction) => {
@@ -518,7 +548,7 @@ function Tierlist() {
   };
 
   const handleExportJSON = () => {
-    const dataStr = JSON.stringify({ items, ranksData, layoutMode, colunas });
+    const dataStr = JSON.stringify({ items, ranksData, layoutMode, colunas, columnTitles });
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
@@ -539,6 +569,7 @@ function Tierlist() {
           setRanksData(data.ranksData);
           if (data.layoutMode) setLayoutMode(data.layoutMode);
           if (data.colunas) setColunas(data.colunas);
+          if (data.columnTitles) setColumnTitles(data.columnTitles);
         } else {
           toast.error('Arquivo JSON inválido.');
         }
@@ -553,7 +584,7 @@ function Tierlist() {
   const handleSaveToCloud = async () => {
     if (!user) return toast.error("Faça login para salvar na nuvem.");
     const currentId = localStorage.getItem('tierlist-current-id');
-    const dataToSave = { items, ranksData, layoutMode, colunas };
+    const dataToSave = { items, ranksData, layoutMode, colunas, columnTitles };
     
     try {
       if (currentId) {
@@ -720,6 +751,7 @@ function Tierlist() {
           ranksData={ranksData} 
           items={items.filter(item => item.tierId !== null)} 
           colunas={colunas}
+          columnTitles={columnTitles}
           layoutMode={layoutMode}
           onRemoveRow={handleRemoveRow}
           selectedItem={selectedItem}
@@ -729,6 +761,8 @@ function Tierlist() {
           onMoveRow={handleMoveRow}
           onAddRow={handleAddRow}
           onUpdateRow={handleUpdateRow}
+          onUpdateGroupTitle={handleUpdateGroupTitle}
+          onUpdateColumnTitle={handleUpdateColumnTitle}
           isPresentationMode={isPresentationMode}
         />
 
