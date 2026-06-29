@@ -391,8 +391,7 @@ export default function TemplateMaker() {
       }
     } catch (err) {
       console.error(err);
-      console.error(err);
-      toast.error("Erro ao publicar. Verifique se a tabela 'templates' existe no Supabase.");
+      toast.error(err.message || "Erro ao publicar. Verifique suas permissões (RLS) ou se a tabela existe no Supabase.");
     }
   };
 
