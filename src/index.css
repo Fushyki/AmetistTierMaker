@@ -536,3 +536,6 @@ h1 {
   border-radius: 12px !important;
 }
 
+
+.event-link { color: #f59e0b !important; font-weight: bold; text-shadow: 0 0 8px rgba(245,158,11,0.5); }
+.event-link:hover { color: #fbbf24 !important; text-shadow: 0 0 12px rgba(251,191,36,0.8); }

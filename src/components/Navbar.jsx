@@ -20,6 +20,7 @@ export default function Navbar() {
         <div className="navbar-links">
           <Link to="/" className="nav-item">Início</Link>
           <Link to="/template-maker" className="nav-item">Criar Modelo</Link>
+          <Link to="/copa" className="nav-item event-link">Copa do mundo 2026</Link>
         </div>
 
         {/* Right Side: Auth */}

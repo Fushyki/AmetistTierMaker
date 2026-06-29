@@ -11,6 +11,7 @@ const Tierlist = lazy(() => import('./pages/Tierlist'));
 const Login = lazy(() => import('./pages/Login'));
 const Admin = lazy(() => import('./pages/Admin'));
 const TemplateMaker = lazy(() => import('./pages/TemplateMaker'));
+const Copa = lazy(() => import('./pages/Copa'));
 
 // Componente de fallback (carregamento)
 const PageLoader = () => (
@@ -50,6 +51,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/template-maker" element={<TemplateMaker />} />
+                <Route path="/copa" element={<Copa />} />
               </Routes>
             </Suspense>
           </ErrorBoundary>
