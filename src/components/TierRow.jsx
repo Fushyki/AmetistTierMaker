@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { Settings, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import DroppableArea from './DroppableArea';
@@ -7,9 +7,24 @@ import SortableItem from './SortableItem';
 export default function TierRow({ rank, items, colunas, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onUpdateRow, isPresentationMode }) {
   const isCustomTier = rank.id.startsWith('tier-') && rank.id.length > 10; 
   const colorInputRef = useRef(null);
+  const popoverRef = useRef(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   const presetColors = ['#ff7f7f', '#ffbf7f', '#ffdf7f', '#ffff7f', '#bfff7f', '#7fff7f', '#7ffff', '#7fbfff', '#7f7fff', '#ff7fff', '#bf7fbf', '#333333'];
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (popoverRef.current && !popoverRef.current.contains(event.target) && !event.target.closest('.config-btn')) {
+        setShowColorPicker(false);
+      }
+    }
+    if (showColorPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showColorPicker]);
 
   const handleRightClick = (e) => {
     e.preventDefault();
@@ -50,6 +65,7 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
         </div>
         {showColorPicker && (
           <div 
+            ref={popoverRef}
             contentEditable={false}
             style={{ 
               position: 'absolute', 
