@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import { confirmAction } from '../utils/alerts';
 import TierBoard from '../components/TierBoard';
 import { fetchAndParseAPI } from '../utils/apiParser';
