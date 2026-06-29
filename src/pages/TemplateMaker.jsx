@@ -55,8 +55,8 @@ export default function TemplateMaker() {
   
   const [layoutMode, setLayoutMode] = useState('classico');
   const [ranksData, setRanksData] = useState(initialRanksClassico);
-  const colunas = layoutMode === 'classico' ? 1 : 3;
-  const [columnTitles, setColumnTitles] = useState(['DPS', 'SUPPORT', 'SUSTAIN']);
+  const colunas = layoutMode === 'classico' ? 1 : 4;
+  const [columnTitles, setColumnTitles] = useState(['DPS', 'SUB-DPS', 'SUPPORT', 'SUSTAIN']);
 
   useEffect(() => {
     if (editTemplateId) {

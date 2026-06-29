@@ -38,7 +38,7 @@ export default function TierBoard({ ranksData, items, colunas, columnTitles, lay
                       if (newText !== (columnTitles && columnTitles[i])) onUpdateColumnTitle(i, newText);
                     }}
                   >
-                    {columnTitles && columnTitles[i] ? columnTitles[i] : (i === 0 ? 'DPS' : i === 1 ? 'SUPPORT' : 'SUSTAIN')}
+                    {columnTitles && columnTitles[i] ? columnTitles[i] : (i === 0 ? 'DPS' : i === 1 ? 'SUB-DPS' : i === 2 ? 'SUPPORT' : 'SUSTAIN')}
                   </div>
                 ))}
               </div>

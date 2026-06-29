@@ -35,7 +35,7 @@ function Tierlist() {
   const [columnTitles, setColumnTitles] = useState(() => {
     const saved = localStorage.getItem('tierlist-column-titles');
     if (saved) return JSON.parse(saved);
-    return ['DPS', 'SUPPORT', 'SUSTAIN'];
+    return ['DPS', 'SUB-DPS', 'SUPPORT', 'SUSTAIN'];
   });
   const [ranksData, setRanksData] = useState(() => {
     const saved = localStorage.getItem('tierlist-ranks');
@@ -717,6 +717,7 @@ function Tierlist() {
                   <button onClick={() => handleColunasChange(1)} className={colunas === 1 ? 'col-btn active' : 'col-btn'}>1</button>
                   <button onClick={() => handleColunasChange(2)} className={colunas === 2 ? 'col-btn active' : 'col-btn'}>2</button>
                   <button onClick={() => handleColunasChange(3)} className={colunas === 3 ? 'col-btn active' : 'col-btn'}>3</button>
+                  <button onClick={() => handleColunasChange(4)} className={colunas === 4 ? 'col-btn active' : 'col-btn'}>4</button>
                 </div>
               )}
             </div>
