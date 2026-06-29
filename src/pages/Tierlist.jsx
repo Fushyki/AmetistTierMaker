@@ -499,12 +499,6 @@ function Tierlist() {
   const handleColunasChange = (novaQuantidade) => {
     saveHistoryState(items, ranksData);
     setColunas(novaQuantidade);
-    setItems(prev => prev.map(item => {
-      if (item.colIndex !== null && item.colIndex >= novaQuantidade) {
-        return { ...item, tierId: null, colIndex: null };
-      }
-      return item;
-    }));
   };
 
   const sortInventory = (mode) => {
