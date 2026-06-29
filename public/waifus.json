@@ -1,0 +1,839 @@
+[
+  {
+    "name": {
+      "full": "Emilia"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b88572-IzTwXEHSobRs.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Mikasa Ackerman"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b40881-F3gr1PkreDvj.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Kurisu Makise"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b34470-Jw2LXZBL5R8i.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Makima"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b137080-UHcynYNjb5ZU.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Mai Sakurajima"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b127222-Jh5hhP7vZ7s1.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Frieren"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b176754-PCnpqIOkjhFk.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Maomao"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b126824-MqsCncTO1qpv.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Kaguya Shinomiya"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b120649-NPaWaIpWy60E.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Violet Evergarden"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b90169-4wr1Zehnsac8.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Power"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b137079-6yLEUYR3bmpr.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Sakura Matou"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b500-NQrLbnBr1sDv.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Megumin"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b89361-tq8PQQ4MmF0M.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Marin Kitagawa"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b133676-kV2czE3C8Qls.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Chika Fujiwara"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b121103-UGLxT8utLPnq.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Rem"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Ichigo"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b124382-bSBkjtYjJQtr.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Nezuko Kamado"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b127518-NRlq1CQ1v1ro.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Itsuki Nakano"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b126375-dEe9IyQ9By09.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Zero Two"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b124381-pkTKi6HHNuVR.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Miko Iino"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b125886-TQbmqAaSgBLS.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Hitagi Senjougahara"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b22037-sY7GWSKYr2Nl.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Asuka Langley Souryuu"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b94-d631a3Z2KPvd.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Robin Nico"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b61-ywXUyyocEEqt.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Yor Forger"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b138102-ZOAu9jI2d5ke.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Nobara Kugisaki"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b133700-f6sOO3TcgLV6.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Shinobu Oshino"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b23602-Z4MDNYcoAWZu.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Anya Forger"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b138100-4Li0tWRCa5bQ.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Maki Zenin"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b134167-5TCytk45YByD.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Rin Tohsaka"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b498-lwawtSpLyATL.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Shouko Nishimiya"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b80243-RzxE51iUU5eq.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Artoria Pendragon"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b497-Yg5pNmC8kxzs.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Kyouko Hori"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b66171-o2vk3689wWFK.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Miku Nakano"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b126373-CWeyXb822uDN.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Hitori Gotou"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b257562-Ru35NYPfsqhY.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Homura Akemi"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b38005-T3NR8p2f021x.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Roxy Migurdia"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b88350-QU1iwgZ887U8.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Kana Arima"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b188783-77orwP7vNuNg.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Rei Ayanami"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/86-cA1zL7fyls8E.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Ai Hayasaka"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b121104-7TYRl3EEsDYU.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Misato Katsuragi"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b1259-afTQkZ5SVMOn.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Nino Nakano"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b126372-DtorHRgQaYUJ.png"
+    }
+  },
+  {
+    "name": {
+      "full": "C.C."
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b1111-UhmlFtRFrnWa.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Asuna Yuuki"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b36828-j5ib0adAzGMx.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Yukino Yukinoshita"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b67067-gqhgjlni0Bcf.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Nami"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b723-vp5hPptgnNEC.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Kurena Kukumila"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b174873-FNf08aPYTVXY.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Vladilena Milizé"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b141061-jqIhB9jmClQ3.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Reze"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b148740-ceAibPxLW8rR.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Kaori Miyazono"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b69411-lxM0FRvWHqlv.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Mami Nanami"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b154224-7dJ09BKEnG3v.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Shinobu Kochou"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b136070-MC9LLxJsHyHE.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Gabi Braun"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b125659-O37MZQWibV7g.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Yumeko Jabami"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b121889-ABsurpy5SjOW.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Tooru Honda"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b207-RQ4EUdTD0K62.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Taiga Aisaka"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b12064-7PDN3ylIeAZn.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Sasha Blouse"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b45887-QPtJH0KwqthW.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Tatsumaki"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b81929-WPVp2LQoWgkc.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Touka Kirishima"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b87277-oUaqrI1iBzu6.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Aqua"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b89362-ibkc0eoECaW1.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Ryuuko Matoi"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b83797-ix0Cl5OMfV22.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Lucy"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b284157-cqYawN7XCNJx.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Fern"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b183965-uGFohBjlFoTp.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Revy"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b458-tlKqPcuR287U.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Shouko Komi"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b121956-5FbIbcd6gAZW.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Rikka Takanashi"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b65865-AC0ru7cDXUgK.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Kurumi Tokisaki"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b70069-DEV7X6o2L7oG.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Nana Oosaki"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b702-qqO3zbj5hp1l.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Jolyne Kuujou"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b11222-Se9QoJHDSeYY.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Tsubasa Hanekawa"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b22055-EaTsy30ihdgb.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Lain Iwakura"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b2219-K3wzEOVwdUhL.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Akame"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b63351-0WmsDENpiscp.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Misa Amane"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b835-CiZa8y2z2gCz.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Erza Scarlet"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b5189-GR1xdok9SFsN.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Chizuru Ichinose"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b128106-zSTsuULvz6PX.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Raphtalia"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b88889-CWYytVbCOPsV.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Holo"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b7373-1BH0gELuZmHD.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Momo Ayase"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Rukia Kuchiki"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b6-25WoBeWMZXBc.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Chisato Nishikigi"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b260329-ejhEdFfXhs53.jpg"
+    }
+  },
+  {
+    "name": {
+      "full": "Faye Valentine"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b2-0Iszg6Izgt4p.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Yoruichi Shihouin"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b908-JSYUkJLCw1f0.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Esdeath"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b65239-2S3t2vSyUew9.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Eris Boreas Greyrat"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b88349-5dsNUah3oBj8.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Himiko Toga"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b125619-iQxQoGHJvjRJ.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Mitsuri Kanroji"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b136072-xVwyRUKdpybi.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Nijika Ijichi"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b261674-a8tJYvtzqWgC.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Hina Chouno"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b218648-kXxXy8lPkeGV.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Nazuna Nanakusa"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b168774-zoB9InjmXYq2.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Yui Yuigahama"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b67069-6B3xnHfJUO0F.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Rias Gremory"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b50389-gIhJkyk8xj1P.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Yui Hirasawa"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b19565-7gMiEAm7NGNK.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Tanya Degurechaff"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b121052-bQZT3nIvaryX.png"
+    }
+  },
+  {
+    "name": {
+      "full": "Emma"
+    },
+    "gender": "Female",
+    "image": {
+      "large": "https://s4.anilist.co/file/anilistcdn/character/large/b121725-LQciVJOjnMVh.png"
+    }
+  }
+]
