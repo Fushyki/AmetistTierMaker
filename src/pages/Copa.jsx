@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
+import { DndContext, useDraggable, useDroppable, DragOverlay } from '@dnd-kit/core';
 import toast from 'react-hot-toast';
 import { supabase } from '../supabaseClient';
 import '../styles/copa.css';
 
 // 32 Popular Football Nations
 const defaultTeams = [
+  // Hosts
+  { id: 't_ca', name: 'Canadá', src: 'https://flagcdn.com/w160/ca.png' },
+  { id: 't_mx', name: 'México', src: 'https://flagcdn.com/w160/mx.png' },
+  { id: 't_us', name: 'EUA', src: 'https://flagcdn.com/w160/us.png' },
+  // CONMEBOL
   { id: 't_br', name: 'Brasil', src: 'https://flagcdn.com/w160/br.png' },
   { id: 't_ar', name: 'Argentina', src: 'https://flagcdn.com/w160/ar.png' },
+  { id: 't_uy', name: 'Uruguai', src: 'https://flagcdn.com/w160/uy.png' },
+  { id: 't_co', name: 'Colômbia', src: 'https://flagcdn.com/w160/co.png' },
+  { id: 't_cl', name: 'Chile', src: 'https://flagcdn.com/w160/cl.png' },
+  { id: 't_ec', name: 'Equador', src: 'https://flagcdn.com/w160/ec.png' },
+  { id: 't_pe', name: 'Peru', src: 'https://flagcdn.com/w160/pe.png' },
+  // UEFA
   { id: 't_fr', name: 'França', src: 'https://flagcdn.com/w160/fr.png' },
   { id: 't_de', name: 'Alemanha', src: 'https://flagcdn.com/w160/de.png' },
   { id: 't_it', name: 'Itália', src: 'https://flagcdn.com/w160/it.png' },
@@ -16,28 +27,41 @@ const defaultTeams = [
   { id: 't_pt', name: 'Portugal', src: 'https://flagcdn.com/w160/pt.png' },
   { id: 't_nl', name: 'Holanda', src: 'https://flagcdn.com/w160/nl.png' },
   { id: 't_be', name: 'Bélgica', src: 'https://flagcdn.com/w160/be.png' },
-  { id: 't_uy', name: 'Uruguai', src: 'https://flagcdn.com/w160/uy.png' },
   { id: 't_hr', name: 'Croácia', src: 'https://flagcdn.com/w160/hr.png' },
-  { id: 't_ma', name: 'Marrocos', src: 'https://flagcdn.com/w160/ma.png' },
-  { id: 't_sn', name: 'Senegal', src: 'https://flagcdn.com/w160/sn.png' },
-  { id: 't_us', name: 'EUA', src: 'https://flagcdn.com/w160/us.png' },
-  { id: 't_mx', name: 'México', src: 'https://flagcdn.com/w160/mx.png' },
-  { id: 't_jp', name: 'Japão', src: 'https://flagcdn.com/w160/jp.png' },
-  { id: 't_kr', name: 'Coreia do Sul', src: 'https://flagcdn.com/w160/kr.png' },
-  { id: 't_au', name: 'Austrália', src: 'https://flagcdn.com/w160/au.png' },
   { id: 't_ch', name: 'Suíça', src: 'https://flagcdn.com/w160/ch.png' },
   { id: 't_pl', name: 'Polônia', src: 'https://flagcdn.com/w160/pl.png' },
   { id: 't_dk', name: 'Dinamarca', src: 'https://flagcdn.com/w160/dk.png' },
   { id: 't_se', name: 'Suécia', src: 'https://flagcdn.com/w160/se.png' },
-  { id: 't_co', name: 'Colômbia', src: 'https://flagcdn.com/w160/co.png' },
-  { id: 't_cl', name: 'Chile', src: 'https://flagcdn.com/w160/cl.png' },
-  { id: 't_pe', name: 'Peru', src: 'https://flagcdn.com/w160/pe.png' },
-  { id: 't_ec', name: 'Equador', src: 'https://flagcdn.com/w160/ec.png' },
+  { id: 't_rs', name: 'Sérvia', src: 'https://flagcdn.com/w160/rs.png' },
+  { id: 't_at', name: 'Áustria', src: 'https://flagcdn.com/w160/at.png' },
+  { id: 't_ua', name: 'Ucrânia', src: 'https://flagcdn.com/w160/ua.png' },
+  // CAF
+  { id: 't_ma', name: 'Marrocos', src: 'https://flagcdn.com/w160/ma.png' },
+  { id: 't_sn', name: 'Senegal', src: 'https://flagcdn.com/w160/sn.png' },
   { id: 't_dz', name: 'Argélia', src: 'https://flagcdn.com/w160/dz.png' },
   { id: 't_ng', name: 'Nigéria', src: 'https://flagcdn.com/w160/ng.png' },
   { id: 't_cm', name: 'Camarões', src: 'https://flagcdn.com/w160/cm.png' },
   { id: 't_ci', name: 'Costa do Marfim', src: 'https://flagcdn.com/w160/ci.png' },
-  { id: 't_gh', name: 'Gana', src: 'https://flagcdn.com/w160/gh.png' }
+  { id: 't_gh', name: 'Gana', src: 'https://flagcdn.com/w160/gh.png' },
+  { id: 't_eg', name: 'Egito', src: 'https://flagcdn.com/w160/eg.png' },
+  { id: 't_tn', name: 'Tunísia', src: 'https://flagcdn.com/w160/tn.png' },
+  // AFC
+  { id: 't_jp', name: 'Japão', src: 'https://flagcdn.com/w160/jp.png' },
+  { id: 't_kr', name: 'Coreia do Sul', src: 'https://flagcdn.com/w160/kr.png' },
+  { id: 't_au', name: 'Austrália', src: 'https://flagcdn.com/w160/au.png' },
+  { id: 't_ir', name: 'Irã', src: 'https://flagcdn.com/w160/ir.png' },
+  { id: 't_sa', name: 'Arábia Saudita', src: 'https://flagcdn.com/w160/sa.png' },
+  { id: 't_qa', name: 'Catar', src: 'https://flagcdn.com/w160/qa.png' },
+  { id: 't_ae', name: 'Emirados Árabes', src: 'https://flagcdn.com/w160/ae.png' },
+  { id: 't_uz', name: 'Uzbequistão', src: 'https://flagcdn.com/w160/uz.png' },
+  // CONCACAF
+  { id: 't_cr', name: 'Costa Rica', src: 'https://flagcdn.com/w160/cr.png' },
+  { id: 't_pa', name: 'Panamá', src: 'https://flagcdn.com/w160/pa.png' },
+  { id: 't_jm', name: 'Jamaica', src: 'https://flagcdn.com/w160/jm.png' },
+  // OFC
+  { id: 't_nz', name: 'Nova Zelândia', src: 'https://flagcdn.com/w160/nz.png' },
+  // Extra UEFA
+  { id: 't_wls', name: 'País de Gales', src: 'https://flagcdn.com/w160/gb-wls.png' }
 ];
 
 const createEmptyMatches = () => {
@@ -145,7 +169,24 @@ function InventoryDroppable({ children }) {
 export default function Copa() {
   const [inventory, setInventory] = useState(() => {
     const saved = localStorage.getItem('copa-inventory');
-    return saved ? JSON.parse(saved) : defaultTeams;
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const matchesSaved = localStorage.getItem('copa-matches');
+      let matchesParsed = matchesSaved ? JSON.parse(matchesSaved) : {};
+      
+      // Merge missing teams from defaultTeams (if they are not in inventory AND not in matches)
+      const existingTeamIds = new Set(parsed.map(t => t.id));
+      
+      // Also collect team ids from matches so we don't duplicate them in inventory if they are already on the board
+      Object.values(matchesParsed).forEach(m => {
+        if (m.t1) existingTeamIds.add(m.t1.id);
+        if (m.t2) existingTeamIds.add(m.t2.id);
+      });
+
+      const missingTeams = defaultTeams.filter(t => !existingTeamIds.has(t.id));
+      return [...parsed, ...missingTeams];
+    }
+    return defaultTeams;
   });
   
   const [matches, setMatches] = useState(() => {
@@ -170,6 +211,7 @@ export default function Copa() {
 
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
+  const [activeTeam, setActiveTeam] = useState(null);
   const boardRef = useRef(null);
 
   useEffect(() => {
@@ -177,7 +219,17 @@ export default function Copa() {
     localStorage.setItem('copa-matches', JSON.stringify(matches));
   }, [inventory, matches]);
 
+  const handleDragStart = (event) => {
+    const { active } = event;
+    setActiveTeam(active.data.current.team);
+  };
+
+  const handleDragCancel = () => {
+    setActiveTeam(null);
+  };
+
   const handleDragEnd = (event) => {
+    setActiveTeam(null);
     const { active, over } = event;
     if (!over) return;
 
@@ -404,23 +456,41 @@ export default function Copa() {
   };
 
   // Helper para renderizar colunas
-  const renderColumn = (prefix, count, title) => (
-    <div className="bracket-column">
-      {Array.from({ length: count }).map((_, i) => {
-        const mId = `${prefix}_${i+1}`;
-        const match = matches[mId];
-        return (
-          <div key={mId} className="match-box">
-            <MatchSlot matchId={mId} slotId="t1" team={match.t1} winner={match.winner} onClickSlot={handleSetWinner} />
-            <MatchSlot matchId={mId} slotId="t2" team={match.t2} winner={match.winner} onClickSlot={handleSetWinner} />
+  const renderColumn = (prefix, count, title, side) => (
+    <div className={`bracket-column bracket-${side}`}>
+      <div className="column-title" style={{ position: 'absolute', top: '-30px', width: '100%', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'bold' }}>{title}</div>
+      {count > 1 ? (
+        Array.from({ length: count / 2 }).map((_, pairIndex) => {
+          const mId1 = `${prefix}_${pairIndex * 2 + 1}`;
+          const mId2 = `${prefix}_${pairIndex * 2 + 2}`;
+          const match1 = matches[mId1];
+          const match2 = matches[mId2];
+          return (
+            <div className="match-pair" key={pairIndex}>
+              <div className="match-box">
+                <MatchSlot matchId={mId1} slotId="t1" team={match1?.t1} winner={match1?.winner} onClickSlot={handleSetWinner} />
+                <MatchSlot matchId={mId1} slotId="t2" team={match1?.t2} winner={match1?.winner} onClickSlot={handleSetWinner} />
+              </div>
+              <div className="match-box">
+                <MatchSlot matchId={mId2} slotId="t1" team={match2?.t1} winner={match2?.winner} onClickSlot={handleSetWinner} />
+                <MatchSlot matchId={mId2} slotId="t2" team={match2?.t2} winner={match2?.winner} onClickSlot={handleSetWinner} />
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <div className="match-pair single-match">
+          <div className="match-box">
+            <MatchSlot matchId={`${prefix}_1`} slotId="t1" team={matches[`${prefix}_1`]?.t1} winner={matches[`${prefix}_1`]?.winner} onClickSlot={handleSetWinner} />
+            <MatchSlot matchId={`${prefix}_1`} slotId="t2" team={matches[`${prefix}_1`]?.t2} winner={matches[`${prefix}_1`]?.winner} onClickSlot={handleSetWinner} />
           </div>
-        );
-      })}
+        </div>
+      )}
     </div>
   );
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
       <div className={`copa-container ${isPresentationMode ? 'presentation-mode' : ''}`}>
         
         <div className="rotate-screen-overlay">
@@ -460,10 +530,10 @@ export default function Copa() {
           <div className="bracket-wrapper">
             
             {/* Esquerda */}
-            {renderColumn('l1', 8, '16-Avos')}
-            {renderColumn('l2', 4, 'Oitavas')}
-            {renderColumn('l3', 2, 'Quartas')}
-            {renderColumn('l4', 1, 'Semi')}
+            {renderColumn('l1', 8, '16-Avos', 'left')}
+            {renderColumn('l2', 4, 'Oitavas', 'left')}
+            {renderColumn('l3', 2, 'Quartas', 'left')}
+            {renderColumn('l4', 1, 'Semi', 'left')}
             
             {/* GRANDE FINAL E TROFÉU */}
             <div className="bracket-center">
@@ -496,10 +566,10 @@ export default function Copa() {
             </div>
 
             {/* Direita */}
-            {renderColumn('r4', 1, 'Semi')}
-            {renderColumn('r3', 2, 'Quartas')}
-            {renderColumn('r2', 4, 'Oitavas')}
-            {renderColumn('r1', 8, '16-Avos')}
+            {renderColumn('r4', 1, 'Semi', 'right')}
+            {renderColumn('r3', 2, 'Quartas', 'right')}
+            {renderColumn('r2', 4, 'Oitavas', 'right')}
+            {renderColumn('r1', 8, '16-Avos', 'right')}
             
           </div>
         </div>
@@ -525,6 +595,13 @@ export default function Copa() {
           </div>
         )}
 
+        <DragOverlay zIndex={9999}>
+          {activeTeam ? (
+            <div style={{ width: '100px', height: '28px', overflow: 'hidden', border: '2px solid #3b82f6', borderRadius: '4px', boxShadow: '0 5px 15px rgba(0,0,0,0.5)' }}>
+              <img src={activeTeam.src} alt={activeTeam.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          ) : null}
+        </DragOverlay>
       </div>
     </DndContext>
   );
