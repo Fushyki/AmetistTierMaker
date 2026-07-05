@@ -606,7 +606,7 @@ export default function Copa() {
               </h3>
               <input
                 type="text"
-                placeholder="🔍 Filtrar país..."
+                placeholder="Filtrar país..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
