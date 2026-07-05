@@ -232,6 +232,7 @@ export default function Copa() {
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [activeTeam, setActiveTeam] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const boardRef = useRef(null);
 
   useEffect(() => {
@@ -596,21 +597,45 @@ export default function Copa() {
 
         {!isPresentationMode && (
           <div className="copa-inventory-wrapper">
-            <h3 className="copa-inventory-title">
-              Inventário de Seleções ({inventory.length})
-              <span style={{ fontSize: '0.8rem', color: '#999' }}>Arraste para as chaves ou clique para selecionar.</span>
-            </h3>
+            <div className="copa-inventory-title">
+              <h3 style={{ margin: 0, fontSize: '1rem', color: '#fff' }}>
+                Inventário de Seleções ({inventory.length})
+                <span style={{ fontSize: '0.8rem', color: '#999', marginLeft: '10px', fontWeight: 'normal' }}>
+                  Arraste para as chaves ou clique para selecionar.
+                </span>
+              </h3>
+              <input
+                type="text"
+                placeholder="🔍 Filtrar país..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #3b82f6',
+                  background: 'rgba(0,0,0,0.4)',
+                  color: '#fff',
+                  fontSize: '0.85rem',
+                  outline: 'none',
+                  width: '200px',
+                  transition: 'border-color 0.2s',
+                }}
+                className="copa-search-input"
+              />
+            </div>
             <InventoryDroppable>
-              {inventory.map(team => (
-                <div 
-                  key={team.id} 
-                  className={`inventory-item ${selectedTeam?.team?.id === team.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedTeam({ team, sourceId: 'inventory' })}
-                  style={{ width: '80px', height: '60px', flexShrink: 0, padding: 0 }}
-                >
-                  <DraggableTeam id={`drag-inventory-${team.id}`} team={team} isSelected={selectedTeam?.team?.id === team.id} />
-                </div>
-              ))}
+              {inventory
+                .filter(team => team.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map(team => (
+                  <div 
+                    key={team.id} 
+                    className={`inventory-item ${selectedTeam?.team?.id === team.id ? 'selected' : ''}`}
+                    onClick={() => setSelectedTeam({ team, sourceId: 'inventory' })}
+                    style={{ width: '80px', height: '60px', flexShrink: 0, padding: 0 }}
+                  >
+                    <DraggableTeam id={`drag-inventory-${team.id}`} team={team} isSelected={selectedTeam?.team?.id === team.id} />
+                  </div>
+                ))}
             </InventoryDroppable>
           </div>
         )}
