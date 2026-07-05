@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DndContext, useDraggable, useDroppable, DragOverlay } from '@dnd-kit/core';
+import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { supabase } from '../supabaseClient';
 import '../styles/copa.css';
@@ -229,16 +232,62 @@ export default function Copa() {
     return createEmptyMatches();
   });
 
+  const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [currentCopaId, setCurrentCopaId] = useState(() => {
+    return localStorage.getItem('copa-current-id') || null;
+  });
+
+  const [copaName, setCopaName] = useState(() => {
+    return localStorage.getItem('copa-name') || 'Copa do Mundo 2026';
+  });
+
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [activeTeam, setActiveTeam] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const boardRef = useRef(null);
 
+  // Sincroniza estado com localStorage
   useEffect(() => {
     localStorage.setItem('copa-inventory-v3', JSON.stringify(inventory));
     localStorage.setItem('copa-matches-v3', JSON.stringify(matches));
   }, [inventory, matches]);
+
+  // Carregar dados da Nuvem com base no ID da URL (se existir)
+  useEffect(() => {
+    const idParam = searchParams.get('id');
+    if (idParam) {
+      const loadCopaFromCloud = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('tierlists')
+            .select('name, data')
+            .eq('id', idParam)
+            .single();
+
+          if (error) throw error;
+          if (data && data.data && data.data.type === 'copa') {
+            setCopaName(data.name);
+            localStorage.setItem('copa-name', data.name);
+            setInventory(data.data.inventory || []);
+            setMatches(data.data.matches || {});
+            setCurrentCopaId(idParam);
+            localStorage.setItem('copa-current-id', idParam);
+          }
+        } catch (err) {
+          console.error("Erro ao carregar Copa da nuvem:", err);
+          toast.error("Erro ao carregar chaveamento da nuvem.");
+        }
+      };
+      loadCopaFromCloud();
+    } else {
+      // Se não há parâmetro na URL, removemos o ID de controle
+      setCurrentCopaId(null);
+      localStorage.removeItem('copa-current-id');
+    }
+  }, [searchParams]);
 
   const handleDragStart = (event) => {
     const { active } = event;
@@ -469,10 +518,82 @@ export default function Copa() {
     e.target.value = null; // reseta input
   };
 
+  const handleSaveToCloud = async () => {
+    if (!user) {
+      toast.error('Você precisa estar logado para salvar na nuvem!');
+      return;
+    }
+
+    const { value: nameInput } = await Swal.fire({
+      title: 'Salvar Chaveamento na Nuvem',
+      input: 'text',
+      inputLabel: 'Dê um nome personalizado para o seu Chaveamento:',
+      inputValue: copaName,
+      showCancelButton: true,
+      confirmButtonText: 'Salvar',
+      cancelButtonText: 'Cancelar',
+      background: '#1a1a1c',
+      color: '#ffffff',
+      confirmButtonColor: '#b062eb',
+      inputValidator: (value) => {
+        if (!value) {
+          return 'Por favor, digite um nome!';
+        }
+      }
+    });
+
+    if (nameInput) {
+      const dataToSave = {
+        type: 'copa',
+        inventory,
+        matches
+      };
+
+      try {
+        toast.loading('Salvando chaveamento...', { id: 'copa-save' });
+        if (currentCopaId) {
+          const { error } = await supabase
+            .from('tierlists')
+            .update({ name: nameInput, data: dataToSave, updated_at: new Date() })
+            .eq('id', currentCopaId);
+
+          if (error) throw error;
+          setCopaName(nameInput);
+          localStorage.setItem('copa-name', nameInput);
+          toast.success('Chaveamento atualizado na nuvem!', { id: 'copa-save' });
+        } else {
+          const { data, error } = await supabase
+            .from('tierlists')
+            .insert([{ user_id: user.id, name: nameInput, data: dataToSave }])
+            .select()
+            .single();
+
+          if (error) throw error;
+          if (data) {
+            setCurrentCopaId(data.id);
+            localStorage.setItem('copa-current-id', data.id);
+            setCopaName(nameInput);
+            localStorage.setItem('copa-name', nameInput);
+            setSearchParams({ id: data.id });
+            toast.success('Chaveamento salvo na nuvem!', { id: 'copa-save' });
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao salvar copa na nuvem:", err);
+        toast.error("Erro ao salvar na nuvem. Verifique a conexão.", { id: 'copa-save' });
+      }
+    }
+  };
+
   const resetBracket = () => {
     if(window.confirm('Tem certeza que deseja resetar todo o chaveamento?')) {
       setMatches(createEmptyMatches());
       setInventory(defaultTeams);
+      setCurrentCopaId(null);
+      localStorage.removeItem('copa-current-id');
+      setCopaName('Copa do Mundo 2026');
+      localStorage.setItem('copa-name', 'Copa do Mundo 2026');
+      setSearchParams({});
     }
   };
 
@@ -522,18 +643,21 @@ export default function Copa() {
 
         {!isPresentationMode && (
           <div className="copa-banner">
-            <h1>Copa do Mundo 2026 - Evento Temporário</h1>
+            <h1>Copa do Mundo 2026 - {copaName}</h1>
           </div>
         )}
 
         {!isPresentationMode && (
-          <div style={{ display: 'flex', gap: '10px', padding: '15px', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', borderBottom: '1px solid #333', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '10px', padding: '15px', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', borderBottom: '1px solid #333', flexWrap: 'wrap', alignItems: 'center' }}>
             <button className="btn-primary" onClick={handleExportImage}>Salvar Imagem</button>
             <button className="btn-primary" onClick={handleExportJSON}>Salvar (JSON)</button>
-            <label className="btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
+            <label className="btn-secondary" style={{ cursor: 'pointer', margin: 0, padding: '12px', borderRadius: '8px', lineHeight: '1.2' }}>
               Carregar (JSON)
               <input type="file" accept=".json" onChange={handleImportJSON} style={{ display: 'none' }} />
             </label>
+            <button className="btn-secondary" onClick={handleSaveToCloud}>
+              {currentCopaId ? 'Atualizar na Nuvem' : 'Salvar na Nuvem'}
+            </button>
             <button className="btn-secondary" onClick={resetBracket}>Resetar Tudo</button>
             <button className="btn-secondary" onClick={() => setIsPresentationMode(true)}>Modo Apresentação</button>
           </div>

@@ -95,8 +95,16 @@ export default function Admin() {
   };
 
   const handleEdit = (tierlist) => {
-    localStorage.setItem('tierlist-current-id', tierlist.id);
-    navigate('/tierlist');
+    if (tierlist.data && tierlist.data.type === 'copa') {
+      localStorage.setItem('copa-current-id', tierlist.id);
+      localStorage.setItem('copa-name', tierlist.name);
+      localStorage.setItem('copa-inventory-v3', JSON.stringify(tierlist.data.inventory || []));
+      localStorage.setItem('copa-matches-v3', JSON.stringify(tierlist.data.matches || {}));
+      navigate(`/copa?id=${tierlist.id}`);
+    } else {
+      localStorage.setItem('tierlist-current-id', tierlist.id);
+      navigate('/tierlist');
+    }
   };
 
   const handleDelete = async (id) => {

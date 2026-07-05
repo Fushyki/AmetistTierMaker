@@ -123,6 +123,15 @@ function Tierlist() {
       const loadCloudData = async () => {
         const { data, error } = await supabase.from('tierlists').select('name, data').eq('id', currentId).single();
         if (data) {
+          if (data.data && data.data.type === 'copa') {
+            localStorage.setItem('copa-current-id', currentId);
+            localStorage.setItem('copa-name', data.name);
+            localStorage.setItem('copa-inventory-v3', JSON.stringify(data.data.inventory || []));
+            localStorage.setItem('copa-matches-v3', JSON.stringify(data.data.matches || {}));
+            localStorage.removeItem('tierlist-current-id');
+            window.location.href = `/copa?id=${currentId}`;
+            return;
+          }
           if (data.name) {
             setTierlistName(data.name);
             localStorage.setItem('tierlist-name', data.name);
