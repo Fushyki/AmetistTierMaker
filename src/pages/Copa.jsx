@@ -755,7 +755,7 @@ export default function Copa() {
                     key={team.id} 
                     className={`inventory-item ${selectedTeam?.team?.id === team.id ? 'selected' : ''}`}
                     onClick={() => setSelectedTeam({ team, sourceId: 'inventory' })}
-                    style={{ width: '80px', height: '60px', flexShrink: 0, padding: 0 }}
+                    style={{ width: '60px', height: '40px', flexShrink: 0, padding: 0 }}
                   >
                     <DraggableTeam id={`drag-inventory-${team.id}`} team={team} isSelected={selectedTeam?.team?.id === team.id} />
                   </div>
