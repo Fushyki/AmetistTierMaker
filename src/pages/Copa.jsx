@@ -4,64 +4,59 @@ import toast from 'react-hot-toast';
 import { supabase } from '../supabaseClient';
 import '../styles/copa.css';
 
-// 32 Popular Football Nations
+// 48 FIFA Confirmed Nations for World Cup 2026
 const defaultTeams = [
-  // Hosts
+  // Países-Sede
   { id: 't_ca', name: 'Canadá', src: 'https://flagcdn.com/w160/ca.png' },
-  { id: 't_mx', name: 'México', src: 'https://flagcdn.com/w160/mx.png' },
   { id: 't_us', name: 'EUA', src: 'https://flagcdn.com/w160/us.png' },
-  // CONMEBOL
-  { id: 't_br', name: 'Brasil', src: 'https://flagcdn.com/w160/br.png' },
-  { id: 't_ar', name: 'Argentina', src: 'https://flagcdn.com/w160/ar.png' },
-  { id: 't_uy', name: 'Uruguai', src: 'https://flagcdn.com/w160/uy.png' },
-  { id: 't_co', name: 'Colômbia', src: 'https://flagcdn.com/w160/co.png' },
-  { id: 't_cl', name: 'Chile', src: 'https://flagcdn.com/w160/cl.png' },
-  { id: 't_ec', name: 'Equador', src: 'https://flagcdn.com/w160/ec.png' },
-  { id: 't_pe', name: 'Peru', src: 'https://flagcdn.com/w160/pe.png' },
-  // UEFA
-  { id: 't_fr', name: 'França', src: 'https://flagcdn.com/w160/fr.png' },
+  { id: 't_mx', name: 'México', src: 'https://flagcdn.com/w160/mx.png' },
+
+  // Seleções Classificadas
+  { id: 't_za', name: 'África do Sul', src: 'https://flagcdn.com/w160/za.png' },
   { id: 't_de', name: 'Alemanha', src: 'https://flagcdn.com/w160/de.png' },
-  { id: 't_it', name: 'Itália', src: 'https://flagcdn.com/w160/it.png' },
-  { id: 't_es', name: 'Espanha', src: 'https://flagcdn.com/w160/es.png' },
-  { id: 't_gb', name: 'Inglaterra', src: 'https://flagcdn.com/w160/gb-eng.png' },
-  { id: 't_pt', name: 'Portugal', src: 'https://flagcdn.com/w160/pt.png' },
-  { id: 't_nl', name: 'Holanda', src: 'https://flagcdn.com/w160/nl.png' },
-  { id: 't_be', name: 'Bélgica', src: 'https://flagcdn.com/w160/be.png' },
-  { id: 't_hr', name: 'Croácia', src: 'https://flagcdn.com/w160/hr.png' },
-  { id: 't_ch', name: 'Suíça', src: 'https://flagcdn.com/w160/ch.png' },
-  { id: 't_pl', name: 'Polônia', src: 'https://flagcdn.com/w160/pl.png' },
-  { id: 't_dk', name: 'Dinamarca', src: 'https://flagcdn.com/w160/dk.png' },
-  { id: 't_se', name: 'Suécia', src: 'https://flagcdn.com/w160/se.png' },
-  { id: 't_rs', name: 'Sérvia', src: 'https://flagcdn.com/w160/rs.png' },
-  { id: 't_at', name: 'Áustria', src: 'https://flagcdn.com/w160/at.png' },
-  { id: 't_ua', name: 'Ucrânia', src: 'https://flagcdn.com/w160/ua.png' },
-  // CAF
-  { id: 't_ma', name: 'Marrocos', src: 'https://flagcdn.com/w160/ma.png' },
-  { id: 't_sn', name: 'Senegal', src: 'https://flagcdn.com/w160/sn.png' },
-  { id: 't_dz', name: 'Argélia', src: 'https://flagcdn.com/w160/dz.png' },
-  { id: 't_ng', name: 'Nigéria', src: 'https://flagcdn.com/w160/ng.png' },
-  { id: 't_cm', name: 'Camarões', src: 'https://flagcdn.com/w160/cm.png' },
-  { id: 't_ci', name: 'Costa do Marfim', src: 'https://flagcdn.com/w160/ci.png' },
-  { id: 't_gh', name: 'Gana', src: 'https://flagcdn.com/w160/gh.png' },
-  { id: 't_eg', name: 'Egito', src: 'https://flagcdn.com/w160/eg.png' },
-  { id: 't_tn', name: 'Tunísia', src: 'https://flagcdn.com/w160/tn.png' },
-  // AFC
-  { id: 't_jp', name: 'Japão', src: 'https://flagcdn.com/w160/jp.png' },
-  { id: 't_kr', name: 'Coreia do Sul', src: 'https://flagcdn.com/w160/kr.png' },
-  { id: 't_au', name: 'Austrália', src: 'https://flagcdn.com/w160/au.png' },
-  { id: 't_ir', name: 'Irã', src: 'https://flagcdn.com/w160/ir.png' },
   { id: 't_sa', name: 'Arábia Saudita', src: 'https://flagcdn.com/w160/sa.png' },
+  { id: 't_dz', name: 'Argélia', src: 'https://flagcdn.com/w160/dz.png' },
+  { id: 't_ar', name: 'Argentina', src: 'https://flagcdn.com/w160/ar.png' },
+  { id: 't_au', name: 'Austrália', src: 'https://flagcdn.com/w160/au.png' },
+  { id: 't_at', name: 'Áustria', src: 'https://flagcdn.com/w160/at.png' },
+  { id: 't_be', name: 'Bélgica', src: 'https://flagcdn.com/w160/be.png' },
+  { id: 't_ba', name: 'Bósnia e Herzegovina', src: 'https://flagcdn.com/w160/ba.png' },
+  { id: 't_br', name: 'Brasil', src: 'https://flagcdn.com/w160/br.png' },
+  { id: 't_cv', name: 'Cabo Verde', src: 'https://flagcdn.com/w160/cv.png' },
   { id: 't_qa', name: 'Catar', src: 'https://flagcdn.com/w160/qa.png' },
-  { id: 't_ae', name: 'Emirados Árabes', src: 'https://flagcdn.com/w160/ae.png' },
-  { id: 't_uz', name: 'Uzbequistão', src: 'https://flagcdn.com/w160/uz.png' },
-  // CONCACAF
-  { id: 't_cr', name: 'Costa Rica', src: 'https://flagcdn.com/w160/cr.png' },
-  { id: 't_pa', name: 'Panamá', src: 'https://flagcdn.com/w160/pa.png' },
-  { id: 't_jm', name: 'Jamaica', src: 'https://flagcdn.com/w160/jm.png' },
-  // OFC
+  { id: 't_co', name: 'Colômbia', src: 'https://flagcdn.com/w160/co.png' },
+  { id: 't_ci', name: 'Costa do Marfim', src: 'https://flagcdn.com/w160/ci.png' },
+  { id: 't_hr', name: 'Croácia', src: 'https://flagcdn.com/w160/hr.png' },
+  { id: 't_cw', name: 'Curaçau', src: 'https://flagcdn.com/w160/cw.png' },
+  { id: 't_eg', name: 'Egito', src: 'https://flagcdn.com/w160/eg.png' },
+  { id: 't_ec', name: 'Equador', src: 'https://flagcdn.com/w160/ec.png' },
+  { id: 't_gb_sct', name: 'Escócia', src: 'https://flagcdn.com/w160/gb-sct.png' },
+  { id: 't_es', name: 'Espanha', src: 'https://flagcdn.com/w160/es.png' },
+  { id: 't_fr', name: 'França', src: 'https://flagcdn.com/w160/fr.png' },
+  { id: 't_gh', name: 'Gana', src: 'https://flagcdn.com/w160/gh.png' },
+  { id: 't_ht', name: 'Haiti', src: 'https://flagcdn.com/w160/ht.png' },
+  { id: 't_nl', name: 'Holanda', src: 'https://flagcdn.com/w160/nl.png' },
+  { id: 't_gb_eng', name: 'Inglaterra', src: 'https://flagcdn.com/w160/gb-eng.png' },
+  { id: 't_iq', name: 'Iraque', src: 'https://flagcdn.com/w160/iq.png' },
+  { id: 't_jp', name: 'Japão', src: 'https://flagcdn.com/w160/jp.png' },
+  { id: 't_jo', name: 'Jordânia', src: 'https://flagcdn.com/w160/jo.png' },
+  { id: 't_ma', name: 'Marrocos', src: 'https://flagcdn.com/w160/ma.png' },
+  { id: 't_no', name: 'Noruega', src: 'https://flagcdn.com/w160/no.png' },
   { id: 't_nz', name: 'Nova Zelândia', src: 'https://flagcdn.com/w160/nz.png' },
-  // Extra UEFA
-  { id: 't_wls', name: 'País de Gales', src: 'https://flagcdn.com/w160/gb-wls.png' }
+  { id: 't_pa', name: 'Panamá', src: 'https://flagcdn.com/w160/pa.png' },
+  { id: 't_py', name: 'Paraguai', src: 'https://flagcdn.com/w160/py.png' },
+  { id: 't_pt', name: 'Portugal', src: 'https://flagcdn.com/w160/pt.png' },
+  { id: 't_cd', name: 'RD do Congo', src: 'https://flagcdn.com/w160/cd.png' },
+  { id: 't_kr', name: 'República da Coreia', src: 'https://flagcdn.com/w160/kr.png' },
+  { id: 't_ir', name: 'RI do Irã', src: 'https://flagcdn.com/w160/ir.png' },
+  { id: 't_sn', name: 'Senegal', src: 'https://flagcdn.com/w160/sn.png' },
+  { id: 't_se', name: 'Suécia', src: 'https://flagcdn.com/w160/se.png' },
+  { id: 't_ch', name: 'Suíça', src: 'https://flagcdn.com/w160/ch.png' },
+  { id: 't_cz', name: 'Tchéquia', src: 'https://flagcdn.com/w160/cz.png' },
+  { id: 't_tn', name: 'Tunísia', src: 'https://flagcdn.com/w160/tn.png' },
+  { id: 't_tr', name: 'Turquia', src: 'https://flagcdn.com/w160/tr.png' },
+  { id: 't_uy', name: 'Uruguai', src: 'https://flagcdn.com/w160/uy.png' },
+  { id: 't_uz', name: 'Uzbequistão', src: 'https://flagcdn.com/w160/uz.png' }
 ];
 
 const createEmptyMatches = () => {
@@ -170,14 +165,14 @@ function InventoryDroppable({ children }) {
 export default function Copa() {
   const [inventory, setInventory] = useState(() => {
     try {
-      const saved = localStorage.getItem('copa-inventory');
+      const saved = localStorage.getItem('copa-inventory-v3');
       if (saved) {
         let parsed = JSON.parse(saved);
         if (!Array.isArray(parsed)) parsed = [];
         
         let matchesParsed = {};
         try {
-          const matchesSaved = localStorage.getItem('copa-matches');
+          const matchesSaved = localStorage.getItem('copa-matches-v3');
           if (matchesSaved) {
             matchesParsed = JSON.parse(matchesSaved);
             if (!matchesParsed || typeof matchesParsed !== 'object') matchesParsed = {};
@@ -206,7 +201,7 @@ export default function Copa() {
   
   const [matches, setMatches] = useState(() => {
     try {
-      const saved = localStorage.getItem('copa-matches');
+      const saved = localStorage.getItem('copa-matches-v3');
       if (saved) {
         let parsed = JSON.parse(saved);
         if (!parsed || typeof parsed !== 'object') return createEmptyMatches();
@@ -240,8 +235,8 @@ export default function Copa() {
   const boardRef = useRef(null);
 
   useEffect(() => {
-    localStorage.setItem('copa-inventory', JSON.stringify(inventory));
-    localStorage.setItem('copa-matches', JSON.stringify(matches));
+    localStorage.setItem('copa-inventory-v3', JSON.stringify(inventory));
+    localStorage.setItem('copa-matches-v3', JSON.stringify(matches));
   }, [inventory, matches]);
 
   const handleDragStart = (event) => {
