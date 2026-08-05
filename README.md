@@ -1,5 +1,4 @@
 <div align="center">
-
   <h1>Ametist Tier Maker</h1>
   
   <p>
@@ -20,14 +19,16 @@
 <br/>
 
 ## Sobre o Projeto
+---
 
 O **Ametist Tier Maker** nasceu da frustração com os "Tiermakers" tradicionais da internet, que geralmente possuem layouts defasados e usabilidade engessada. O objetivo deste projeto foi construir do zero uma plataforma premium, responsiva e flexível, capaz de não apenas ranquear imagens, mas de integrar APIs externas (como as do universo de *Genshin Impact*), oferecer suporte nativo a dispositivos móveis e abrigar páginas de eventos temáticos sazonais.
 
 Esta é uma aplicação Full-Stack construída de forma 100% autoral, focada em resolver desafios reais como **gerenciamento de estados complexos**, **interfaces interativas (Drag & Drop)** e **sincronização de dados em nuvem**.
 
----
+<br/>
 
 ## Funcionalidades Principais
+---
 
 * **Drag & Drop Avançado:** Interface interativa e fluida, totalmente otimizada para desktops e dispositivos móveis (touch) usando `@dnd-kit`.
 * **Salvamento em Nuvem:** Sistema de contas e autenticação. Os usuários podem salvar seu progresso no banco de dados e continuar editando de qualquer dispositivo.
@@ -36,9 +37,29 @@ Esta é uma aplicação Full-Stack construída de forma 100% autoral, focada em 
 * **Modo Copa do Mundo (Bracket Tournament):** Módulo exclusivo para montar chaveamentos de torneios no estilo mata-mata. Conta com lógica de propagação automática de vencedores e renderização visual por CSS.
 * **Exportação de Alta Qualidade:** Converta o HTML/DOM diretamente para imagens `.png` em alta resolução usando o `html2canvas`.
 
+<br/>
+
+## Estrutura do Projeto
 ---
 
+```text
+AmetistTierMaker/
+├── src/
+│   ├── assets/       # Imagens e vetores estáticos
+│   ├── components/   # Componentes modulares do React (Navbar, Drag&Drop, etc)
+│   ├── contexts/     # Contextos globais (como o AuthContext para Login)
+│   ├── pages/        # Telas completas roteáveis (Home, Tierlist, Admin)
+│   ├── services/     # Clientes e configurações externas (Supabase)
+│   ├── styles/       # Estilos CSS globais e variáveis de tema
+│   ├── utils/        # Funções utilitárias reutilizáveis (alertas, parsers)
+│   ├── App.jsx       # Ponto de entrada das rotas da aplicação
+│   └── main.jsx      # Ponto de entrada do renderizador DOM
+```
+
+<br/>
+
 ## Arquitetura e Tecnologias
+---
 
 A arquitetura do projeto segue padrões rigorosos do mercado, dividida em camadas claras de responsabilidade:
 
@@ -55,28 +76,10 @@ A arquitetura do projeto segue padrões rigorosos do mercado, dividida em camada
 * **PostgreSQL:** Banco de dados relacional poderoso utilizado para armazenar os *Profiles*, *Templates* e as *Tier Lists* dos usuários.
 * **Uso de JSONB:** O estado das tier lists (como as imagens e posições que mudam o tempo todo) é salvo estruturalmente como JSONB dentro do PostgreSQL, unindo a confiabilidade relacional com a flexibilidade NoSQL.
 
----
-
-## Estrutura de Arquivos
-
-O código fonte está organizado seguindo as melhores práticas do ecossistema React, promovendo escalabilidade:
-
-```text
-📦 src
- ┣ 📂 assets       # Imagens e vetores estáticos
- ┣ 📂 components   # Componentes modulares do React (Navbar, Drag&Drop, etc)
- ┣ 📂 contexts     # Contextos globais (como o AuthContext para Login)
- ┣ 📂 pages        # Telas completas roteáveis da aplicação (Home, Tierlist, Admin)
- ┣ 📂 services     # Clientes e configurações externas (Supabase)
- ┣ 📂 styles       # Estilos CSS globais e variáveis de tema
- ┣ 📂 utils        # Funções utilitárias reutilizáveis (alertas, parsers)
- ┣ 📜 App.jsx      # Ponto de entrada das rotas da aplicação
- ┗ 📜 main.jsx     # Ponto de entrada do renderizador DOM
-```
-
----
+<br/>
 
 ## Como Rodar Localmente
+---
 
 Se você deseja clonar este projeto e rodá-lo na sua máquina, siga os passos abaixo:
 
@@ -103,9 +106,10 @@ Se você deseja clonar este projeto e rodá-lo na sua máquina, siga os passos a
    npm run dev
    ```
 
----
+<br/>
 
 ## FAQ / Decisões Arquiteturais
+---
 
 <details>
 <summary><b>1. Como o Drag & Drop funciona no Mobile sem quebrar?</b></summary>
