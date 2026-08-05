@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { supabase } from '../supabaseClient';
-import '../index.css';
+import { supabase } from '../services/supabaseClient';
+import '../styles/index.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');

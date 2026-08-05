@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../services/supabaseClient';
 import { isAdmin } from '../utils/admin';
 import { confirmAction } from '../utils/alerts';
 import { Trash2, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
-import '../index.css';
+import '../styles/index.css';
 
 export default function Home() {
   const { user } = useAuth();

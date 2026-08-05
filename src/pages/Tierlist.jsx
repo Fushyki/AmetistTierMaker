@@ -6,10 +6,10 @@ import { confirmAction } from '../utils/alerts';
 import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../services/supabaseClient';
 import { useSearchParams } from 'react-router-dom';
 import { fetchAndParseAPI } from '../utils/apiParser';
-import '../index.css';
+import '../styles/index.css';
 
 const initialRanksAvancado = [
   { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
@@ -306,7 +306,7 @@ function Tierlist() {
     try {
       if (activeTemplateId) {
         // Restaurar imagens do Template carregado
-        const { data, error } = await supabase.from('templates').select('data').eq('id', activeTemplateId).single();
+        const { data } = await supabase.from('templates').select('data').eq('id', activeTemplateId).single();
         if (data && data.data) {
           let templateItems = [];
           

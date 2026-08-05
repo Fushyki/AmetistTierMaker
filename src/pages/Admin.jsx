@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../services/supabaseClient';
 import { confirmAction } from '../utils/alerts';
 import { isAdmin } from '../utils/admin';
 import { Trash2, Pencil } from 'lucide-react';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
-import '../index.css';
+import '../styles/index.css';
 
 export default function Admin() {
   const { user } = useAuth();

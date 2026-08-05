@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../services/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -134,7 +134,7 @@ export default function TemplateMaker() {
       // 16:9 banner size standard (e.g. 600x338)
       const result = await processImage(file, 600, 338);
       setCoverImage(result.dataUrl);
-    } catch (err) {
+    } catch {
       toast.error("Erro ao processar a capa.");
     }
   };
@@ -197,7 +197,7 @@ export default function TemplateMaker() {
       }
       
       setItems(prev => [...prev, ...newProcessedItems]);
-    } catch (err) {
+    } catch {
       toast.error("Erro ao processar as imagens.");
     } finally {
       setIsProcessing(false);
@@ -603,7 +603,7 @@ export default function TemplateMaker() {
           </div>
           
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', maxHeight: '400px', overflowY: 'auto', padding: '10px', backgroundColor: '#161618', borderRadius: '8px' }}>
-            {items.map((item, index) => (
+            {items.map((item) => (
               <div key={item.id} style={{ position: 'relative' }}>
                 <img src={item.src} alt={item.nome} title={item.nome} style={{ width: '80px', height: '80px', objectFit: 'contain', backgroundColor: '#2a2a2f', borderRadius: '5px' }} />
                 <button 

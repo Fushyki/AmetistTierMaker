@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import '../index.css';
+import '../styles/index.css';
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -20,7 +20,6 @@ export default function Navbar() {
         <div className="navbar-links">
           <Link to="/" className="nav-item">Início</Link>
           <Link to="/template-maker" className="nav-item">Criar Modelo</Link>
-          <Link to="/copa" className="nav-item event-link">Copa do mundo 2026</Link>
         </div>
 
         {/* Right Side: Auth */}

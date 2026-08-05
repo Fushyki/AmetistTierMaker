@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../services/supabaseClient';
 import '../styles/copa.css';
 
 // 48 FIFA Confirmed Nations for World Cup 2026
@@ -116,7 +116,7 @@ function DraggableTeam({ id, team, isSelected }) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`team-flag-container ${isSelected ? 'selected' : ''}`} title={team.name} style={{ width: '100%', height: '100%', ...style }}>
+    <div ref={setNodeRef} {...listeners} {...attributes} className={`team-flag-container ${isSelected ? 'selected' : ''}`} title={team.name} style={{ width: '100%', height: '100%', ...style }}>
       <img src={team.src} alt={team.name} className="team-flag" draggable="false" />
     </div>
   );
@@ -477,7 +477,7 @@ export default function Copa() {
       link.href = dataUrl;
       link.click();
       toast.success('Imagem salva com sucesso!', { id: 'img-export' });
-    } catch (err) {
+    } catch {
       toast.error('Erro ao salvar imagem.', { id: 'img-export' });
     }
   };
@@ -510,7 +510,7 @@ export default function Copa() {
         } else {
           toast.error('Arquivo JSON inválido.');
         }
-      } catch (err) {
+      } catch {
         toast.error('Erro ao ler arquivo JSON.');
       }
     };
