@@ -118,66 +118,38 @@ function Tierlist() {
   }, [selectedItem]);
 
   useEffect(() => {
-    const currentId = localStorage.getItem('tierlist-current-id');
-    if (currentId) {
-      const loadCloudData = async () => {
-        const { data, error } = await supabase.from('tierlists').select('name, data').eq('id', currentId).single();
-        if (data) {
-          if (data.data && data.data.type === 'copa') {
-            localStorage.setItem('copa-current-id', currentId);
-            localStorage.setItem('copa-name', data.name);
-            localStorage.setItem('copa-inventory-v3', JSON.stringify(data.data.inventory || []));
-            localStorage.setItem('copa-matches-v3', JSON.stringify(data.data.matches || {}));
-            localStorage.removeItem('tierlist-current-id');
-            window.location.href = `/copa?id=${currentId}`;
-            return;
-          }
-          if (data.name) {
-            setTierlistName(data.name);
-            localStorage.setItem('tierlist-name', data.name);
-          }
-          setItems(data.data.items || []);
-          setRanksData(data.data.ranksData || []);
-          if (data.data.layoutMode) setLayoutMode(data.data.layoutMode);
-          if (data.data.colunas) setColunas(data.data.colunas);
-          if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
-        }
-      };
-      loadCloudData();
-    }
-  }, []);
+    const initPage = async () => {
+      const templateId = searchParams.get('templateId');
+      const isNew = searchParams.get('new') === 'true';
+      const currentId = localStorage.getItem('tierlist-current-id');
+      const forceCloudLoad = localStorage.getItem('tierlist-force-cloud-load') === 'true';
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } })
-  );
-
-  useEffect(() => {
-    localStorage.setItem('tierlist-ranks', JSON.stringify(ranksData));
-  }, [ranksData]);
-
-  useEffect(() => {
-    localStorage.setItem('tierlist-column-titles', JSON.stringify(columnTitles));
-  }, [columnTitles]);
-
-  useEffect(() => {
-    localStorage.setItem('tierlist-items', JSON.stringify(items));
-  }, [items]);
-
-  useEffect(() => {
-    // Carregamento de Template da Home
-    const templateId = searchParams.get('templateId');
-    if (templateId) {
-      // OTIMIZAÇÃO DE CACHE E PRESERVAÇÃO DE ESTADO
-      // Se o usuário clicou no mesmo template que já está salvo na memória local,
-      // não puxa tudo de novo! Apenas limpa a URL e mantém o progresso atual na tela instantaneamente.
-      if (templateId === localStorage.getItem('tierlist-active-template-id') && localStorage.getItem('tierlist-api-loaded') === 'true') {
-        searchParams.delete('templateId');
+      // 1. CARREGAR NOVA TIERLIST (RESET)
+      if (isNew) {
+        localStorage.removeItem('tierlist-items');
+        localStorage.removeItem('tierlist-ranks');
+        localStorage.removeItem('tierlist-api-loaded');
+        localStorage.removeItem('tierlist-active-template-id');
+        localStorage.removeItem('tierlist-current-id');
+        localStorage.removeItem('tierlist-name');
+        
+        setTierlistName('Minha Tier List');
+        setItems([]);
+        setRanksData(initialRanksClassico);
+        setLayoutMode('classico');
+        
+        searchParams.delete('new');
         setSearchParams(searchParams);
-        return;
-      }
+        // Deixa cair para o Fallback da API se necessário
+      } 
+      // 2. CARREGAR TEMPLATE
+      else if (templateId) {
+        if (templateId === localStorage.getItem('tierlist-active-template-id') && localStorage.getItem('tierlist-api-loaded') === 'true') {
+          searchParams.delete('templateId');
+          setSearchParams(searchParams);
+          return;
+        }
 
-      const loadTemplate = async () => {
         try {
           const { data, error } = await supabase.from('templates').select('name, data').eq('id', templateId).single();
           if (data && data.data) {
@@ -188,7 +160,6 @@ function Tierlist() {
             saveHistoryState(items, ranksData);
             
             if (data.data.items && data.data.ranksData) {
-              // New template structure
               setRanksData(data.data.ranksData);
               setLayoutMode(data.data.layoutMode || 'classico');
               setColunas(data.data.colunas || 1);
@@ -197,9 +168,7 @@ function Tierlist() {
               if (data.data.apiConfig) {
                 try {
                   const apiItems = await fetchAndParseAPI(data.data.apiConfig);
-                  if (apiItems.length === 0) {
-                    toast.error('A API não retornou nenhuma imagem. Verifique bloqueios (CORS).');
-                  }
+                  if (apiItems.length === 0) toast.error('A API não retornou nenhuma imagem.');
                   setItems(apiItems);
                   if (data.data.apiConfig.pagesToFetch > 1) {
                     setTimeout(() => {
@@ -207,58 +176,66 @@ function Tierlist() {
                     }, 1000);
                   }
                 } catch (apiErr) {
-                  console.error("Erro ao puxar API do template:", apiErr);
                   toast.error("Erro ao puxar imagens da API do Template.");
                 }
               } else {
                 setItems(data.data.items);
               }
             } else {
-              // Legacy template structure (just array of items)
               setItems(data.data);
             }
             
             localStorage.setItem('tierlist-api-loaded', 'true');
-            localStorage.setItem('tierlist-active-template-id', templateId); // RESTORE THIS LINE
-            // FIX 5: CLEAR current id to avoid overwriting previous cloud saves
+            localStorage.setItem('tierlist-active-template-id', templateId);
             localStorage.removeItem('tierlist-current-id');
             
-            // Remove the query param to avoid reloading on refresh
             searchParams.delete('templateId');
             setSearchParams(searchParams);
           }
         } catch (err) {
           console.error("Erro ao carregar template:", err);
         }
-      };
-      loadTemplate();
-      return;
-    }
+        return; 
+      } 
+      // 3. CARREGAR TIERLIST SALVA NA NUVEM
+      else if (currentId && forceCloudLoad) {
+        try {
+          const { data, error } = await supabase.from('tierlists').select('name, data').eq('id', currentId).single();
+          if (data) {
+            if (data.data && data.data.type === 'copa') {
+              localStorage.setItem('copa-current-id', currentId);
+              localStorage.setItem('copa-name', data.name);
+              localStorage.setItem('copa-inventory-v3', JSON.stringify(data.data.inventory || []));
+              localStorage.setItem('copa-matches-v3', JSON.stringify(data.data.matches || {}));
+              localStorage.removeItem('tierlist-current-id');
+              localStorage.removeItem('tierlist-force-cloud-load');
+              window.location.href = `/copa?id=${currentId}`;
+              return;
+            }
+            if (data.name) {
+              setTierlistName(data.name);
+              localStorage.setItem('tierlist-name', data.name);
+            }
+            setItems(data.data.items || []);
+            setRanksData(data.data.ranksData || []);
+            if (data.data.layoutMode) setLayoutMode(data.data.layoutMode);
+            if (data.data.colunas) setColunas(data.data.colunas);
+            if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
+            
+            localStorage.removeItem('tierlist-force-cloud-load');
+          }
+        } catch (err) {
+          console.error("Erro ao carregar da nuvem:", err);
+        }
+        return; 
+      }
 
-    // Carregamento Nova Tierlist Reset
-    if (searchParams.get('new') === 'true') {
-      localStorage.removeItem('tierlist-items');
-      localStorage.removeItem('tierlist-ranks');
-      localStorage.removeItem('tierlist-api-loaded');
-      localStorage.removeItem('tierlist-active-template-id');
-      localStorage.removeItem('tierlist-current-id'); // FIX 5: CLEAR current ID
-      localStorage.removeItem('tierlist-name');
+      // 4. FALLBACK: Carrega da API padrão se não tiver cache local
+      const hasLoadedApi = localStorage.getItem('tierlist-api-loaded');
+      const savedItems = localStorage.getItem('tierlist-items');
+      const hasItems = savedItems ? JSON.parse(savedItems).length > 0 : false;
       
-      setTierlistName('Minha Tier List');
-      setItems([]);
-      setRanksData(initialRanksClassico);
-      setLayoutMode('classico');
-      
-      searchParams.delete('new');
-      setSearchParams(searchParams);
-      
-      // Allow fetchCharacters to run naturally below
-    }
-
-    // Carregamento inicial da API
-    const hasLoadedApi = localStorage.getItem('tierlist-api-loaded');
-    if (!hasLoadedApi && items.length === 0) {
-      const fetchCharacters = async () => {
+      if (!hasLoadedApi && !hasItems) {
         try {
           const apiUrl = localStorage.getItem('tierlist-api-url') || 'https://api.lunaris.moe/data/6.6.54.3/charlist.json';
           const res = await fetch(apiUrl);
@@ -278,15 +255,34 @@ function Tierlist() {
 
           setItems(newItems);
           localStorage.setItem('tierlist-api-loaded', 'true');
-          localStorage.removeItem('tierlist-active-template-id'); // FIX: Ensure no ghost template ID is left when loading default
+          localStorage.removeItem('tierlist-active-template-id');
         } catch (err) {
           console.error("Erro ao carregar API:", err);
         }
-      };
+      }
+    };
 
-      fetchCharacters();
-    }
-  }, [items.length]);
+    initPage();
+  }, []);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } })
+  );
+
+  useEffect(() => {
+    localStorage.setItem('tierlist-ranks', JSON.stringify(ranksData));
+  }, [ranksData]);
+
+  useEffect(() => {
+    localStorage.setItem('tierlist-column-titles', JSON.stringify(columnTitles));
+  }, [columnTitles]);
+
+  useEffect(() => {
+    localStorage.setItem('tierlist-items', JSON.stringify(items));
+  }, [items]);
+
+
 
   const handleUpload = (newItems) => {
     saveHistoryState(items, ranksData);

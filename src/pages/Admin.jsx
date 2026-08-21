@@ -103,6 +103,7 @@ export default function Admin() {
       navigate(`/copa?id=${tierlist.id}`);
     } else {
       localStorage.setItem('tierlist-current-id', tierlist.id);
+      localStorage.setItem('tierlist-force-cloud-load', 'true');
       navigate('/tierlist');
     }
   };
