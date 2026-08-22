@@ -57,7 +57,7 @@ export default function TemplateMaker() {
   const [layoutMode, setLayoutMode] = useState('classico');
   const [ranksData, setRanksData] = useState(initialRanksClassico);
   const colunas = layoutMode === 'classico' ? 1 : 4;
-  const [columnTitles, setColumnTitles] = useState(['DPS', 'SUB-DPS', 'SUPPORT', 'SUSTAIN']);
+  const [columnTitles, setColumnTitles] = useState(['On-field DPS', 'Damage Support', 'Pure Support/Sustain', 'Niche']);
 
   useEffect(() => {
     if (editTemplateId) {
