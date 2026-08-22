@@ -35,7 +35,7 @@ function Tierlist() {
   const [columnTitles, setColumnTitles] = useState(() => {
     const saved = localStorage.getItem('tierlist-column-titles');
     if (saved) return JSON.parse(saved);
-    return ['DPS', 'SUB-DPS', 'SUPPORT', 'SUSTAIN'];
+    return ['On-field DPS', 'Damage Support', 'Pure Support/Sustain', 'Niche'];
   });
   const [ranksData, setRanksData] = useState(() => {
     const saved = localStorage.getItem('tierlist-ranks');
