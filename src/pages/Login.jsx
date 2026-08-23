@@ -46,6 +46,22 @@ export default function Login() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/admin'
+        }
+      });
+      if (error) throw error;
+    } catch (err) {
+      toast.error('Erro no login do Google: ' + err.message);
+      setLoading(false);
+    }
+  };
+
   const toggleMode = () => {
     setIsLogin(!isLogin);
   };
@@ -128,6 +144,38 @@ export default function Login() {
             {loading ? 'Processando...' : (isLogin ? 'Entrar no Sistema' : 'Cadastrar e Entrar')}
           </button>
         </form>
+
+        <div style={{ display: 'flex', alignItems: 'center', margin: '25px 0' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: '#333' }}></div>
+          <span style={{ padding: '0 15px', color: '#888', fontSize: '0.85rem' }}>OU</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: '#333' }}></div>
+        </div>
+
+        <button 
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          style={{ 
+            width: '100%',
+            padding: '16px', 
+            backgroundColor: '#fff', 
+            color: '#333', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontWeight: 'bold', 
+            fontSize: '1.1rem',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '12px',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = '#f1f1f1'}
+          onMouseOut={(e) => e.target.style.backgroundColor = '#fff'}
+        >
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style={{ width: '22px', height: '22px' }} />
+          Continuar com Google
+        </button>
         
         <div style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>
           <button 
