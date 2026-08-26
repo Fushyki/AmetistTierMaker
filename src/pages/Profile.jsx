@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -29,7 +29,7 @@ export default function Profile() {
   const { siteTheme, setSiteTheme, uiDensity, setUiDensity, availableThemes } = useTheme();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('visual'); // 'visual', 'tierlists', 'templates', 'account'
+  const [activeTab, setActiveTab] = useState('tierlists'); // 'tierlists', 'templates', 'visual', 'account'
   const [tierlists, setTierlists] = useState([]);
   const [userTemplates, setUserTemplates] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -245,27 +245,6 @@ export default function Profile() {
       {/* ABAS DE NAVEGAÇÃO */}
       <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #282834', paddingBottom: '10px', marginBottom: '22px', flexWrap: 'wrap' }}>
         <button
-          onClick={() => setActiveTab('visual')}
-          style={{
-            padding: '9px 18px',
-            borderRadius: '10px',
-            border: activeTab === 'visual' ? '1px solid #b062eb' : '1px solid transparent',
-            backgroundColor: activeTab === 'visual' ? 'rgba(176,98,235,0.18)' : '#17171c',
-            color: activeTab === 'visual' ? '#ffffff' : '#9999a5',
-            fontWeight: activeTab === 'visual' ? '700' : '500',
-            fontSize: '0.88rem',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <Palette size={16} color={activeTab === 'visual' ? '#b062eb' : '#888'} />
-          Personalização & Visuais
-        </button>
-
-        <button
           onClick={() => setActiveTab('tierlists')}
           style={{
             padding: '9px 18px',
@@ -308,6 +287,27 @@ export default function Profile() {
         </button>
 
         <button
+          onClick={() => setActiveTab('visual')}
+          style={{
+            padding: '9px 18px',
+            borderRadius: '10px',
+            border: activeTab === 'visual' ? '1px solid #b062eb' : '1px solid transparent',
+            backgroundColor: activeTab === 'visual' ? 'rgba(176,98,235,0.18)' : '#17171c',
+            color: activeTab === 'visual' ? '#ffffff' : '#9999a5',
+            fontWeight: activeTab === 'visual' ? '700' : '500',
+            fontSize: '0.88rem',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <Palette size={16} color={activeTab === 'visual' ? '#b062eb' : '#888'} />
+          Personalização & Visuais
+        </button>
+
+        <button
           onClick={() => setActiveTab('account')}
           style={{
             padding: '9px 18px',
@@ -328,122 +328,6 @@ export default function Profile() {
           Segurança da Conta
         </button>
       </div>
-
-      {/* CONTEÚDO DA ABA: VISUAL & CORES */}
-      {activeTab === 'visual' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
-          <div className="control-card" style={{ padding: '22px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <Palette size={22} color="#b062eb" />
-              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Tema de Cores do Ametist</h3>
-            </div>
-            <p style={{ color: '#aaa', fontSize: '0.88rem', margin: '0 0 20px 0', lineHeight: '1.4' }}>
-              Escolha a skin visual que define a estética do site e dos seus tabuleiros. Essa configuração fica gravada no seu perfil.
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
-              {availableThemes.map((themeItem) => {
-                const isSelected = siteTheme === themeItem.id;
-                return (
-                  <div
-                    key={themeItem.id}
-                    onClick={() => {
-                      setSiteTheme(themeItem.id);
-                      toast.success(`Tema ${themeItem.name} ativado!`);
-                    }}
-                    style={{
-                      padding: '16px',
-                      borderRadius: '12px',
-                      backgroundColor: isSelected ? `${themeItem.accentColor}15` : '#17171c',
-                      border: isSelected ? `2px solid ${themeItem.accentColor}` : '1px solid #282832',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      boxShadow: isSelected ? `0 0 20px ${themeItem.accentColor}25` : 'none',
-                      position: 'relative'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{
-                          width: '16px',
-                          height: '16px',
-                          borderRadius: '50%',
-                          backgroundColor: themeItem.accentColor,
-                          boxShadow: `0 0 8px ${themeItem.accentColor}`
-                        }} />
-                        <strong style={{ color: '#fff', fontSize: '0.95rem' }}>{themeItem.name}</strong>
-                      </div>
-                      {isSelected && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: themeItem.accentColor, fontSize: '0.75rem', fontWeight: 'bold' }}>
-                          <Check size={14} /> Ativo
-                        </span>
-                      )}
-                    </div>
-
-                    <p style={{ margin: '0 0 12px 0', color: '#8e8e99', fontSize: '0.8rem', lineHeight: '1.3' }}>
-                      {themeItem.description}
-                    </p>
-
-                    {/* Mini Preview Bar */}
-                    <div style={{ height: '6px', borderRadius: '4px', background: themeItem.gradient, width: '100%' }} />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="control-card" style={{ padding: '22px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <Sliders size={20} color="#b062eb" />
-              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Densidade e Escala Visual</h3>
-            </div>
-            <p style={{ color: '#aaa', fontSize: '0.88rem', margin: '0 0 16px 0' }}>
-              Ajuste o tamanho base dos elementos para a sua tela.
-            </p>
-
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => {
-                  setUiDensity('compact');
-                  toast.success('Escala Compacta (100% Nativo) selecionada!');
-                }}
-                style={{
-                  padding: '12px 20px',
-                  borderRadius: '10px',
-                  border: uiDensity === 'compact' ? '1.5px solid #b062eb' : '1px solid #2e2e38',
-                  backgroundColor: uiDensity === 'compact' ? 'rgba(176,98,235,0.18)' : '#17171c',
-                  color: uiDensity === 'compact' ? '#fff' : '#aaa',
-                  cursor: 'pointer',
-                  textAlign: 'left'
-                }}
-              >
-                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>💎 Compacto (Recomendado)</div>
-                <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Proporção ideal para ver todo o tabuleiro sem precisar de zoom</div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setUiDensity('spacious');
-                  toast.success('Escala Confortável selecionada!');
-                }}
-                style={{
-                  padding: '12px 20px',
-                  borderRadius: '10px',
-                  border: uiDensity === 'spacious' ? '1.5px solid #b062eb' : '1px solid #2e2e38',
-                  backgroundColor: uiDensity === 'spacious' ? 'rgba(176,98,235,0.18)' : '#17171c',
-                  color: uiDensity === 'spacious' ? '#fff' : '#aaa',
-                  cursor: 'pointer',
-                  textAlign: 'left'
-                }}
-              >
-                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>🔍 Confortável</div>
-                <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Botões e textos maiores para monitores de alta resolução</div>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* CONTEÚDO DA ABA: MINHAS TIER LISTS */}
       {activeTab === 'tierlists' && (
@@ -606,6 +490,122 @@ export default function Profile() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* CONTEÚDO DA ABA: VISUAL & CORES */}
+      {activeTab === 'visual' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          <div className="control-card" style={{ padding: '22px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <Palette size={22} color="#b062eb" />
+              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Tema de Cores do Ametist</h3>
+            </div>
+            <p style={{ color: '#aaa', fontSize: '0.88rem', margin: '0 0 20px 0', lineHeight: '1.4' }}>
+              Escolha a skin visual que define a estética do site e dos seus tabuleiros. Essa configuração fica gravada no seu perfil.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+              {availableThemes.map((themeItem) => {
+                const isSelected = siteTheme === themeItem.id;
+                return (
+                  <div
+                    key={themeItem.id}
+                    onClick={() => {
+                      setSiteTheme(themeItem.id);
+                      toast.success(`Tema ${themeItem.name} ativado!`);
+                    }}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      backgroundColor: isSelected ? `${themeItem.accentColor}15` : '#17171c',
+                      border: isSelected ? `2px solid ${themeItem.accentColor}` : '1px solid #282832',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: isSelected ? `0 0 20px ${themeItem.accentColor}25` : 'none',
+                      position: 'relative'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          backgroundColor: themeItem.accentColor,
+                          boxShadow: `0 0 8px ${themeItem.accentColor}`
+                        }} />
+                        <strong style={{ color: '#fff', fontSize: '0.95rem' }}>{themeItem.name}</strong>
+                      </div>
+                      {isSelected && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: themeItem.accentColor, fontSize: '0.75rem', fontWeight: 'bold' }}>
+                          <Check size={14} /> Ativo
+                        </span>
+                      )}
+                    </div>
+
+                    <p style={{ margin: '0 0 12px 0', color: '#8e8e99', fontSize: '0.8rem', lineHeight: '1.3' }}>
+                      {themeItem.description}
+                    </p>
+
+                    {/* Mini Preview Bar */}
+                    <div style={{ height: '6px', borderRadius: '4px', background: themeItem.gradient, width: '100%' }} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="control-card" style={{ padding: '22px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <Sliders size={20} color="#b062eb" />
+              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Densidade e Escala Visual</h3>
+            </div>
+            <p style={{ color: '#aaa', fontSize: '0.88rem', margin: '0 0 16px 0' }}>
+              Ajuste o tamanho base dos elementos para a sua tela.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => {
+                  setUiDensity('compact');
+                  toast.success('Escala Compacta (100% Nativo) selecionada!');
+                }}
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: '10px',
+                  border: uiDensity === 'compact' ? '1.5px solid #b062eb' : '1px solid #2e2e38',
+                  backgroundColor: uiDensity === 'compact' ? 'rgba(176,98,235,0.18)' : '#17171c',
+                  color: uiDensity === 'compact' ? '#fff' : '#aaa',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>💎 Compacto (Recomendado)</div>
+                <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Proporção ideal para ver todo o tabuleiro sem precisar de zoom</div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setUiDensity('spacious');
+                  toast.success('Escala Confortável selecionada!');
+                }}
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: '10px',
+                  border: uiDensity === 'spacious' ? '1.5px solid #b062eb' : '1px solid #2e2e38',
+                  backgroundColor: uiDensity === 'spacious' ? 'rgba(176,98,235,0.18)' : '#17171c',
+                  color: uiDensity === 'spacious' ? '#fff' : '#aaa',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>🔍 Confortável</div>
+                <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Botões e textos maiores para monitores de alta resolução</div>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
