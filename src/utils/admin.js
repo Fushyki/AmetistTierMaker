@@ -1,9 +1,15 @@
-// Adicione seu email aqui para ter poderes globais de exclusão na Home
-export const ADMIN_EMAILS = [
-  'daviamaral3284@gmail.com'
-];
+// Carrega e-mails de administradores com segurança via variáveis de ambiente
+const getAdminEmails = () => {
+  const envAdmins = import.meta.env.VITE_ADMIN_EMAILS || '';
+  return envAdmins
+    .split(',')
+    .map(email => email.trim().toLowerCase())
+    .filter(Boolean);
+};
 
 export const isAdmin = (user) => {
   if (!user || !user.email) return false;
-  return ADMIN_EMAILS.includes(user.email);
+  const adminList = getAdminEmails();
+  return adminList.includes(user.email.trim().toLowerCase());
 };
+

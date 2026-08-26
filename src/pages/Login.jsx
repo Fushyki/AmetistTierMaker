@@ -14,24 +14,46 @@ export default function Login() {
 
   const handleAuth = async (e) => {
     e.preventDefault();
+    
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password;
+
+    if (!cleanEmail || !cleanPassword) {
+      toast.error('Preencha o e-mail e a senha.');
+      return;
+    }
+
+    if (cleanPassword.length < 6) {
+      toast.error('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
     setLoading(true);
     
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ 
+          email: cleanEmail, 
+          password: cleanPassword 
+        });
+        
         if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            setIsLogin(false);
-            toast.error('Conta não encontrada! Preencha a senha para criar uma agora.', { duration: 5000 });
-            return;
-          }
-          throw error;
+          toast.error('E-mail ou senha incorretos.');
+          return;
         }
+        
         toast.success('Bem-vindo de volta!');
         navigate('/admin');
       } else {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
+        const { data, error } = await supabase.auth.signUp({ 
+          email: cleanEmail, 
+          password: cleanPassword 
+        });
+        
+        if (error) {
+          toast.error(error.message || 'Erro ao criar conta.');
+          return;
+        }
         
         // Fazer login automático logo após o cadastro
         if (data?.user) {
@@ -40,7 +62,7 @@ export default function Login() {
         }
       }
     } catch (err) {
-      toast.error('Erro na autenticação: ' + err.message);
+      toast.error('Erro na autenticação. Tente novamente.');
     } finally {
       setLoading(false);
     }
