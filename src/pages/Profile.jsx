@@ -597,7 +597,7 @@ export default function Profile() {
                   textAlign: 'left'
                 }}
               >
-                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>💎 Compacto (Recomendado)</div>
+                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Compacto (Recomendado)</div>
                 <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Proporção ideal para ver todo o tabuleiro sem precisar de zoom</div>
               </button>
 
@@ -616,7 +616,7 @@ export default function Profile() {
                   textAlign: 'left'
                 }}
               >
-                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>🔍 Confortável</div>
+                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Confortável</div>
                 <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Botões e textos maiores para monitores de alta resolução</div>
               </button>
             </div>
@@ -676,7 +676,7 @@ export default function Profile() {
             </div>
 
             <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#777', lineHeight: '1.4' }}>
-              🔒 A nova senha é criptografada e salva instantaneamente no banco de autenticação do Supabase. Nos próximos acessos, utilize esta nova senha.
+              A nova senha é criptografada e salva instantaneamente no banco de autenticação do Supabase. Nos próximos acessos, utilize esta nova senha.
             </p>
 
             <button 
