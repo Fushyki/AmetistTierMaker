@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
+import { Plus } from 'lucide-react';
 import DroppableArea from './DroppableArea';
 import SortableItem from './SortableItem';
 
@@ -41,8 +42,8 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
   return (
     <div className="inventory-section">
       <div className="inventory-header">
-        <label htmlFor="image-input" className="custom-upload-btn">
-          ＋ Adicionar Imagens
+        <label htmlFor="image-input" className="custom-upload-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <Plus size={16} /> Adicionar Imagens
         </label>
         <input
           type="file"

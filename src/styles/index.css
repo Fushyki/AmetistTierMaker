@@ -1,4 +1,4 @@
-﻿/* 1. CONFIGURAÇÕES GERAIS E ESCALA COMPACTA */
+/* 1. CONFIGURAÇÕES GERAIS E ESCALA COMPACTA */
 html {
     font-size: 14px;
     box-sizing: border-box;
@@ -600,4 +600,13 @@ h1 {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-4px); }
   40%, 80% { transform: translateX(4px); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }

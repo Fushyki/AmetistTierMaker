@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { supabase } from '../services/supabaseClient';
 import { defaultTeams } from '../data/copaTeams';
 import { createEmptyMatches } from '../utils/copaBracket';
+import { Trophy, Award, Check, AlertTriangle } from 'lucide-react';
 import '../styles/copa.css';
 
 // Draggable Item Component
@@ -55,7 +56,9 @@ function MatchSlot({ matchId, slotId, team, winner, onClickSlot }) {
         <>
           <DraggableTeam id={`drag-${matchId}-${slotId}-${team.id}`} team={team} isSelected={false} />
           {matchId !== 'champion' && matchId !== 'third_winner' && (
-             <button className="winner-btn" onClick={(e) => { e.stopPropagation(); onClickSlot(matchId, slotId, team, true); }} title="Definir Vencedor">✔️</button>
+             <button className="winner-btn" onClick={(e) => { e.stopPropagation(); onClickSlot(matchId, slotId, team, true); }} title="Definir Vencedor">
+               <Check size={12} strokeWidth={2.8} />
+             </button>
           )}
         </>
       ) : (
@@ -544,7 +547,9 @@ export default function Copa() {
       <div className={`copa-container ${isPresentationMode ? 'presentation-mode' : ''}`}>
         
         <div className="rotate-screen-overlay">
-          <h2 style={{ color: '#fbbf24', marginBottom: '20px' }}>⚠️ Aviso</h2>
+          <h2 style={{ color: '#fbbf24', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <AlertTriangle size={24} /> Aviso
+          </h2>
           <p>O Modo Copa do Mundo requer muito espaço na tela.</p>
           <p>Por favor, <strong>gire o seu celular</strong> (Modo Paisagem) ou acesse pelo computador para montar o seu chaveamento.</p>
         </div>
@@ -591,7 +596,9 @@ export default function Copa() {
             {/* GRANDE FINAL E TROFÉU */}
             <div className="bracket-center">
               <div style={{ textAlign: 'center' }}>
-                <h2 style={{ color: '#fbbf24', fontSize: '1.8rem', margin: '0 0 10px 0', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>🏆 CAMPEÃO 🏆</h2>
+                <h2 style={{ color: '#fbbf24', fontSize: '1.8rem', margin: '0 0 10px 0', textShadow: '0 2px 4px rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                  <Trophy size={28} /> CAMPEÃO <Trophy size={28} />
+                </h2>
                 <div className="match-box final-match" style={{ margin: '0 auto', background: 'rgba(255, 255, 255, 0.1)', borderColor: '#fbbf24', width: '120px' }}>
                   <MatchSlot matchId="champion" slotId="t1" team={matches.champion?.t1} winner={null} onClickSlot={() => {}} />
                 </div>
@@ -604,7 +611,9 @@ export default function Copa() {
               </div>
 
               <div style={{ textAlign: 'center', marginTop: '30px' }}>
-                <h3 style={{ color: '#cbd5e1', margin: '0 0 10px 0' }}>🥉 3º LUGAR</h3>
+                <h3 style={{ color: '#cbd5e1', margin: '0 0 10px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <Award size={20} /> 3º LUGAR
+                </h3>
                 <div className="match-box">
                   <MatchSlot matchId="third_1" slotId="t1" team={matches.third_1.t1} winner={matches.third_1.winner} onClickSlot={handleSetWinner} />
                   <MatchSlot matchId="third_1" slotId="t2" team={matches.third_1.t2} winner={matches.third_1.winner} onClickSlot={handleSetWinner} />

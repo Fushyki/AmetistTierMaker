@@ -1,11 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../services/supabaseClient';
 import { isAdmin } from '../utils/admin';
 import { confirmAction } from '../utils/alerts';
-import { Trash2, Pencil, Sparkles } from 'lucide-react';
-import { TEMPLATE_CATEGORIES, getCategoryBadge } from '../data/categories';
+import { TEMPLATE_CATEGORIES } from '../data/categories';
+import CategoryBadge, { CategoryIcon } from '../components/CategoryBadge';
 import toast from 'react-hot-toast';
 import '../styles/index.css';
 
@@ -100,30 +100,33 @@ export default function Home() {
 
         {/* Barra de Filtros de Categoria */}
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '22px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {TEMPLATE_CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              style={{
-                padding: '7px 15px',
-                borderRadius: '20px',
-                border: selectedCategory === cat.id ? '1px solid #b062eb' : '1px solid #2f2f38',
-                backgroundColor: selectedCategory === cat.id ? 'rgba(176, 98, 235, 0.22)' : '#18181b',
-                color: selectedCategory === cat.id ? '#ffffff' : '#9999a5',
-                fontSize: '0.85rem',
-                fontWeight: selectedCategory === cat.id ? '600' : '400',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.2s ease',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
-            </button>
-          ))}
+          {TEMPLATE_CATEGORIES.map(cat => {
+            const isSelected = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                style={{
+                  padding: '7px 15px',
+                  borderRadius: '20px',
+                  border: isSelected ? `1px solid ${cat.color}` : '1px solid #2f2f38',
+                  backgroundColor: isSelected ? `${cat.color}22` : '#18181b',
+                  color: isSelected ? '#ffffff' : '#9999a5',
+                  fontSize: '0.85rem',
+                  fontWeight: isSelected ? '600' : '400',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '7px'
+                }}
+              >
+                <CategoryIcon name={cat.iconName} size={15} color={isSelected ? cat.color : '#888899'} />
+                <span>{cat.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {isLoading ? (
@@ -151,9 +154,7 @@ export default function Home() {
                         </h3>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-                        <span style={{ fontSize: '0.72rem', padding: '2px 7px', background: 'rgba(176, 98, 235, 0.15)', border: '1px solid rgba(176, 98, 235, 0.3)', borderRadius: '4px', color: '#c4b5fd' }}>
-                          {getCategoryBadge(template.data?.category || 'games')}
-                        </span>
+                        <CategoryBadge categoryId={template.data?.category || 'games'} />
                         <span style={{ margin: 0, color: '#666', fontSize: '0.75rem' }}>
                           {new Date(template.created_at).toLocaleDateString()}
                         </span>

@@ -1,4 +1,4 @@
-﻿import toast from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 /**
  * Exporta o tabuleiro como imagem PNG de alta fidelidade nos formatos:
@@ -70,9 +70,9 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
       footer.style.textAlign = 'center';
       footer.style.marginTop = '30px';
       footer.innerHTML = `
-        <div style="display: inline-flex; align-items: center; gap: 10px; background: rgba(176, 98, 235, 0.15); border: 1px solid rgba(176, 98, 235, 0.4); padding: 10px 24px; border-radius: 30px; margin-bottom: 12px;">
-          <span style="font-size: 1.15rem; font-weight: 700; color: #b062eb; letter-spacing: 1px;">
-            ✨ CRIE A SUA EM AMETIST TIER MAKER
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(176, 98, 235, 0.18); border: 1px solid rgba(176, 98, 235, 0.5); padding: 10px 26px; border-radius: 30px; margin-bottom: 12px; box-shadow: 0 0 20px rgba(176, 98, 235, 0.2);">
+          <span style="font-size: 1.05rem; font-weight: 800; color: #e9d5ff; letter-spacing: 2px; text-transform: uppercase;">
+            AMETIST TIER MAKER
           </span>
         </div>
         <div style="font-size: 0.95rem; color: #777788; letter-spacing: 0.5px;">
@@ -105,7 +105,7 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
     link.download = filename;
     link.href = dataUrl;
     link.click();
-    toast.success(format === 'story' ? '📱 Story 9:16 gerado com sucesso!' : '🖼️ Imagem 16:9 gerada com sucesso!');
+    toast.success(format === 'story' ? 'Story 9:16 gerado com sucesso!' : 'Imagem 16:9 gerada com sucesso!');
   } catch (error) {
     console.error('Erro ao salvar imagem:', error);
     toast.error('Houve um erro ao gerar a imagem: ' + (error.message || error));

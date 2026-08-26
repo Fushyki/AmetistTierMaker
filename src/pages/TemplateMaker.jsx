@@ -10,7 +10,7 @@ import { fetchAndParseAPI } from '../utils/apiParser';
 import { processImage } from '../utils/imageProcessor';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
 import { importAnimeCharacters, importMusic, autoImport } from '../utils/autoImporter';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Zap, Flame, Music, Lock, X, Loader2 } from 'lucide-react';
 
 const initialRanksAvancado = [
   { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
@@ -82,7 +82,7 @@ export default function TemplateMaker() {
       if (!coverImage && result.cover) setCoverImage(result.cover);
       if (result.category) setCategory(result.category);
 
-      toast.success(`🎉 ${result.items.length} itens importados com sucesso!`);
+      toast.success(`${result.items.length} itens importados com sucesso!`);
     } catch (err) {
       console.error(err);
       toast.error(err.message || 'Erro ao importar automaticamente.');
@@ -321,7 +321,7 @@ export default function TemplateMaker() {
       toast.success(`Sucesso! API retornou ${apiItems.length} itens.`);
       if (apiConfig.pagesToFetch > 1) {
         setTimeout(() => {
-          toast.info("💡 Dica: Se a API não trouxe todos os itens, você poderá usar o botão 'Restaurar' na Tier List para continuar buscando.", { autoClose: 7000 });
+          toast.info("Dica: Se a API não trouxe todos os itens, você poderá usar o botão 'Restaurar' na Tier List para continuar buscando.", { autoClose: 7000 });
         }, 1500);
       }
     } catch (error) {
@@ -416,8 +416,12 @@ export default function TemplateMaker() {
     return (
       <div className="container" style={{ padding: '20px 15px', maxWidth: '520px', margin: '55px auto 20px', color: '#fff', textAlign: 'center' }}>
         <h1 style={{ color: '#b062eb', marginBottom: '14px', fontSize: '1.4rem' }}>Acesso Restrito</h1>
-        <div style={{ background: '#18181b', padding: '20px', borderRadius: '10px', border: '1px solid #28282e' }}>
-          <div style={{ fontSize: '2.4rem', marginBottom: '10px' }}>🔒</div>
+        <div style={{ background: '#18181b', padding: '24px 20px', borderRadius: '12px', border: '1px solid #28282e' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'rgba(176,98,235,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b062eb' }}>
+              <Lock size={28} />
+            </div>
+          </div>
           <h2 style={{ marginBottom: '10px', fontSize: '1.15rem' }}>Criar modelo é uma função exclusiva para membros</h2>
           <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '20px' }}>
             Crie sua conta gratuitamente para salvar suas Tier Lists e criar seus templates, além de continuar editando elas de qualquer dispositivo, a qualquer momento.
@@ -467,7 +471,7 @@ export default function TemplateMaker() {
           >
             {TEMPLATE_CATEGORIES.filter(c => c.id !== 'todos').map(cat => (
               <option key={cat.id} value={cat.id}>
-                {cat.icon} {cat.label}
+                {cat.label}
               </option>
             ))}
           </select>
@@ -480,8 +484,11 @@ export default function TemplateMaker() {
               <img src={coverImage} alt="Capa" style={{ width: '100%', maxWidth: '300px', borderRadius: '8px', border: '2px solid #b062eb' }} />
               <button 
                 onClick={() => setCoverImage(null)}
-                style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer' }}
-              >✕</button>
+                style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                title="Remover Capa"
+              >
+                <X size={15} />
+              </button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
@@ -546,9 +553,9 @@ export default function TemplateMaker() {
             <button 
               className={dataSourceType === 'auto' ? 'btn-active' : 'btn-secondary'}
               onClick={() => setDataSourceType('auto')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <Sparkles size={14} /> ⚡ Importar por Link / Nome
+              <Zap size={14} color={dataSourceType === 'auto' ? '#ffffff' : '#ffd700'} /> Importar por Link / Nome
             </button>
             <button 
               className={dataSourceType === 'api' ? 'btn-active' : 'btn-secondary'}
@@ -596,13 +603,13 @@ export default function TemplateMaker() {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '7px',
                   padding: '9px 18px',
                   cursor: isAutoLoading ? 'not-allowed' : 'pointer',
                   opacity: isAutoLoading ? 0.6 : 1
                 }}
               >
-                ⛩️ Importar Anime (AniList)
+                <Flame size={15} color="#ffd1d9" /> Importar Anime (AniList)
               </button>
               <button
                 onClick={() => handleRunAutoImport('music')}
@@ -611,13 +618,13 @@ export default function TemplateMaker() {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '7px',
                   padding: '9px 18px',
                   cursor: isAutoLoading ? 'not-allowed' : 'pointer',
                   opacity: isAutoLoading ? 0.6 : 1
                 }}
               >
-                🎵 Importar Discografia (Música)
+                <Music size={15} color="#e9d5ff" /> Importar Discografia (Música)
               </button>
               <button
                 onClick={() => handleRunAutoImport('auto')}
@@ -626,19 +633,19 @@ export default function TemplateMaker() {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '7px',
                   padding: '9px 18px',
                   cursor: isAutoLoading ? 'not-allowed' : 'pointer',
                   opacity: isAutoLoading ? 0.6 : 1
                 }}
               >
-                ⚡ Auto Detectar
+                <Zap size={15} color="#fef08a" /> Auto Detectar
               </button>
             </div>
 
             {isAutoLoading && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '16px', color: '#b062eb', fontWeight: '600', fontSize: '0.9rem' }}>
-                <span style={{ animation: 'spin 1s infinite linear' }}>⏳</span>
+                <Loader2 size={18} className="animate-spin" />
                 <span>Consultando base de dados e baixando imagens em alta definição...</span>
               </div>
             )}
@@ -738,8 +745,11 @@ export default function TemplateMaker() {
                 <img src={item.src} alt={item.nome} title={item.nome} style={{ width: '80px', height: '80px', objectFit: 'contain', backgroundColor: '#2a2a2f', borderRadius: '5px' }} />
                 <button 
                   onClick={() => setItems(items.filter(i => i.id !== item.id))}
-                  style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '10px', cursor: 'pointer' }}
-                >✕</button>
+                  style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
+                  title="Remover Imagem"
+                >
+                  <X size={12} />
+                </button>
               </div>
             ))}
           </div>
