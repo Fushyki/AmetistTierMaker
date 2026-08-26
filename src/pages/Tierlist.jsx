@@ -26,6 +26,9 @@ export default function Tierlist() {
     items,
     setItems,
     tierlistName,
+    setTierlistName,
+    theme,
+    setTheme,
     selectedItem,
     setSelectedItem,
     canUndo,
@@ -182,6 +185,7 @@ export default function Tierlist() {
             user={user}
             layoutMode={layoutMode}
             colunas={colunas}
+            theme={theme}
             canUndo={canUndo}
             onExportImage={() => setIsExportModalOpen(true)}
             onExportJSON={handleExportJSON}
@@ -190,6 +194,7 @@ export default function Tierlist() {
             onEnterPresentation={() => setIsPresentationMode(true)}
             onLayoutChange={handleLayoutChange}
             onColunasChange={setColunas}
+            onThemeChange={setTheme}
             onUndo={undo}
             onReset={resetarTierList}
           />
@@ -199,7 +204,7 @@ export default function Tierlist() {
           isOpen={isExportModalOpen}
           onClose={() => setIsExportModalOpen(false)}
           tierlistName={tierlistName}
-          onExport={(format) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName })}
+          onExport={(format) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme })}
         />
 
         <div className="dica-texto" style={{ marginBottom: '14px', textAlign: 'center' }}>
@@ -212,6 +217,7 @@ export default function Tierlist() {
           colunas={colunas}
           columnTitles={columnTitles}
           layoutMode={layoutMode}
+          theme={theme}
           onRemoveRow={handleRemoveRow}
           selectedItem={selectedItem}
           setSelectedItem={setSelectedItem}

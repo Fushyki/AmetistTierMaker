@@ -2,9 +2,27 @@ import React from 'react';
 import { Settings } from 'lucide-react';
 import TierRow from './TierRow';
 
-export default function TierBoard({ ranksData, items, colunas, columnTitles, layoutMode, onRemoveRow, selectedItem, setSelectedItem, onAreaClick, onDoubleClickItem, onMoveRow, onAddRow, onUpdateRow, onUpdateGroupTitle, onUpdateColumnTitle, isPresentationMode }) {
+export default function TierBoard({ 
+  ranksData, 
+  items, 
+  colunas, 
+  columnTitles, 
+  layoutMode, 
+  theme = 'ametist',
+  onRemoveRow, 
+  selectedItem, 
+  setSelectedItem, 
+  onAreaClick, 
+  onDoubleClickItem, 
+  onMoveRow, 
+  onAddRow, 
+  onUpdateRow, 
+  onUpdateGroupTitle, 
+  onUpdateColumnTitle, 
+  isPresentationMode 
+}) {
   return (
-    <div id="board" className={layoutMode === 'avancado' ? 'avancado-board' : 'classico-board'}>
+    <div id="board" className={`${layoutMode === 'avancado' ? 'avancado-board' : 'classico-board'} theme-${theme}`}>
       {ranksData.map((grupo, groupIndex) => (
         <div key={grupo.id} className="tier-section-group">
           {layoutMode === 'avancado' && (

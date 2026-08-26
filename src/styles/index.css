@@ -131,6 +131,117 @@ h1 {
 .tier-section-group:nth-child(2) .group-header { color: #00ffcc; } 
 .tier-section-group:nth-child(3) .group-header { color: #ff00ff; } 
 
+/* 3.1 SISTEMA DE TEMAS VISUAIS DO TABULEIRO */
+#board {
+    padding: 12px;
+    border-radius: 14px;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#board.theme-ametist {
+    background: #101014;
+    border: 1px solid rgba(176, 98, 235, 0.35);
+    box-shadow: 0 0 25px rgba(176, 98, 235, 0.12);
+}
+#board.theme-ametist .storage-box {
+    background-color: #171720;
+    border-color: #292938;
+}
+#board.theme-ametist .col-title-box {
+    border-color: rgba(176, 98, 235, 0.3);
+    background: #181824;
+}
+
+#board.theme-cyberpunk {
+    background: #090d14;
+    border: 1px solid rgba(0, 255, 204, 0.5);
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.18), 0 0 15px rgba(255, 0, 85, 0.12);
+}
+#board.theme-cyberpunk .storage-box {
+    background-color: #0d131f;
+    border-color: #1c273c;
+}
+#board.theme-cyberpunk .col-title-box {
+    border-color: rgba(0, 255, 204, 0.45);
+    background: #0b1522;
+    color: #00ffcc;
+}
+#board.theme-cyberpunk .tier-section-group:nth-child(1) .group-header { color: #00ffcc; }
+#board.theme-cyberpunk .tier-section-group:nth-child(2) .group-header { color: #ff0055; }
+#board.theme-cyberpunk .tier-section-group:nth-child(3) .group-header { color: #ffe600; }
+
+#board.theme-gold {
+    background: #11100b;
+    border: 1px solid rgba(255, 215, 0, 0.45);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+}
+#board.theme-gold .storage-box {
+    background-color: #181610;
+    border-color: #312b1c;
+}
+#board.theme-gold .col-title-box {
+    border-color: rgba(255, 215, 0, 0.4);
+    background: #1f1b11;
+    color: #ffd700;
+}
+#board.theme-gold .tier-section-group:nth-child(1) .group-header { color: #ffd700; }
+#board.theme-gold .tier-section-group:nth-child(2) .group-header { color: #f59e0b; }
+#board.theme-gold .tier-section-group:nth-child(3) .group-header { color: #fbbf24; }
+
+#board.theme-emerald {
+    background: #09130f;
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+}
+#board.theme-emerald .storage-box {
+    background-color: #0f1c16;
+    border-color: #1b3328;
+}
+#board.theme-emerald .col-title-box {
+    border-color: rgba(16, 185, 129, 0.4);
+    background: #13261e;
+    color: #34d399;
+}
+#board.theme-emerald .tier-section-group:nth-child(1) .group-header { color: #34d399; }
+#board.theme-emerald .tier-section-group:nth-child(2) .group-header { color: #10b981; }
+#board.theme-emerald .tier-section-group:nth-child(3) .group-header { color: #059669; }
+
+#board.theme-pastel {
+    background: #171018;
+    border: 1px solid rgba(244, 114, 182, 0.45);
+    box-shadow: 0 0 25px rgba(244, 114, 182, 0.15);
+}
+#board.theme-pastel .storage-box {
+    background-color: #211623;
+    border-color: #3d2642;
+}
+#board.theme-pastel .col-title-box {
+    border-color: rgba(244, 114, 182, 0.4);
+    background: #2b1a2d;
+    color: #f472b6;
+}
+#board.theme-pastel .tier-section-group:nth-child(1) .group-header { color: #f472b6; }
+#board.theme-pastel .tier-section-group:nth-child(2) .group-header { color: #c084fc; }
+#board.theme-pastel .tier-section-group:nth-child(3) .group-header { color: #38bdf8; }
+
+#board.theme-monochrome {
+    background: #09090b;
+    border: 1px solid #27272a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+#board.theme-monochrome .storage-box {
+    background-color: #141418;
+    border-color: #222228;
+}
+#board.theme-monochrome .col-title-box {
+    border-color: #3f3f46;
+    background: #18181b;
+    color: #e4e4e7;
+}
+#board.theme-monochrome .tier-section-group:nth-child(1) .group-header { color: #e4e4e7; }
+#board.theme-monochrome .tier-section-group:nth-child(2) .group-header { color: #a1a1aa; }
+#board.theme-monochrome .tier-section-group:nth-child(3) .group-header { color: #71717a; }
+
 /* 4. LINHAS DE RANK E ÁREA DE DROP */
 .section-grid {
     display: flex;

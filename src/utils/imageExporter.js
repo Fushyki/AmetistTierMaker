@@ -1,4 +1,5 @@
 import toast from 'react-hot-toast';
+import { getThemeById } from '../data/themes';
 
 /**
  * Exporta o tabuleiro como imagem PNG de alta fidelidade nos formatos:
@@ -19,6 +20,9 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
     let dataUrl;
 
     if (format === 'story') {
+      const themeObj = getThemeById(options.theme || 'ametist');
+      const accent = themeObj.accentColor || '#b062eb';
+
       const storyWrapper = document.createElement('div');
       storyWrapper.id = 'story-export-temp';
       storyWrapper.style.position = 'fixed';
@@ -28,7 +32,7 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
       storyWrapper.style.minHeight = '1920px';
       storyWrapper.style.padding = '80px 45px';
       storyWrapper.style.backgroundColor = '#0b0b0f';
-      storyWrapper.style.backgroundImage = 'radial-gradient(circle at 50% 15%, rgba(176, 98, 235, 0.28) 0%, transparent 60%), radial-gradient(circle at 50% 85%, rgba(131, 56, 236, 0.2) 0%, transparent 50%)';
+      storyWrapper.style.backgroundImage = `radial-gradient(circle at 50% 15%, ${accent}44 0%, transparent 60%), radial-gradient(circle at 50% 85%, ${accent}25 0%, transparent 50%)`;
       storyWrapper.style.display = 'flex';
       storyWrapper.style.flexDirection = 'column';
       storyWrapper.style.justifyContent = 'space-between';
@@ -44,10 +48,10 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
       header.style.marginBottom = '30px';
       header.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 20px;">
-          <img src="/ametist-logo.png" style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 0 16px rgba(176,98,235,0.7));" />
+          <img src="/ametist-logo.png" style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 0 16px ${accent}bb);" />
           <img src="/ametist-text.png" style="height: 48px; object-fit: contain;" />
         </div>
-        <h1 style="font-size: 2.8rem; margin: 0 0 8px 0; font-weight: 900; color: #ffffff; text-shadow: 0 0 25px rgba(176, 98, 235, 0.8); text-transform: uppercase; letter-spacing: 2px;">
+        <h1 style="font-size: 2.8rem; margin: 0 0 8px 0; font-weight: 900; color: #ffffff; text-shadow: 0 0 25px ${accent}aa; text-transform: uppercase; letter-spacing: 2px;">
           ${options.title || 'Minha Tier List'}
         </h1>
         <p style="font-size: 1.2rem; color: #b5b5c3; margin: 0; font-weight: 500;">
@@ -59,19 +63,19 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
       const boardClone = boardElement.cloneNode(true);
       boardClone.style.width = '100%';
       boardClone.style.maxWidth = '980px';
-      boardClone.style.backgroundColor = 'rgba(20, 20, 26, 0.92)';
-      boardClone.style.border = '2px solid rgba(176, 98, 235, 0.4)';
+      boardClone.style.backgroundColor = 'rgba(18, 18, 24, 0.95)';
+      boardClone.style.border = `2px solid ${accent}88`;
       boardClone.style.borderRadius = '20px';
       boardClone.style.padding = '25px';
-      boardClone.style.boxShadow = '0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(176,98,235,0.2)';
+      boardClone.style.boxShadow = `0 20px 60px rgba(0,0,0,0.85), 0 0 40px ${accent}33`;
 
       // Footer
       const footer = document.createElement('div');
       footer.style.textAlign = 'center';
       footer.style.marginTop = '30px';
       footer.innerHTML = `
-        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(176, 98, 235, 0.18); border: 1px solid rgba(176, 98, 235, 0.5); padding: 10px 26px; border-radius: 30px; margin-bottom: 12px; box-shadow: 0 0 20px rgba(176, 98, 235, 0.2);">
-          <span style="font-size: 1.05rem; font-weight: 800; color: #e9d5ff; letter-spacing: 2px; text-transform: uppercase;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: ${accent}22; border: 1px solid ${accent}77; padding: 10px 26px; border-radius: 30px; margin-bottom: 12px; box-shadow: 0 0 20px ${accent}33;">
+          <span style="font-size: 1.05rem; font-weight: 800; color: ${accent}; letter-spacing: 2px; text-transform: uppercase;">
             AMETIST TIER MAKER
           </span>
         </div>

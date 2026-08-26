@@ -46,10 +46,17 @@ export function useTierlistState(user) {
   const [tierlistName, setTierlistName] = useState(() => {
     return localStorage.getItem('tierlist-name') || 'Minha Tier List';
   });
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('tierlist-theme') || 'ametist';
+  });
   const [selectedItem, setSelectedItem] = useState(null);
 
   // Hook de Histórico / Undo
   const { saveState, undo: executeUndo, canUndo } = useHistory();
+
+  useEffect(() => {
+    localStorage.setItem('tierlist-theme', theme);
+  }, [theme]);
 
   const saveHistoryState = useCallback((currentItems, currentRanks) => {
     saveState({
@@ -136,6 +143,7 @@ export function useTierlistState(user) {
               setLayoutMode(data.data.layoutMode || 'classico');
               setColunas(data.data.colunas || 1);
               if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
+              if (data.data.theme) setTheme(data.data.theme);
 
               if (data.data.apiConfig) {
                 try {
@@ -185,6 +193,7 @@ export function useTierlistState(user) {
             if (data.data.layoutMode) setLayoutMode(data.data.layoutMode);
             if (data.data.colunas) setColunas(data.data.colunas);
             if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
+            if (data.data.theme) setTheme(data.data.theme);
             
             localStorage.removeItem('tierlist-force-cloud-load');
           }
@@ -376,7 +385,7 @@ export function useTierlistState(user) {
   const handleSaveToCloud = async () => {
     if (!user) return toast.error("Faça login para salvar na nuvem.");
     const currentId = localStorage.getItem('tierlist-current-id');
-    const dataToSave = { items, ranksData, layoutMode, colunas, columnTitles };
+    const dataToSave = { items, ranksData, layoutMode, colunas, columnTitles, theme };
     
     try {
       if (currentId) {
@@ -395,7 +404,7 @@ export function useTierlistState(user) {
   };
 
   const handleExportJSON = () => {
-    const dataStr = JSON.stringify({ items, ranksData, layoutMode, colunas, columnTitles });
+    const dataStr = JSON.stringify({ items, ranksData, layoutMode, colunas, columnTitles, theme });
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
@@ -417,6 +426,7 @@ export function useTierlistState(user) {
           if (data.layoutMode) setLayoutMode(data.layoutMode);
           if (data.colunas) setColunas(data.colunas);
           if (data.columnTitles) setColumnTitles(data.columnTitles);
+          if (data.theme) setTheme(data.theme);
           toast.success('Tierlist importada com sucesso!');
         } else {
           toast.error('Arquivo JSON inválido.');
@@ -516,6 +526,8 @@ export function useTierlistState(user) {
     setItems,
     tierlistName,
     setTierlistName,
+    theme,
+    setTheme,
     selectedItem,
     setSelectedItem,
     canUndo,

@@ -9,8 +9,9 @@ import TierBoard from '../components/TierBoard';
 import { fetchAndParseAPI } from '../utils/apiParser';
 import { processImage } from '../utils/imageProcessor';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
+import { BOARD_THEMES } from '../data/themes';
 import { importAnimeCharacters, importMusic, autoImport } from '../utils/autoImporter';
-import { Sparkles, Zap, Flame, Music, Lock, X, Loader2 } from 'lucide-react';
+import { Sparkles, Zap, Flame, Music, Lock, X, Loader2, Palette } from 'lucide-react';
 
 const initialRanksAvancado = [
   { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
@@ -39,6 +40,7 @@ export default function TemplateMaker() {
   const [coverImage, setCoverImage] = useState(null);
   const [isPublic, setIsPublic] = useState(true);
   const [category, setCategory] = useState('games');
+  const [theme, setTheme] = useState('ametist');
   
   const [masterDimensions, setMasterDimensions] = useState(null);
   const [items, setItems] = useState([]);
@@ -111,6 +113,7 @@ export default function TemplateMaker() {
           setLayoutMode(tData.layoutMode || 'classico');
           if (tData.columnTitles) setColumnTitles(tData.columnTitles);
           if (tData.category) setCategory(tData.category);
+          if (tData.theme) setTheme(tData.theme);
           
           if (tData.apiConfig) {
             setDataSourceType('api');
@@ -371,7 +374,8 @@ export default function TemplateMaker() {
         layoutMode,
         colunas,
         columnTitles,
-        category
+        category,
+        theme
       };
 
       if (editTemplateId) {
@@ -476,6 +480,52 @@ export default function TemplateMaker() {
             ))}
           </select>
         </div>
+
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#aaa', marginBottom: '8px', fontWeight: '600' }}>
+            <Palette size={14} color="#b062eb" /> Tema Padrão do Tabuleiro
+          </label>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {BOARD_THEMES.map(t => {
+              const isSelected = theme === t.id;
+              return (
+                <button
+                  type="button"
+                  key={t.id}
+                  onClick={() => setTheme(t.id)}
+                  title={t.description}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    border: isSelected ? `1.5px solid ${t.accentColor}` : '1px solid #33333e',
+                    backgroundColor: isSelected ? `${t.accentColor}22` : '#1c1c20',
+                    color: isSelected ? '#ffffff' : '#9999a5',
+                    fontSize: '0.8rem',
+                    fontWeight: isSelected ? '700' : '400',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: isSelected ? `0 0 10px ${t.accentColor}30` : 'none'
+                  }}
+                >
+                  <span 
+                    style={{ 
+                      width: '9px', 
+                      height: '9px', 
+                      borderRadius: '50%', 
+                      backgroundColor: t.accentColor,
+                      display: 'inline-block',
+                      boxShadow: `0 0 6px ${t.accentColor}`
+                    }} 
+                  />
+                  <span>{t.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
         
         <div style={{ marginTop: '15px' }}>
           <h4>Capa do Template</h4>
@@ -528,6 +578,7 @@ export default function TemplateMaker() {
             colunas={colunas}
             columnTitles={columnTitles}
             layoutMode={layoutMode}
+            theme={theme}
             onRemoveRow={handleRemoveRow}
             selectedItem={null}
             setSelectedItem={() => {}}

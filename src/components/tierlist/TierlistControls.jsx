@@ -1,9 +1,12 @@
-﻿import React from 'react';
+import React from 'react';
+import { Palette } from 'lucide-react';
+import { BOARD_THEMES } from '../../data/themes';
 
 export default function TierlistControls({
   user,
   layoutMode,
   colunas,
+  theme = 'ametist',
   canUndo,
   onExportImage,
   onExportJSON,
@@ -12,6 +15,7 @@ export default function TierlistControls({
   onEnterPresentation,
   onLayoutChange,
   onColunasChange,
+  onThemeChange,
   onUndo,
   onReset
 }) {
@@ -46,9 +50,9 @@ export default function TierlistControls({
         </div>
       </div>
 
-      {/* GRUPO 2: CONFIGURAÇÃO DO TABULEIRO */}
+      {/* GRUPO 2: CONFIGURAÇÃO & TEMAS */}
       <div className="control-card">
-        <h3>Configuração</h3>
+        <h3>Configuração & Tema</h3>
         <div className="btn-grid">
           <button onClick={onEnterPresentation} className="btn-secondary">
             Modo Apresentação
@@ -79,6 +83,53 @@ export default function TierlistControls({
               ))}
             </div>
           )}
+        </div>
+
+        {/* SELETOR DE TEMAS */}
+        <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #282830' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '0.78rem', color: '#aaa', fontWeight: '600' }}>
+            <Palette size={14} color="#b062eb" />
+            <span>Tema do Quadro:</span>
+          </div>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {BOARD_THEMES.map(t => {
+              const isSelected = theme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => onThemeChange && onThemeChange(t.id)}
+                  title={t.description}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 9px',
+                    borderRadius: '7px',
+                    border: isSelected ? `1.5px solid ${t.accentColor}` : '1px solid #2e2e38',
+                    backgroundColor: isSelected ? `${t.accentColor}22` : '#16161a',
+                    color: isSelected ? '#ffffff' : '#9999a5',
+                    fontSize: '0.74rem',
+                    fontWeight: isSelected ? '700' : '400',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: isSelected ? `0 0 10px ${t.accentColor}30` : 'none'
+                  }}
+                >
+                  <span 
+                    style={{ 
+                      width: '8px', 
+                      height: '8px', 
+                      borderRadius: '50%', 
+                      backgroundColor: t.accentColor,
+                      display: 'inline-block',
+                      boxShadow: `0 0 5px ${t.accentColor}`
+                    }} 
+                  />
+                  <span>{t.name}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
