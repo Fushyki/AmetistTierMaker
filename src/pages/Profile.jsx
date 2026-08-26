@@ -18,7 +18,10 @@ import {
   ExternalLink,
   ShieldAlert,
   Sliders,
-  FolderHeart
+  FolderHeart,
+  Eye,
+  EyeOff,
+  Lock
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
@@ -38,6 +41,8 @@ export default function Profile() {
   // Estados de troca de senha
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   useEffect(() => {
@@ -136,12 +141,22 @@ export default function Profile() {
     setIsUpdatingPassword(true);
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-      toast.success('Senha atualizada com sucesso!');
+      if (error) {
+        let msg = error.message;
+        if (msg.includes('New password should be different')) {
+          msg = 'A nova senha deve ser diferente da sua senha atual.';
+        } else if (msg.includes('Password should be at least')) {
+          msg = 'A senha deve ter pelo menos 6 caracteres.';
+        } else if (msg.includes('Auth session missing')) {
+          msg = 'Sua sessão expirou. Por favor, saia e entre novamente.';
+        }
+        throw new Error(msg);
+      }
+      toast.success('Senha atualizada com sucesso no banco de dados!');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
-      toast.error('Erro ao atualizar senha: ' + err.message);
+      toast.error(err.message || 'Erro ao atualizar senha.');
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -620,25 +635,49 @@ export default function Profile() {
           <form onSubmit={handleUpdatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', color: '#aaa', marginBottom: '6px' }}>Nova Senha</label>
-              <input 
-                type="password"
-                placeholder="Mínimo de 6 caracteres"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff' }}
-              />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input 
+                  type={showNewPassword ? 'text' : 'password'}
+                  placeholder="Mínimo de 6 caracteres"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.9rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#777', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                  tabIndex="-1"
+                >
+                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', color: '#aaa', marginBottom: '6px' }}>Confirmar Nova Senha</label>
-              <input 
-                type="password"
-                placeholder="Repita a nova senha"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff' }}
-              />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input 
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Repita a nova senha"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.9rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#777', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                  tabIndex="-1"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
+
+            <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#777', lineHeight: '1.4' }}>
+              🔒 A nova senha é criptografada e salva instantaneamente no banco de autenticação do Supabase. Nos próximos acessos, utilize esta nova senha.
+            </p>
 
             <button 
               type="submit" 
