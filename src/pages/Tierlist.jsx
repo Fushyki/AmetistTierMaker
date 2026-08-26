@@ -1,106 +1,63 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { DndContext, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import toast from 'react-hot-toast';
-import { confirmAction } from '../utils/alerts';
+import { useAuth } from '../contexts/AuthContext';
+import { useTierlistState } from '../hooks/useTierlistState';
+import { exportBoardAsImage } from '../utils/imageExporter';
+
 import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../services/supabaseClient';
-import { useSearchParams } from 'react-router-dom';
-import { fetchAndParseAPI } from '../utils/apiParser';
+import TierlistControls from '../components/tierlist/TierlistControls';
+import PresentationOverlay from '../components/tierlist/PresentationOverlay';
 import '../styles/index.css';
 
-const initialRanksAvancado = [
-  { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
-  { id: 'group-2', titulo: "META CHARACTERS", ranks: [{ id: 'tier-3', l: "T1", c: "b-rank" }, { id: 'tier-4', l: "T1,5", c: "c-rank" }] },
-  { id: 'group-3', titulo: "OFF-META CHARACTERS", ranks: [{ id: 'tier-5', l: "T2", c: "d-rank" }, { id: 'tier-6', l: "T3", c: "f-rank" }] }
-];
-
-const initialRanksClassico = [
-  { id: 'group-1', titulo: "TIER LIST", ranks: [
-    { id: 'tier-1', l: "S", c: "s-rank" }, 
-    { id: 'tier-2', l: "A", c: "a-rank" },
-    { id: 'tier-3', l: "B", c: "b-rank" },
-    { id: 'tier-4', l: "C", c: "c-rank" },
-    { id: 'tier-5', l: "D", c: "d-rank" }
-  ]}
-];
-
-function Tierlist() {
-  const [layoutMode, setLayoutMode] = useState(() => {
-    return localStorage.getItem('tierlist-layout') || 'avancado';
-  });
-  const [colunas, setColunas] = useState(1);
-  const [columnTitles, setColumnTitles] = useState(() => {
-    const saved = localStorage.getItem('tierlist-column-titles');
-    if (saved) return JSON.parse(saved);
-    return ['On-field DPS', 'Damage Support', 'Pure Support/Sustain', 'Niche'];
-  });
-  const [ranksData, setRanksData] = useState(() => {
-    const saved = localStorage.getItem('tierlist-ranks');
-    if (saved) return JSON.parse(saved);
-    return localStorage.getItem('tierlist-layout') === 'classico' ? initialRanksClassico : initialRanksAvancado;
-  });
-  const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem('tierlist-items');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [tierlistName, setTierlistName] = useState(() => {
-    return localStorage.getItem('tierlist-name') || 'Minha Tier List';
-  });
-  
-  // HISTORY STATE (Undo / Ctrl+Z)
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-
-  // Helper para salvar estado no histórico sempre que algo relevante acontecer
-  const saveHistoryState = (newItems, newRanks) => {
-    const snapshot = {
-      items: JSON.parse(JSON.stringify(newItems)),
-      ranksData: JSON.parse(JSON.stringify(newRanks))
-    };
-    
-    setHistory(prev => {
-      const past = prev.slice(0, historyIndex + 1);
-      return [...past, snapshot];
-    });
-    setHistoryIndex(prev => prev + 1);
-  };
-
-  const undo = () => {
-    if (historyIndex >= 0) {
-      const previousState = history[historyIndex];
-      setItems(previousState.items);
-      setRanksData(previousState.ranksData);
-      setHistoryIndex(prev => prev - 1);
-    }
-  };
-
-  // Escutar Ctrl+Z globalmente
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-        e.preventDefault();
-        undo();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [history, historyIndex]); // Depende do histórico para pegar o estado mais recente no undo
-
-  
-  const [isPresentationMode, setIsPresentationMode] = useState(false);
+export default function Tierlist() {
   const { user } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
 
-  const [selectedItem, setSelectedItem] = useState(null);
-  const isInitialMount = useRef(true);
+  const {
+    layoutMode,
+    colunas,
+    setColunas,
+    columnTitles,
+    ranksData,
+    items,
+    setItems,
+    tierlistName,
+    selectedItem,
+    setSelectedItem,
+    canUndo,
+    undo,
+    saveHistoryState,
+    handleUpload,
+    handleClearInventory,
+    handleLayoutChange,
+    resetarTierList,
+    handleAddRow,
+    handleUpdateRow,
+    handleUpdateGroupTitle,
+    handleUpdateColumnTitle,
+    handleMoveRow,
+    handleRemoveRow,
+    moveItem,
+    sortInventory,
+    loadFromApiAgain,
+    handleSaveToCloud,
+    handleExportJSON,
+    handleImportJSON,
+    handleDuplicateSelected,
+    handleDeleteSelected
+  } = useTierlistState(user);
 
-  // Deselecionar ao clicar fora
+  // Configuração dos Sensores de Arrastar (Pointer & Touch)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } })
+  );
+
+  // Deselecionar ao clicar fora de áreas ativas
   useEffect(() => {
     const handleGlobalClick = (e) => {
-      // Se clicou em algo que NÃO é um personagem nem uma área de drop, limpa a seleção
       if (
         selectedItem &&
         !e.target.closest('.personagem-item') &&
@@ -115,361 +72,19 @@ function Tierlist() {
     
     document.addEventListener('click', handleGlobalClick);
     return () => document.removeEventListener('click', handleGlobalClick);
-  }, [selectedItem]);
+  }, [selectedItem, setSelectedItem]);
 
-  useEffect(() => {
-    const initPage = async () => {
-      const templateId = searchParams.get('templateId');
-      const isNew = searchParams.get('new') === 'true';
-      const currentId = localStorage.getItem('tierlist-current-id');
-      const forceCloudLoad = localStorage.getItem('tierlist-force-cloud-load') === 'true';
-
-      // 1. CARREGAR NOVA TIERLIST (RESET)
-      if (isNew) {
-        localStorage.removeItem('tierlist-items');
-        localStorage.removeItem('tierlist-ranks');
-        localStorage.removeItem('tierlist-api-loaded');
-        localStorage.removeItem('tierlist-active-template-id');
-        localStorage.removeItem('tierlist-current-id');
-        localStorage.removeItem('tierlist-name');
-        
-        setTierlistName('Minha Tier List');
-        setItems([]);
-        setRanksData(initialRanksClassico);
-        setLayoutMode('classico');
-        
-        searchParams.delete('new');
-        setSearchParams(searchParams);
-        // Deixa cair para o Fallback da API se necessário
-      } 
-      // 2. CARREGAR TEMPLATE
-      else if (templateId) {
-        if (templateId === localStorage.getItem('tierlist-active-template-id') && localStorage.getItem('tierlist-api-loaded') === 'true') {
-          searchParams.delete('templateId');
-          setSearchParams(searchParams);
-          return;
-        }
-
-        try {
-          const { data, error } = await supabase.from('templates').select('name, data').eq('id', templateId).single();
-          if (data && data.data) {
-            if (data.name) {
-              setTierlistName(data.name);
-              localStorage.setItem('tierlist-name', data.name);
-            }
-            saveHistoryState(items, ranksData);
-            
-            if (data.data.items && data.data.ranksData) {
-              setRanksData(data.data.ranksData);
-              setLayoutMode(data.data.layoutMode || 'classico');
-              setColunas(data.data.colunas || 1);
-              if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
-
-              if (data.data.apiConfig) {
-                try {
-                  const apiItems = await fetchAndParseAPI(data.data.apiConfig);
-                  if (apiItems.length === 0) toast.error('A API não retornou nenhuma imagem.');
-                  setItems(apiItems);
-                  if (data.data.apiConfig.pagesToFetch > 1) {
-                    setTimeout(() => {
-                      toast.info("💡 Dica: Se a API não trouxe todas as imagens de uma vez, clique em 'Restaurar' no inventário para continuar buscando.", { autoClose: 7000 });
-                    }, 1000);
-                  }
-                } catch (apiErr) {
-                  toast.error("Erro ao puxar imagens da API do Template.");
-                }
-              } else {
-                setItems(data.data.items);
-              }
-            } else {
-              setItems(data.data);
-            }
-            
-            localStorage.setItem('tierlist-api-loaded', 'true');
-            localStorage.setItem('tierlist-active-template-id', templateId);
-            localStorage.removeItem('tierlist-current-id');
-            
-            searchParams.delete('templateId');
-            setSearchParams(searchParams);
-          }
-        } catch (err) {
-          console.error("Erro ao carregar template:", err);
-        }
-        return; 
-      } 
-      // 3. CARREGAR TIERLIST SALVA NA NUVEM
-      else if (currentId && forceCloudLoad) {
-        try {
-          const { data, error } = await supabase.from('tierlists').select('name, data').eq('id', currentId).single();
-          if (data) {
-            if (data.data && data.data.type === 'copa') {
-              localStorage.setItem('copa-current-id', currentId);
-              localStorage.setItem('copa-name', data.name);
-              localStorage.setItem('copa-inventory-v3', JSON.stringify(data.data.inventory || []));
-              localStorage.setItem('copa-matches-v3', JSON.stringify(data.data.matches || {}));
-              localStorage.removeItem('tierlist-current-id');
-              localStorage.removeItem('tierlist-force-cloud-load');
-              window.location.href = `/copa?id=${currentId}`;
-              return;
-            }
-            if (data.name) {
-              setTierlistName(data.name);
-              localStorage.setItem('tierlist-name', data.name);
-            }
-            setItems(data.data.items || []);
-            setRanksData(data.data.ranksData || []);
-            if (data.data.layoutMode) setLayoutMode(data.data.layoutMode);
-            if (data.data.colunas) setColunas(data.data.colunas);
-            if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
-            
-            localStorage.removeItem('tierlist-force-cloud-load');
-          }
-        } catch (err) {
-          console.error("Erro ao carregar da nuvem:", err);
-        }
-        return; 
-      }
-
-      // 4. FALLBACK: Carrega da API padrão se não tiver cache local
-      const hasLoadedApi = localStorage.getItem('tierlist-api-loaded');
-      const savedItems = localStorage.getItem('tierlist-items');
-      const hasItems = savedItems ? JSON.parse(savedItems).length > 0 : false;
-      
-      if (!hasLoadedApi && !hasItems) {
-        try {
-          const apiUrl = localStorage.getItem('tierlist-api-url') || 'https://api.lunaris.moe/data/6.6.54.3/charlist.json';
-          const res = await fetch(apiUrl);
-          const data = await res.json();
-          
-          const newItems = Object.entries(data).map(([id, char], index) => {
-            const iconName = char.CardImg ? char.CardImg.replace('UI_Gacha_', 'UI_') : '';
-            return {
-              id: 'genshin-' + id,
-              src: `https://api.lunaris.moe/data/assets/avataricon/${iconName}.webp`,
-              nome: char.ptName || char.enName || id,
-              tierId: null,
-              colIndex: null,
-              uploadIndex: index
-            };
-          });
-
-          setItems(newItems);
-          localStorage.setItem('tierlist-api-loaded', 'true');
-          localStorage.removeItem('tierlist-active-template-id');
-        } catch (err) {
-          console.error("Erro ao carregar API:", err);
-        }
-      }
-    };
-
-    initPage();
-  }, []);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } })
-  );
-
-  useEffect(() => {
-    localStorage.setItem('tierlist-ranks', JSON.stringify(ranksData));
-  }, [ranksData]);
-
-  useEffect(() => {
-    localStorage.setItem('tierlist-column-titles', JSON.stringify(columnTitles));
-  }, [columnTitles]);
-
-  useEffect(() => {
-    localStorage.setItem('tierlist-items', JSON.stringify(items));
-  }, [items]);
-
-
-
-  const handleUpload = (newItems) => {
-    saveHistoryState(items, ranksData);
-    setItems(prev => [...prev, ...newItems]);
-  };
-
-  const handleClearInventory = () => {
-    saveHistoryState(items, ranksData);
-    setItems(prev => prev.filter(item => item.tierId !== null));
-    setSelectedItem(null);
-  };
-
-  const loadFromApiAgain = async () => {
-    const activeTemplateId = localStorage.getItem('tierlist-active-template-id');
-    const existingIds = new Set(items.map(i => i.id));
-
-    try {
-      if (activeTemplateId) {
-        // Restaurar imagens do Template carregado
-        const { data } = await supabase.from('templates').select('data').eq('id', activeTemplateId).single();
-        if (data && data.data) {
-          let templateItems = [];
-          
-          if (data.data.apiConfig) {
-            templateItems = await fetchAndParseAPI(data.data.apiConfig);
-          } else {
-            templateItems = data.data.items || data.data; // Handles both new and legacy template structures
-          }
-
-          if (templateItems.length === 0) {
-            toast.error('A API não retornou nenhuma imagem. Pode haver um erro de conexão (CORS) ou a API falhou.');
-            return;
-          }
-
-          const missingItems = templateItems.filter(item => !existingIds.has(item.id));
-          
-          if (missingItems.length > 0) {
-            // Add them back to inventory (tierId = null)
-            const restoredItems = missingItems.map(item => ({ ...item, tierId: null, colIndex: null }));
-            setItems(prev => [...prev, ...restoredItems]);
-          } else {
-            toast.success('Todas as imagens originais do template já estão presentes.');
-          }
-        }
-      } else {
-        // Restaurar imagens do Genshin (Padrão)
-        const defaultUrl = localStorage.getItem('tierlist-api-url') || 'https://api.lunaris.moe/data/6.6.54.3/charlist.json';
-        const res = await fetch(defaultUrl);
-        const data = await res.json();
-        
-        const newItems = Object.entries(data)
-          .filter(([id, _]) => !existingIds.has('genshin-' + id))
-          .map(([id, char], index) => {
-            const iconName = char.CardImg ? char.CardImg.replace('UI_Gacha_', 'UI_') : '';
-            return {
-              id: 'genshin-' + id,
-              src: `https://api.lunaris.moe/data/assets/avataricon/${iconName}.webp`,
-              nome: char.ptName || char.enName || id,
-              tierId: null,
-              colIndex: null,
-              uploadIndex: Date.now() + index
-            };
-          });
-
-        setItems(prev => [...prev, ...newItems]);
-      }
-    } catch (err) {
-      console.error("Erro ao restaurar imagens:", err);
-    }
-  };
-
-  const handleLayoutChange = async (newMode) => {
-    if (layoutMode === newMode) return;
-    const isConfirmed = await confirmAction(
-      'Mudar Layout',
-      'Atenção: Mudar o modo de layout limpará sua montagem atual e devolverá os personagens ao inventário. Deseja continuar?',
-      'Sim, mudar'
-    );
-    if (isConfirmed) {
-      saveHistoryState(items, ranksData);
-      setLayoutMode(newMode);
-      localStorage.setItem('tierlist-layout', newMode);
-      setRanksData(newMode === 'classico' ? initialRanksClassico : initialRanksAvancado);
-      setColunas(1);
-      
-      setItems(prev => prev.map(item => ({...item, tierId: null, colIndex: null})));
-      setSelectedItem(null);
-    }
-  };
-
-  const resetarTierList = async () => {
-    const isConfirmed = await confirmAction(
-      'Limpar Quadro',
-      'Tem certeza que deseja limpar a tier list? Todas as imagens voltarão para o inventário.',
-      'Sim, limpar'
-    );
-    if (isConfirmed) {
-      saveHistoryState(items, ranksData);
-      setItems(prev => prev.map(item => ({ ...item, tierId: null, colIndex: null })));
-      setSelectedItem(null);
-    }
-  };
-
-  const handleAddRow = (groupId) => {
-    saveHistoryState(items, ranksData);
-    setRanksData(prev => prev.map(group => {
-      if (group.id !== groupId) return group;
-      return {
-        ...group,
-        ranks: [...group.ranks, { id: 'tier-' + Date.now(), l: "NEW", c: "f-rank" }]
-      };
-    }));
-  };
-
-  const handleUpdateRow = (rankId, updates) => {
-    saveHistoryState(items, ranksData);
-    setRanksData(prev => prev.map(group => ({
-      ...group,
-      ranks: group.ranks.map(r => r.id === rankId ? { ...r, ...updates } : r)
-    })));
-  };
-
-  const handleUpdateGroupTitle = (groupId, newTitle) => {
-    saveHistoryState(items, ranksData);
-    setRanksData(prev => prev.map(group => {
-      if (group.id !== groupId) return group;
-      return { ...group, titulo: newTitle };
-    }));
-  };
-
-  const handleUpdateColumnTitle = (colIndex, newTitle) => {
-    saveHistoryState(items, ranksData);
-    setColumnTitles(prev => {
-      const newTitles = [...prev];
-      newTitles[colIndex] = newTitle;
-      return newTitles;
-    });
-  };
-
-  const handleMoveRow = (rankId, direction) => {
-    saveHistoryState(items, ranksData);
-    setRanksData(prev => {
-      const newData = JSON.parse(JSON.stringify(prev));
-      for (const group of newData) {
-        const index = group.ranks.findIndex(r => r.id === rankId);
-        if (index !== -1) {
-          if (direction === 'up' && index > 0) {
-            const temp = group.ranks[index - 1];
-            group.ranks[index - 1] = group.ranks[index];
-            group.ranks[index] = temp;
-          } else if (direction === 'down' && index < group.ranks.length - 1) {
-            const temp = group.ranks[index + 1];
-            group.ranks[index + 1] = group.ranks[index];
-            group.ranks[index] = temp;
-          }
-          break;
-        }
-      }
-      return newData;
-    });
-  };
-
-  const handleRemoveRow = (rowId) => {
-    saveHistoryState(items, ranksData);
-    setItems(prev => prev.map(item => 
-      item.tierId === rowId ? { ...item, tierId: null, colIndex: null } : item
-    ));
-    
-    setRanksData(prev => prev.map(group => ({
-      ...group,
-      ranks: group.ranks.filter(r => r.id !== rowId)
-    })));
-  };
-
+  // Auxiliares de DnD
   const findContainer = (id) => {
     if (!id) return null;
     if (id === 'inventory') return 'inventory';
     if (typeof id === 'string' && id.startsWith('tier-') && id.includes('-col-')) {
-       // Se o ID for exatamente do container (DroppableArea)
-       if (!items.find(i => i.id === id)) return id;
+      if (!items.find(i => i.id === id)) return id;
     }
-    
-    // Se for um item, busca em qual container ele está
     const item = items.find(i => i.id === id);
     if (item) {
-       if (item.tierId === null) return 'inventory';
-       return `tier-${item.tierId}-col-${item.colIndex}`;
+      if (item.tierId === null) return 'inventory';
+      return `tier-${item.tierId}-col-${item.colIndex}`;
     }
     return id;
   };
@@ -496,11 +111,11 @@ function Tierlist() {
       let newTierId = null;
       let newColIndex = null;
       if (overContainer !== 'inventory') {
-         const match = overContainer.match(/tier-(.+)-col-(\d+)/);
-         if (match) {
-           newTierId = match[1];
-           newColIndex = parseInt(match[2], 10);
-         }
+        const match = overContainer.match(/tier-(.+)-col-(\d+)/);
+        if (match) {
+          newTierId = match[1];
+          newColIndex = parseInt(match[2], 10);
+        }
       }
 
       const newItems = [...prev];
@@ -511,7 +126,7 @@ function Tierlist() {
       };
 
       if (overIndex !== -1) {
-         return arrayMove(newItems, activeIndex, overIndex);
+        return arrayMove(newItems, activeIndex, overIndex);
       }
       return newItems;
     });
@@ -531,25 +146,10 @@ function Tierlist() {
       setItems((prev) => {
         const activeIndex = prev.findIndex(i => i.id === activeId);
         const overIndex = prev.findIndex(i => i.id === overId);
-        
         return arrayMove(prev, activeIndex, overIndex);
       });
     }
     setSelectedItem(null);
-  };
-
-  const moveItem = (itemId, targetTierId, targetColIndex) => {
-    saveHistoryState(items, ranksData);
-    setItems(prev => {
-      const activeIndex = prev.findIndex(i => i.id === itemId);
-      if (activeIndex === -1) return prev;
-      const newItems = [...prev];
-      const itemToMove = newItems.splice(activeIndex, 1)[0];
-      itemToMove.tierId = targetTierId;
-      itemToMove.colIndex = targetColIndex;
-      newItems.push(itemToMove);
-      return newItems;
-    });
   };
 
   const handleDoubleClickItem = (item) => {
@@ -565,225 +165,35 @@ function Tierlist() {
     }
   };
 
-  const handleColunasChange = (novaQuantidade) => {
-    saveHistoryState(items, ranksData);
-    setColunas(novaQuantidade);
-  };
-
-  const sortInventory = (mode) => {
-    setItems(prev => {
-      const inventoryItems = prev.filter(i => i.tierId === null);
-      const tierItems = prev.filter(i => i.tierId !== null);
-      
-      inventoryItems.sort((a, b) => {
-        if (mode === 'az') return (a.nome || '').localeCompare(b.nome || '');
-        if (mode === 'za') return (b.nome || '').localeCompare(a.nome || '');
-        if (mode === 'upload') return (a.uploadIndex || 0) - (b.uploadIndex || 0);
-        return 0;
-      });
-      
-      return [...tierItems, ...inventoryItems];
-    });
-  };
-
-  const handleExportJSON = () => {
-    const dataStr = JSON.stringify({ items, ranksData, layoutMode, colunas, columnTitles });
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', 'minha-tierlist.json');
-    linkElement.click();
-  };
-
-  const handleImportJSON = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (data.items && data.ranksData) {
-          saveHistoryState(items, ranksData);
-          setItems(data.items);
-          setRanksData(data.ranksData);
-          if (data.layoutMode) setLayoutMode(data.layoutMode);
-          if (data.colunas) setColunas(data.colunas);
-          if (data.columnTitles) setColumnTitles(data.columnTitles);
-        } else {
-          toast.error('Arquivo JSON inválido.');
-        }
-      } catch (err) {
-        toast.error('Erro ao ler o arquivo JSON.');
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-  };
-
-  const handleSaveToCloud = async () => {
-    if (!user) return toast.error("Faça login para salvar na nuvem.");
-    const currentId = localStorage.getItem('tierlist-current-id');
-    const dataToSave = { items, ranksData, layoutMode, colunas, columnTitles };
-    
-    try {
-      if (currentId) {
-        await supabase.from('tierlists').update({ data: dataToSave, updated_at: new Date() }).eq('id', currentId);
-      } else {
-        const name = prompt('Dê um nome para a sua Tierlist:');
-        if (!name) return;
-        const { data, error } = await supabase.from('tierlists').insert([{ user_id: user.id, name, data: dataToSave }]).select();
-        if (error) throw error;
-        localStorage.setItem('tierlist-current-id', data[0].id);
-      }
-      toast.success('Tierlist salva na nuvem com sucesso!');
-    } catch (err) {
-      toast.error('Erro ao salvar: ' + err.message);
-    }
-  };
-
-  const handleDuplicateSelected = () => {
-    if (!selectedItem) return;
-    saveHistoryState(items, ranksData);
-    const newItem = {
-      ...selectedItem,
-      id: selectedItem.id + '-copy-' + Date.now(),
-      tierId: null,
-      colIndex: null,
-      uploadIndex: Date.now()
-    };
-    setItems(prev => [...prev, newItem]);
-  };
-
-  const handleDeleteSelected = () => {
-    if (!selectedItem) return;
-    saveHistoryState(items, ranksData);
-    setItems(prev => prev.filter(item => item.id !== selectedItem.id));
-    setSelectedItem(null);
-  };
-
-  const handleExportImage = async () => {
-    try {
-      const htmlToImage = await import('html-to-image');
-      const boardElement = document.getElementById('board');
-      if (!boardElement) return;
-      
-      boardElement.classList.add('clean-mode');
-
-      const dataUrl = await htmlToImage.toPng(boardElement, { 
-        backgroundColor: '#161618',
-        pixelRatio: 1, 
-        cacheBust: true, 
-      });
-      
-      boardElement.classList.remove('clean-mode');
-
-      const link = document.createElement('a');
-      link.download = 'minha-tierlist.png';
-      link.href = dataUrl;
-      link.click();
-    } catch (error) {
-      console.error('Erro ao salvar imagem:', error);
-      toast.error('Houve um erro ao gerar a imagem: ' + (error.message || error));
-    }
-  };
-
   return (
     <DndContext sensors={sensors} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <div className={`tierlist-container ${isPresentationMode ? 'presentation-mode' : ''}`}>
         
         {isPresentationMode && (
-          <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
-            <button onClick={() => setIsPresentationMode(false)} style={{ padding: '10px 20px', fontSize: '1.2rem', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-              Sair do Modo Apresentação
-            </button>
-          </div>
+          <PresentationOverlay onExit={() => setIsPresentationMode(false)} />
         )}
 
         {!isPresentationMode && <h1>{tierlistName}</h1>}
 
         {!isPresentationMode && (
-        <div className="controls-wrapper">
-          {/* GRUPO 1: AÇÕES PRINCIPAIS E NUVEM */}
-          <div className="control-card">
-            <h3>Salvar & Nuvem</h3>
-            <div className="btn-grid">
-              <button onClick={handleExportImage} className="btn-primary">
-                Salvar Imagem
-              </button>
-              <button onClick={handleExportJSON} className="btn-primary">
-                Salvar (JSON)
-              </button>
-              {user ? (
-                <button onClick={handleSaveToCloud} className="btn-primary">
-                  Salvar na Nuvem
-                </button>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <button disabled className="btn-primary" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
-                    Salvar na Nuvem
-                  </button>
-                  <span style={{ fontSize: '0.7rem', color: '#b062eb', textAlign: 'center' }}>Faça login para salvar!</span>
-                </div>
-              )}
-              <label className="btn-secondary" style={{ cursor: 'pointer', textAlign: 'center' }}>
-                Carregar (JSON)
-                <input type="file" accept=".json" onChange={handleImportJSON} style={{ display: 'none' }} />
-              </label>
-            </div>
-          </div>
-
-          {/* GRUPO 2: CONFIGURAÇÃO DO TABULEIRO */}
-          <div className="control-card">
-            <h3>Configuração</h3>
-            <div className="btn-grid">
-              <button onClick={() => setIsPresentationMode(true)} className="btn-secondary">
-                Modo Apresentação
-              </button>
-              <button 
-                onClick={() => handleLayoutChange('avancado')}
-                className={layoutMode === 'avancado' ? 'btn-active' : 'btn-secondary'}
-              >
-                Modo Avançado
-              </button>
-              <button 
-                onClick={() => handleLayoutChange('classico')}
-                className={layoutMode === 'classico' ? 'btn-active' : 'btn-secondary'}
-              >
-                Modo Clássico
-              </button>
-              {layoutMode === 'avancado' && (
-                <div className="col-selector">
-                  <span>Colunas:</span>
-                  <button onClick={() => handleColunasChange(1)} className={colunas === 1 ? 'col-btn active' : 'col-btn'}>1</button>
-                  <button onClick={() => handleColunasChange(2)} className={colunas === 2 ? 'col-btn active' : 'col-btn'}>2</button>
-                  <button onClick={() => handleColunasChange(3)} className={colunas === 3 ? 'col-btn active' : 'col-btn'}>3</button>
-                  <button onClick={() => handleColunasChange(4)} className={colunas === 4 ? 'col-btn active' : 'col-btn'}>4</button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* GRUPO 3: EDIÇÃO E ZONA DE PERIGO */}
-          <div className="control-card">
-            <h3>Edição</h3>
-            <div className="btn-grid">
-              <button 
-                onClick={undo} 
-                className="btn-secondary"
-                disabled={historyIndex < 0}
-                style={{ opacity: historyIndex < 0 ? 0.5 : 1 }}
-              >
-                Desfazer (Ctrl+Z)
-              </button>
-              <button onClick={resetarTierList} className="btn-danger outline">
-                Reset
-              </button>
-            </div>
-          </div>
-        </div>
+          <TierlistControls 
+            user={user}
+            layoutMode={layoutMode}
+            colunas={colunas}
+            canUndo={canUndo}
+            onExportImage={() => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`)}
+            onExportJSON={handleExportJSON}
+            onImportJSON={handleImportJSON}
+            onSaveToCloud={handleSaveToCloud}
+            onEnterPresentation={() => setIsPresentationMode(true)}
+            onLayoutChange={handleLayoutChange}
+            onColunasChange={setColunas}
+            onUndo={undo}
+            onReset={resetarTierList}
+          />
         )}
 
-        <div className="dica-texto" style={{ marginBottom: '20px', textAlign: 'center' }}>
+        <div className="dica-texto" style={{ marginBottom: '14px', textAlign: 'center' }}>
           Dica: No celular, clique na imagem e depois clique na área de tier desejada para mover.
         </div>
 
@@ -807,22 +217,20 @@ function Tierlist() {
         />
 
         {!isPresentationMode && (
-        <Inventory 
-          items={items.filter(item => item.tierId === null)} 
-          onUpload={handleUpload}
-          onClear={handleClearInventory}
-          selectedItem={selectedItem}
-          setSelectedItem={setSelectedItem}
-          onSort={sortInventory}
-          onAreaClick={() => handleAreaClick(null, null)}
-          onDuplicate={handleDuplicateSelected}
-          onUpdateApi={loadFromApiAgain}
-          onDeleteSelected={handleDeleteSelected}
-        />
+          <Inventory 
+            items={items.filter(item => item.tierId === null)} 
+            onUpload={handleUpload}
+            onClear={handleClearInventory}
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
+            onSort={sortInventory}
+            onAreaClick={() => handleAreaClick(null, null)}
+            onDuplicate={handleDuplicateSelected}
+            onUpdateApi={loadFromApiAgain}
+            onDeleteSelected={handleDeleteSelected}
+          />
         )}
       </div>
     </DndContext>
   );
 }
-
-export default Tierlist;
