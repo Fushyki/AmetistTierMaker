@@ -1,7 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, Sparkles, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, Sparkles, AlertCircle, Check } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import '../styles/index.css';
 
@@ -21,6 +21,19 @@ export default function Login() {
   const [generalError, setGeneralError] = useState('');
 
   const navigate = useNavigate();
+
+  // Verificações de segurança de senha
+  const hasMinLength = password.length >= 8;
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password);
+  const isPasswordSecure = hasMinLength && hasUpper && hasLower && hasNumber && hasSpecial;
+
+  // Validador de formato de e-mail RFC padrão
+  const isValidEmail = (val) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+  };
 
   const clearErrors = () => {
     setEmailError('');
@@ -43,19 +56,40 @@ export default function Login() {
 
     let hasError = false;
 
+    // 1. Validação de E-mail
     if (!cleanEmail) {
       setEmailError('Por favor, informe seu e-mail.');
       hasError = true;
+    } else if (!isValidEmail(cleanEmail)) {
+      setEmailError('Por favor, insira um e-mail válido (ex: seu@email.com).');
+      hasError = true;
     }
 
+    // 2. Validação de Senha
     if (!cleanPassword) {
       setPasswordError('Por favor, digite sua senha.');
       hasError = true;
-    } else if (cleanPassword.length < 6) {
-      setPasswordError('A senha deve ter pelo menos 6 caracteres.');
-      hasError = true;
+    } else if (isLogin) {
+      if (cleanPassword.length < 6) {
+        setPasswordError('A senha deve ter pelo menos 6 caracteres.');
+        hasError = true;
+      }
+    } else {
+      // Regras de Senha Forte no Cadastro
+      const missingRules = [];
+      if (!hasMinLength) missingRules.push('mínimo 8 caracteres');
+      if (!hasUpper) missingRules.push('1 letra maiúscula');
+      if (!hasLower) missingRules.push('1 letra minúscula');
+      if (!hasNumber) missingRules.push('1 número');
+      if (!hasSpecial) missingRules.push('1 caractere especial (!@#$...)');
+
+      if (missingRules.length > 0) {
+        setPasswordError(`A senha precisa ter: ${missingRules.join(', ')}.`);
+        hasError = true;
+      }
     }
 
+    // 3. Validação de Confirmação de Senha (Cadastro)
     if (!isLogin) {
       if (!confirmPassword) {
         setConfirmPasswordError('Por favor, confirme sua senha.');
@@ -78,7 +112,7 @@ export default function Login() {
         });
         
         if (error) {
-          // Erro de senha/login posicionado diretamente em cima do box da senha
+          // Erro posicionado diretamente em cima do box da senha
           setPasswordError('Senha incorreta ou e-mail não cadastrado.');
           return;
         }
@@ -336,7 +370,7 @@ export default function Login() {
               <Lock size={18} style={{ position: 'absolute', left: '14px', color: passwordError ? '#ff6b6b' : '#6e6e7d' }} />
               <input 
                 type={showPassword ? 'text' : 'password'} 
-                placeholder="Mínimo 6 caracteres" 
+                placeholder={isLogin ? 'Sua senha' : 'Mínimo 8 caracteres'} 
                 value={password}
                 onChange={e => {
                   setPassword(e.target.value);
@@ -387,6 +421,39 @@ export default function Login() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+
+            {/* Checklist Visual de Requisitos de Senha (Apenas em Cadastro) */}
+            {!isLogin && (
+              <div 
+                style={{ 
+                  background: 'rgba(0, 0, 0, 0.3)', 
+                  padding: '10px 12px', 
+                  borderRadius: '10px', 
+                  marginTop: '4px',
+                  border: '1px solid #2a2a30',
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr 1fr', 
+                  gap: '6px' 
+                }}
+              >
+                <span style={{ fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '6px', color: hasMinLength ? '#4ade80' : '#8e8e99', fontWeight: hasMinLength ? '600' : '400', transition: 'all 0.2s' }}>
+                  {hasMinLength ? <Check size={13} color="#4ade80" /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#666' }} />}
+                  8+ caracteres
+                </span>
+                <span style={{ fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '6px', color: hasUpper ? '#4ade80' : '#8e8e99', fontWeight: hasUpper ? '600' : '400', transition: 'all 0.2s' }}>
+                  {hasUpper ? <Check size={13} color="#4ade80" /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#666' }} />}
+                  1 maiúscula (A-Z)
+                </span>
+                <span style={{ fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '6px', color: hasNumber ? '#4ade80' : '#8e8e99', fontWeight: hasNumber ? '600' : '400', transition: 'all 0.2s' }}>
+                  {hasNumber ? <Check size={13} color="#4ade80" /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#666' }} />}
+                  1 número (0-9)
+                </span>
+                <span style={{ fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '6px', color: hasSpecial ? '#4ade80' : '#8e8e99', fontWeight: hasSpecial ? '600' : '400', transition: 'all 0.2s' }}>
+                  {hasSpecial ? <Check size={13} color="#4ade80" /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#666' }} />}
+                  1 especial (!@#$)
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Campo Confirmar Senha (Apenas em Cadastro) */}
