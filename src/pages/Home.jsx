@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../services/supabaseClient';
 import { isAdmin } from '../utils/admin';
 import { confirmAction } from '../utils/alerts';
-import { Trash2, Pencil } from 'lucide-react';
+import { Trash2, Pencil, Sparkles } from 'lucide-react';
+import { TEMPLATE_CATEGORIES, getCategoryBadge } from '../data/categories';
 import toast from 'react-hot-toast';
 import '../styles/index.css';
 
@@ -12,6 +13,7 @@ export default function Home() {
   const { user } = useAuth();
   const [templates, setTemplates] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('todos');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +21,7 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from('templates')
-          .select('id, name, cover_image, created_at, user_id')
+          .select('id, name, cover_image, created_at, user_id, data')
           .eq('is_public', true)
           .order('created_at', { ascending: false });
         
@@ -50,13 +52,19 @@ export default function Home() {
       const { error } = await supabase.from('templates').delete().eq('id', templateId);
       if (!error) {
         setTemplates(prev => prev.filter(t => t.id !== templateId));
+        toast.success("Template removido com sucesso!");
       } else {
         toast.error("Erro ao deletar: " + error.message);
       }
     }
   };
 
-  const filteredTemplates = templates.filter(t => t.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredTemplates = templates.filter(t => {
+    const matchesSearch = t.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const itemCat = t.data?.category || 'games';
+    const matchesCat = selectedCategory === 'todos' || itemCat === selectedCategory;
+    return matchesSearch && matchesCat;
+  });
 
   return (
     <div className="tierlist-container" style={{ textAlign: 'center', marginTop: '55px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -68,7 +76,7 @@ export default function Home() {
         Crie suas próprias Tier Lists de forma rápida e mobile-friendly!
       </p>
 
-      <div style={{ background: 'linear-gradient(90deg, rgba(176,98,235,0.08) 0%, rgba(255,215,0,0.06) 100%)', padding: '10px 20px', borderRadius: '10px', border: '1px solid rgba(176,98,235,0.25)', marginBottom: '25px', maxWidth: '600px' }}>
+      <div style={{ background: 'linear-gradient(90deg, rgba(176,98,235,0.08) 0%, rgba(255,215,0,0.06) 100%)', padding: '10px 20px', borderRadius: '10px', border: '1px solid rgba(176,98,235,0.25)', marginBottom: '22px', maxWidth: '600px' }}>
         <p style={{ margin: 0, color: '#ccc', fontSize: '0.85rem', lineHeight: '1.4' }}>
           {!user ? (
             "Crie sua conta gratuitamente para salvar suas Tier Lists e criar seus templates, além de continuar editando elas de qualquer dispositivo, a qualquer momento."
@@ -78,16 +86,45 @@ export default function Home() {
         </p>
       </div>
 
-      <div style={{ marginTop: '10px', width: '100%', maxWidth: '1200px' }}>
-        <h2 style={{ color: '#fff', marginBottom: '14px', fontSize: '1.25rem' }}>Novos Templates da Comunidade</h2>
+      <div style={{ marginTop: '5px', width: '100%', maxWidth: '1200px' }}>
+        <h2 style={{ color: '#fff', marginBottom: '16px', fontSize: '1.25rem' }}>Modelos da Comunidade</h2>
         
+        {/* Barra de Busca */}
         <input 
           type="search" 
-          placeholder="Buscar template..." 
+          placeholder="Buscar modelo..." 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '100%', maxWidth: '360px', padding: '9px 18px', borderRadius: '24px', border: '1px solid #33333d', backgroundColor: '#141416', color: '#fff', fontSize: '0.9rem', marginBottom: '20px', outline: 'none' }}
+          style={{ width: '100%', maxWidth: '360px', padding: '9px 18px', borderRadius: '24px', border: '1px solid #33333d', backgroundColor: '#141416', color: '#fff', fontSize: '0.9rem', marginBottom: '16px', outline: 'none' }}
         />
+
+        {/* Barra de Filtros de Categoria */}
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '22px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {TEMPLATE_CATEGORIES.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              style={{
+                padding: '7px 15px',
+                borderRadius: '20px',
+                border: selectedCategory === cat.id ? '1px solid #b062eb' : '1px solid #2f2f38',
+                backgroundColor: selectedCategory === cat.id ? 'rgba(176, 98, 235, 0.22)' : '#18181b',
+                color: selectedCategory === cat.id ? '#ffffff' : '#9999a5',
+                fontSize: '0.85rem',
+                fontWeight: selectedCategory === cat.id ? '600' : '400',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s ease',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>{cat.icon}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
 
         {isLoading ? (
           <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Carregando templates...</p>
@@ -96,7 +133,7 @@ export default function Home() {
             {filteredTemplates.map(template => (
               <div key={template.id} style={{ position: 'relative' }}>
                 <Link to={`/tierlist?templateId=${template.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <div className="template-card" style={{ backgroundColor: '#18181b', borderRadius: '10px', overflow: 'hidden', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid #28282e' }}>
+                  <div className="template-card" style={{ backgroundColor: '#18181b', borderRadius: '10px', overflow: 'hidden', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid #28282e', height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ width: '100%', height: '120px', overflow: 'hidden', position: 'relative' }}>
                       <img 
                         src={template.cover_image} 
@@ -107,9 +144,20 @@ export default function Home() {
                         onError={(e) => { e.target.src = 'https://via.placeholder.com/300x160?text=Sem+Capa' }}
                       />
                     </div>
-                    <div style={{ padding: '10px 12px' }}>
-                      <h3 style={{ margin: '0 0 4px 0', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{template.name}</h3>
-                      <p style={{ margin: 0, color: '#777', fontSize: '0.78rem' }}>{new Date(template.created_at).toLocaleDateString()}</p>
+                    <div style={{ padding: '10px 12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', textAlign: 'left' }}>
+                      <div>
+                        <h3 style={{ margin: '0 0 6px 0', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#fff' }}>
+                          {template.name}
+                        </h3>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                        <span style={{ fontSize: '0.72rem', padding: '2px 7px', background: 'rgba(176, 98, 235, 0.15)', border: '1px solid rgba(176, 98, 235, 0.3)', borderRadius: '4px', color: '#c4b5fd' }}>
+                          {getCategoryBadge(template.data?.category || 'games')}
+                        </span>
+                        <span style={{ margin: 0, color: '#666', fontSize: '0.75rem' }}>
+                          {new Date(template.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -136,7 +184,7 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <p style={{ color: '#777', fontSize: '0.9rem' }}>Nenhum template encontrado.</p>
+          <p style={{ color: '#777', fontSize: '0.9rem', marginTop: '20px' }}>Nenhum template encontrado nesta categoria.</p>
         )}
       </div>
     </div>

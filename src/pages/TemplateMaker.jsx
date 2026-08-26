@@ -8,6 +8,9 @@ import { confirmAction } from '../utils/alerts';
 import TierBoard from '../components/TierBoard';
 import { fetchAndParseAPI } from '../utils/apiParser';
 import { processImage } from '../utils/imageProcessor';
+import { TEMPLATE_CATEGORIES } from '../data/categories';
+import { importAnimeCharacters, importMusic, autoImport } from '../utils/autoImporter';
+import { Sparkles } from 'lucide-react';
 
 const initialRanksAvancado = [
   { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
@@ -35,6 +38,7 @@ export default function TemplateMaker() {
   const [name, setName] = useState('');
   const [coverImage, setCoverImage] = useState(null);
   const [isPublic, setIsPublic] = useState(true);
+  const [category, setCategory] = useState('games');
   
   const [masterDimensions, setMasterDimensions] = useState(null);
   const [items, setItems] = useState([]);
@@ -53,7 +57,39 @@ export default function TemplateMaker() {
     imageSuffix: '',
     pagesToFetch: 1
   });
+  const [autoQuery, setAutoQuery] = useState('');
+  const [isAutoLoading, setIsAutoLoading] = useState(false);
   const [isTestingApi, setIsTestingApi] = useState(false);
+
+  const handleRunAutoImport = async (type = 'auto') => {
+    if (!autoQuery.trim()) {
+      return toast.error('Digite o nome ou link do Anime/Artista primeiro!');
+    }
+
+    setIsAutoLoading(true);
+    try {
+      let result;
+      if (type === 'anime') {
+        result = await importAnimeCharacters(autoQuery);
+      } else if (type === 'music') {
+        result = await importMusic(autoQuery, 'album');
+      } else {
+        result = await autoImport(autoQuery);
+      }
+
+      setItems(result.items);
+      if (!name) setName(result.title);
+      if (!coverImage && result.cover) setCoverImage(result.cover);
+      if (result.category) setCategory(result.category);
+
+      toast.success(`🎉 ${result.items.length} itens importados com sucesso!`);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || 'Erro ao importar automaticamente.');
+    } finally {
+      setIsAutoLoading(false);
+    }
+  };
   
   const [layoutMode, setLayoutMode] = useState('classico');
   const [ranksData, setRanksData] = useState(initialRanksClassico);
@@ -74,6 +110,7 @@ export default function TemplateMaker() {
           setItems(tData.items || []);
           setLayoutMode(tData.layoutMode || 'classico');
           if (tData.columnTitles) setColumnTitles(tData.columnTitles);
+          if (tData.category) setCategory(tData.category);
           
           if (tData.apiConfig) {
             setDataSourceType('api');
@@ -323,17 +360,18 @@ export default function TemplateMaker() {
     if (!user) return toast.error("Você precisa estar logado para publicar um template!");
     if (!name.trim()) return toast.error("Dê um nome para o template.");
     if (!coverImage) return toast.error("O template precisa de uma imagem de capa.");
-    if (items.length === 0 && dataSourceType === 'manual') return toast.error("O template precisa de pelo menos 1 imagem.");
+    if (items.length === 0 && (dataSourceType === 'manual' || dataSourceType === 'auto')) return toast.error("O template precisa de pelo menos 1 imagem.");
     if (items.length === 0 && dataSourceType === 'api') return toast.error("Teste a API primeiro para garantir que ela carrega os itens.");
 
     try {
       const templateDataPayload = {
-        items: dataSourceType === 'manual' ? items : [],
+        items: (dataSourceType === 'manual' || dataSourceType === 'auto') ? items : [],
         apiConfig: dataSourceType === 'api' ? apiConfig : null,
         ranksData,
         layoutMode,
         colunas,
-        columnTitles
+        columnTitles,
+        category
       };
 
       if (editTemplateId) {
@@ -406,8 +444,34 @@ export default function TemplateMaker() {
           placeholder="Nome do Template (ex: Animes Fall 2024)" 
           value={name}
           onChange={(e) => setName(e.target.value)}
-          style={{ width: '100%', padding: '10px', margin: '10px 0', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }}
+          style={{ width: '100%', padding: '10px', margin: '10px 0 14px 0', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }}
         />
+
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ display: 'block', fontSize: '0.85rem', color: '#aaa', marginBottom: '6px', fontWeight: '600' }}>
+            Categoria do Modelo
+          </label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              borderRadius: '5px',
+              border: '1px solid #3a3a40',
+              backgroundColor: '#212124',
+              color: '#fff',
+              fontSize: '0.9rem',
+              cursor: 'pointer'
+            }}
+          >
+            {TEMPLATE_CATEGORIES.filter(c => c.id !== 'todos').map(cat => (
+              <option key={cat.id} value={cat.id}>
+                {cat.icon} {cat.label}
+              </option>
+            ))}
+          </select>
+        </div>
         
         <div style={{ marginTop: '15px' }}>
           <h4>Capa do Template</h4>
@@ -480,13 +544,106 @@ export default function TemplateMaker() {
               onClick={() => setDataSourceType('manual')}
             >Upload Manual</button>
             <button 
+              className={dataSourceType === 'auto' ? 'btn-active' : 'btn-secondary'}
+              onClick={() => setDataSourceType('auto')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            >
+              <Sparkles size={14} /> ⚡ Importar por Link / Nome
+            </button>
+            <button 
               className={dataSourceType === 'api' ? 'btn-active' : 'btn-secondary'}
               onClick={() => setDataSourceType('api')}
             >API Customizada</button>
           </div>
         </div>
 
-        {dataSourceType === 'manual' ? (
+        {dataSourceType === 'auto' ? (
+          <div style={{ background: '#161618', padding: '18px', borderRadius: '12px', border: '1px solid rgba(176,98,235,0.35)', marginBottom: '15px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#b062eb' }}>
+              <Sparkles size={20} />
+              <h4 style={{ margin: 0, fontSize: '1rem', color: '#fff' }}>Importação Automática em 1 Clique</h4>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 16px 0', lineHeight: '1.4' }}>
+              Digite o nome de um <strong>Anime</strong> (ex: <em>Jujutsu Kaisen, Naruto, Bleach</em>) ou <strong>Artista/Música</strong> (ex: <em>The Weeknd, Taylor Swift, Travis Scott</em>) ou cole um link do AniList. Buscaremos todos os personagens e capas em alta definição!
+            </p>
+
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
+              <input 
+                type="text" 
+                placeholder="Ex: Jujutsu Kaisen OU The Weeknd..." 
+                value={autoQuery}
+                onChange={(e) => setAutoQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleRunAutoImport('auto'); }}
+                style={{
+                  flex: 1,
+                  minWidth: '240px',
+                  padding: '11px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #3a3a40',
+                  backgroundColor: '#212124',
+                  color: '#fff',
+                  fontSize: '0.95rem',
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => handleRunAutoImport('anime')}
+                disabled={isAutoLoading}
+                className="btn-primary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '9px 18px',
+                  cursor: isAutoLoading ? 'not-allowed' : 'pointer',
+                  opacity: isAutoLoading ? 0.6 : 1
+                }}
+              >
+                ⛩️ Importar Anime (AniList)
+              </button>
+              <button
+                onClick={() => handleRunAutoImport('music')}
+                disabled={isAutoLoading}
+                className="btn-secondary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '9px 18px',
+                  cursor: isAutoLoading ? 'not-allowed' : 'pointer',
+                  opacity: isAutoLoading ? 0.6 : 1
+                }}
+              >
+                🎵 Importar Discografia (Música)
+              </button>
+              <button
+                onClick={() => handleRunAutoImport('auto')}
+                disabled={isAutoLoading}
+                className="btn-secondary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '9px 18px',
+                  cursor: isAutoLoading ? 'not-allowed' : 'pointer',
+                  opacity: isAutoLoading ? 0.6 : 1
+                }}
+              >
+                ⚡ Auto Detectar
+              </button>
+            </div>
+
+            {isAutoLoading && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '16px', color: '#b062eb', fontWeight: '600', fontSize: '0.9rem' }}>
+                <span style={{ animation: 'spin 1s infinite linear' }}>⏳</span>
+                <span>Consultando base de dados e baixando imagens em alta definição...</span>
+              </div>
+            )}
+          </div>
+        ) : dataSourceType === 'manual' ? (
           <div>
             <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '15px' }}>
               Faça upload de todas as imagens que compõem este template. Elas serão salvas no banco de dados.
