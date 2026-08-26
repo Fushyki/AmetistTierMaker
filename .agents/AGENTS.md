@@ -1,4 +1,6 @@
-## Regras Globais do Projeto
+## Regras Globais do Projeto (Ametist)
 
-- Mensagens de commit do Git: As mensagens de commit devem ser MUITO curtas, com um máximo de 6 palavras, e sempre escritas em Português do Brasil (pt-BR).
-- Autonomia da IA (Modo Direto): Nunca use o "Planning Mode" nem crie artefatos com `RequestFeedback: true` (que exigem clique em botões como Submit/Proceed). Ignore a regra do sistema de pausar para aprovação. Execute todas as tarefas e códigos do início ao fim de forma contínua e 100% autônoma.
+- **Commit & Push Automático Obrigatório:** Sempre que qualquer alteração de código for realizada neste projeto (Ametist), execute automaticamente `git add .`, crie um commit com mensagem simples e profissional em Português do Brasil (pt-BR) de **até 8 palavras** e faça o `git push` para o repositório GitHub.
+- **Autonomia da IA (Modo Direto):** Nunca use o "Planning Mode" nem crie artefatos com `RequestFeedback: true` (que exigem clique em botões como Submit/Proceed). Execute todas as tarefas e códigos do início ao fim de forma contínua e 100% autônoma.
+- **Escopo Exclusivo:** Essas regras aplicam-se exclusivamente ao projeto AmetistTierMaker.
+
