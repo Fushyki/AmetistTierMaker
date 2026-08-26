@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, Sparkles } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import '../styles/index.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   
@@ -19,12 +23,17 @@ export default function Login() {
     const cleanPassword = password;
 
     if (!cleanEmail || !cleanPassword) {
-      toast.error('Preencha o e-mail e a senha.');
+      toast.error('Por favor, preencha o e-mail e a senha.');
       return;
     }
 
     if (cleanPassword.length < 6) {
       toast.error('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    if (!isLogin && cleanPassword !== confirmPassword) {
+      toast.error('As senhas não coincidem!');
       return;
     }
 
@@ -55,7 +64,6 @@ export default function Login() {
           return;
         }
         
-        // Fazer login automático logo após o cadastro
         if (data?.user) {
           toast.success('Conta criada com sucesso! Bem-vindo!');
           navigate('/admin');
@@ -84,147 +92,355 @@ export default function Login() {
     }
   };
 
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-  };
-
-  const themeColor = isLogin ? '#b062eb' : '#ffd700';
-
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 110px)', padding: '20px' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 110px)', padding: '30px 15px' }}>
       <div 
         style={{
           width: '100%',
-          maxWidth: '420px',
-          background: 'rgba(22, 22, 24, 0.7)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          borderRadius: '20px',
-          padding: '40px 30px',
-          border: `1px solid ${themeColor}33`, // 33 é opacidade em hex
-          boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 20px ${themeColor}15`,
-          transition: 'all 0.4s ease'
+          maxWidth: '440px',
+          background: 'rgba(20, 20, 24, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '24px',
+          padding: '35px 28px',
+          border: '1px solid rgba(176, 98, 235, 0.25)',
+          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(176, 98, 235, 0.12)',
+          transition: 'all 0.3s ease'
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <img src="/ametist-logo.png" alt="Ametist Logo" style={{ width: '60px', marginBottom: '15px', filter: isLogin ? 'none' : 'hue-rotate(280deg) brightness(1.5)' }} />
-          <h1 style={{ color: '#fff', fontSize: '1.8rem', margin: 0, transition: 'color 0.3s' }}>
-            {isLogin ? 'Acessar Conta' : 'Criar Nova Conta'}
+        {/* Cabeçalho */}
+        <div style={{ textAlign: 'center', marginBottom: '25px' }}>
+          <div style={{ display: 'inline-flex', padding: '10px', background: 'rgba(176, 98, 235, 0.1)', borderRadius: '16px', marginBottom: '12px', border: '1px solid rgba(176, 98, 235, 0.2)' }}>
+            <img src="/ametist-logo.png" alt="Ametist Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+          </div>
+          <h1 style={{ color: '#fff', fontSize: '1.7rem', margin: '0 0 6px 0', fontWeight: '700' }}>
+            {isLogin ? 'Bem-vindo de volta' : 'Crie sua conta'}
           </h1>
-          <p style={{ color: '#888', marginTop: '10px', fontSize: '0.9rem' }}>
-            {isLogin ? 'Bem-vindo de volta ao Ametist Tier Maker' : 'Junte-se a nós e salve suas criações na nuvem'}
+          <p style={{ color: '#8e8e99', fontSize: '0.9rem', margin: 0 }}>
+            {isLogin ? 'Acesse suas Tier Lists e modelos salvos' : 'Junte-se ao Ametist e salve suas criações na nuvem'}
           </p>
         </div>
-        
-        <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', textAlign: 'left' }}>
-            <label style={{ color: '#aaa', fontSize: '0.85rem', paddingLeft: '5px' }}>E-mail</label>
-            <input 
-              type="email" 
-              placeholder="seu@email.com" 
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              style={{ padding: '15px', borderRadius: '10px', border: '1px solid #333', background: 'rgba(0,0,0,0.5)', color: 'white', outline: 'none', transition: 'border-color 0.3s', fontSize: '1rem' }}
-              onFocus={(e) => e.target.style.borderColor = themeColor}
-              onBlur={(e) => e.target.style.borderColor = '#333'}
-            />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', textAlign: 'left' }}>
-            <label style={{ color: '#aaa', fontSize: '0.85rem', paddingLeft: '5px' }}>Senha</label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              style={{ padding: '15px', borderRadius: '10px', border: '1px solid #333', background: 'rgba(0,0,0,0.5)', color: 'white', outline: 'none', transition: 'border-color 0.3s', fontSize: '1rem' }}
-              onFocus={(e) => e.target.style.borderColor = themeColor}
-              onBlur={(e) => e.target.style.borderColor = '#333'}
-            />
-          </div>
-          
-          <button 
-            type="submit" 
-            disabled={loading} 
-            style={{ 
-              padding: '16px', 
-              backgroundColor: themeColor, 
-              color: isLogin ? '#fff' : '#000', 
-              border: 'none', 
-              borderRadius: '10px', 
-              fontWeight: 'bold', 
-              fontSize: '1.1rem',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              marginTop: '10px',
-              transition: 'all 0.3s ease',
-              boxShadow: `0 4px 15px ${themeColor}40`
-            }}
-            onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-            onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-          >
-            {loading ? 'Processando...' : (isLogin ? 'Entrar no Sistema' : 'Cadastrar e Entrar')}
-          </button>
-        </form>
 
-        <div style={{ display: 'flex', alignItems: 'center', margin: '25px 0' }}>
-          <div style={{ flex: 1, height: '1px', backgroundColor: '#333' }}></div>
-          <span style={{ padding: '0 15px', color: '#888', fontSize: '0.85rem' }}>OU</span>
-          <div style={{ flex: 1, height: '1px', backgroundColor: '#333' }}></div>
+        {/* Abas Alternadoras (Segmented Control) */}
+        <div 
+          style={{
+            display: 'flex',
+            background: 'rgba(0, 0, 0, 0.45)',
+            padding: '5px',
+            borderRadius: '14px',
+            marginBottom: '25px',
+            border: '1px solid #2a2a30'
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setIsLogin(true)}
+            style={{
+              flex: 1,
+              padding: '11px',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '0.95rem',
+              fontWeight: isLogin ? '700' : '500',
+              color: isLogin ? '#ffffff' : '#888899',
+              background: isLogin ? 'linear-gradient(135deg, #b062eb, #8338ec)' : 'transparent',
+              boxShadow: isLogin ? '0 4px 15px rgba(176, 98, 235, 0.35)' : 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.25s ease'
+            }}
+          >
+            <LogIn size={17} />
+            Entrar
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsLogin(false)}
+            style={{
+              flex: 1,
+              padding: '11px',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '0.95rem',
+              fontWeight: !isLogin ? '700' : '500',
+              color: !isLogin ? '#ffffff' : '#888899',
+              background: !isLogin ? 'linear-gradient(135deg, #b062eb, #8338ec)' : 'transparent',
+              boxShadow: !isLogin ? '0 4px 15px rgba(176, 98, 235, 0.35)' : 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.25s ease'
+            }}
+          >
+            <UserPlus size={17} />
+            Criar Conta
+          </button>
         </div>
 
+        {/* Botão Rápido do Google */}
         <button 
           onClick={handleGoogleLogin}
           disabled={loading}
+          type="button"
           style={{ 
             width: '100%',
-            padding: '16px', 
-            backgroundColor: '#fff', 
-            color: '#333', 
+            padding: '13px 16px', 
+            backgroundColor: '#ffffff', 
+            color: '#1f1f23', 
             border: 'none', 
-            borderRadius: '10px', 
-            fontWeight: 'bold', 
-            fontSize: '1.1rem',
+            borderRadius: '12px', 
+            fontWeight: '600', 
+            fontSize: '0.95rem',
             cursor: loading ? 'not-allowed' : 'pointer',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: '12px',
-            transition: 'all 0.3s ease'
+            gap: '10px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            transition: 'all 0.2s ease',
+            marginBottom: '20px'
           }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#f1f1f1'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#fff'}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f3f5'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
         >
-          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style={{ width: '22px', height: '22px' }} />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style={{ width: '20px', height: '20px' }} />
           Continuar com Google
         </button>
-        
-        <div style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>
+
+        {/* Divisor */}
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: '#2d2d35' }}></div>
+          <span style={{ padding: '0 12px', color: '#6e6e7d', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            ou use e-mail
+          </span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: '#2d2d35' }}></div>
+        </div>
+
+        {/* Formulário Principal */}
+        <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Campo E-mail */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
+            <label style={{ color: '#b5b5c3', fontSize: '0.85rem', fontWeight: '500' }}>E-mail</label>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Mail size={18} style={{ position: 'absolute', left: '14px', color: '#6e6e7d' }} />
+              <input 
+                type="email" 
+                placeholder="seu@email.com" 
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                style={{ 
+                  width: '100%',
+                  padding: '13px 14px 13px 42px', 
+                  borderRadius: '12px', 
+                  border: '1px solid #33333d', 
+                  background: 'rgba(10, 10, 12, 0.6)', 
+                  color: 'white', 
+                  outline: 'none', 
+                  fontSize: '0.95rem',
+                  transition: 'border-color 0.25s, box-shadow 0.25s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#b062eb';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#33333d';
+                  e.target.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Campo Senha */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
+            <label style={{ color: '#b5b5c3', fontSize: '0.85rem', fontWeight: '500' }}>Senha</label>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Lock size={18} style={{ position: 'absolute', left: '14px', color: '#6e6e7d' }} />
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="Mínimo 6 caracteres" 
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                style={{ 
+                  width: '100%',
+                  padding: '13px 44px 13px 42px', 
+                  borderRadius: '12px', 
+                  border: '1px solid #33333d', 
+                  background: 'rgba(10, 10, 12, 0.6)', 
+                  color: 'white', 
+                  outline: 'none', 
+                  fontSize: '0.95rem',
+                  transition: 'border-color 0.25s, box-shadow 0.25s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#b062eb';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#33333d';
+                  e.target.style.boxShadow = 'none';
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#6e6e7d',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+                title={showPassword ? 'Ocultar senha' : 'Ver senha'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Campo Confirmar Senha (Apenas em Cadastro) */}
+          {!isLogin && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left', animation: 'fadeIn 0.3s ease' }}>
+              <label style={{ color: '#b5b5c3', fontSize: '0.85rem', fontWeight: '500' }}>Confirmar Senha</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Lock size={18} style={{ position: 'absolute', left: '14px', color: '#6e6e7d' }} />
+                <input 
+                  type={showConfirmPassword ? 'text' : 'password'} 
+                  placeholder="Digite novamente sua senha" 
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  required
+                  style={{ 
+                    width: '100%',
+                    padding: '13px 44px 13px 42px', 
+                    borderRadius: '12px', 
+                    border: '1px solid #33333d', 
+                    background: 'rgba(10, 10, 12, 0.6)', 
+                    color: 'white', 
+                    outline: 'none', 
+                    fontSize: '0.95rem',
+                    transition: 'border-color 0.25s, box-shadow 0.25s'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#b062eb';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#33333d';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6e6e7d',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  title={showConfirmPassword ? 'Ocultar senha' : 'Ver senha'}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Botão de Envio */}
           <button 
-            onClick={toggleMode} 
+            type="submit" 
+            disabled={loading} 
+            style={{ 
+              padding: '14px', 
+              background: 'linear-gradient(135deg, #b062eb, #7b2cbf)', 
+              color: '#ffffff', 
+              border: 'none', 
+              borderRadius: '12px', 
+              fontWeight: '700', 
+              fontSize: '1rem',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginTop: '8px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '10px',
+              transition: 'all 0.25s ease',
+              boxShadow: '0 4px 18px rgba(176, 98, 235, 0.35)'
+            }}
+            onMouseOver={(e) => {
+              if (!loading) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 22px rgba(176, 98, 235, 0.5)';
+              }
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 18px rgba(176, 98, 235, 0.35)';
+            }}
+          >
+            {loading ? (
+              'Processando...'
+            ) : isLogin ? (
+              <>
+                <LogIn size={18} />
+                Entrar no Ametist
+              </>
+            ) : (
+              <>
+                <Sparkles size={18} />
+                Criar Minha Conta Gratuita
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* Rodapé / Alternador Secundário */}
+        <div style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+          <button 
+            type="button"
+            onClick={() => setIsLogin(!isLogin)} 
             style={{ 
               background: 'none', 
               border: 'none', 
-              color: '#888', 
+              color: '#8e8e99', 
               cursor: 'pointer', 
-              fontSize: '0.95rem',
+              fontSize: '0.9rem',
               transition: 'color 0.2s' 
             }}
-            onMouseOver={(e) => e.target.style.color = '#fff'}
-            onMouseOut={(e) => e.target.style.color = '#888'}
+            onMouseOver={(e) => e.currentTarget.style.color = '#ffffff'}
+            onMouseOut={(e) => e.currentTarget.style.color = '#8e8e99'}
           >
             {isLogin ? (
-              <>Não tem conta? <span style={{ color: '#ffd700', fontWeight: 'bold' }}>Cadastre-se grátis</span></>
+              <>Não tem uma conta? <span style={{ color: '#b062eb', fontWeight: 'bold' }}>Cadastre-se gratuitamente</span></>
             ) : (
-              <>Já tem conta? <span style={{ color: '#b062eb', fontWeight: 'bold' }}>Faça login</span></>
+              <>Já tem uma conta? <span style={{ color: '#b062eb', fontWeight: 'bold' }}>Fazer login</span></>
             )}
           </button>
           
-          <Link to="/" style={{ color: '#555', textDecoration: 'none', fontSize: '0.85rem' }}>
-            Voltar para a Página Inicial
+          <Link to="/" style={{ color: '#555566', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#aaaabb'} onMouseOut={(e) => e.currentTarget.style.color = '#555566'}>
+            ← Voltar para a Página Inicial
           </Link>
         </div>
       </div>
     </div>
   );
 }
+
