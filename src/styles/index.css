@@ -4,6 +4,14 @@ html {
     box-sizing: border-box;
 }
 
+[data-density="spacious"] {
+    font-size: 15.5px;
+}
+
+[data-density="compact"] {
+    font-size: 14px;
+}
+
 *, *:before, *:after {
     box-sizing: inherit;
 }
@@ -97,13 +105,35 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3px 6px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    border-radius: 8px;
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 6px;
     border: 1px solid #28282d;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.col-title-box input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    text-align: center;
+    cursor: text;
+    padding: 0 2px;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .group-header {
@@ -254,6 +284,8 @@ h1 {
     align-items: stretch;
     gap: 6px;
     margin-bottom: 6px;
+    width: 100%;
+    min-width: 0;
 }
 
 @media (max-width: 768px) {
@@ -266,35 +298,75 @@ h1 {
     }
 }
 
+.tier-label-wrapper {
+    width: 65px;
+    min-width: 65px;
+    max-width: 65px;
+    flex: 0 0 65px;
+    display: flex;
+    position: relative;
+}
+
 .tier-label {
-    min-width: 55px;
-    max-width: 90px;
-    min-height: 44px;
-    width: auto;
-    padding: 4px;
+    width: 100%;
+    min-height: 48px;
+    padding: 0;
     display: flex;
     align-items: center;
-    position: relative;
     justify-content: center;
     font-size: 1.15rem;
-    font-weight: bold;
+    font-weight: 800;
     border-radius: 6px;
-    color: rgba(0,0,0,0.7);
+    color: rgba(0,0,0,0.75);
     background-image: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.3) 100%);
     border: none;
     cursor: pointer;
     transition: 0.2s;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.tier-label input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    text-align: center;
+    cursor: text;
+    padding: 2px;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .tier-drop-area {
     display: grid;
-    flex-grow: 1;
+    flex: 1 1 0%;
+    min-width: 0;
     gap: 6px;
 }
-.grid-1 { grid-template-columns: 1fr; }
-.grid-2 { grid-template-columns: 1fr 1fr; }
-.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-1 { grid-template-columns: minmax(0, 1fr); }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.tier-settings-wrapper {
+    width: 28px;
+    min-width: 28px;
+    max-width: 28px;
+    flex: 0 0 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 2px 0;
+    box-sizing: border-box;
+}
 
 /* 5. CORES DOS RANKS */
 .s-rank { background-color: #ff4444; }
@@ -434,9 +506,13 @@ h1 {
 .storage-box {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
+    align-content: flex-start;
+    align-items: center;
+    gap: 6px;
     width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    box-sizing: border-box;
 }
 
 .storage-box .personagem-item {

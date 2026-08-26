@@ -44,17 +44,10 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
 
   return (
     <div className="tier-row" id={rank.id}>
-      <div style={{ position: 'relative', display: 'flex' }}>
+      <div className="tier-label-wrapper">
         <div 
           className={`tier-label ${rank.c || 'f-rank'}`} 
-          style={{
-            ...(rank.bgColor ? { backgroundColor: rank.bgColor } : {}),
-            padding: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative'
-          }}
+          style={rank.bgColor ? { backgroundColor: rank.bgColor } : {}}
           onContextMenu={isPresentationMode ? undefined : handleRightClick}
         >
           {isPresentationMode ? (
@@ -159,7 +152,7 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
       </div>
       
       {!isPresentationMode && (
-        <div className="tier-settings" style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '5px' }}>
+        <div className="tier-settings-wrapper">
           <button onClick={() => onMoveRow(rank.id, 'up')} title="Mover para Cima" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center' }}><ArrowUp size={16} /></button>
           <button onClick={() => onMoveRow(rank.id, 'down')} title="Mover para Baixo" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center' }}><ArrowDown size={16} /></button>
           {isCustomTier && (

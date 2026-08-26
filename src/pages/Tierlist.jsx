@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DndContext, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useTierlistState } from '../hooks/useTierlistState';
 import { exportBoardAsImage } from '../utils/imageExporter';
 
@@ -14,6 +15,7 @@ import '../styles/index.css';
 
 export default function Tierlist() {
   const { user } = useAuth();
+  const { siteTheme } = useTheme();
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
@@ -185,7 +187,6 @@ export default function Tierlist() {
             user={user}
             layoutMode={layoutMode}
             colunas={colunas}
-            theme={theme}
             canUndo={canUndo}
             onExportImage={() => setIsExportModalOpen(true)}
             onExportJSON={handleExportJSON}
@@ -194,7 +195,6 @@ export default function Tierlist() {
             onEnterPresentation={() => setIsPresentationMode(true)}
             onLayoutChange={handleLayoutChange}
             onColunasChange={setColunas}
-            onThemeChange={setTheme}
             onUndo={undo}
             onReset={resetarTierList}
           />
@@ -204,7 +204,7 @@ export default function Tierlist() {
           isOpen={isExportModalOpen}
           onClose={() => setIsExportModalOpen(false)}
           tierlistName={tierlistName}
-          onExport={(format) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme })}
+          onExport={(format) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: theme || siteTheme || 'ametist' })}
         />
 
         <div className="dica-texto" style={{ marginBottom: '14px', textAlign: 'center' }}>
@@ -217,7 +217,7 @@ export default function Tierlist() {
           colunas={colunas}
           columnTitles={columnTitles}
           layoutMode={layoutMode}
-          theme={theme}
+          theme={theme || siteTheme || 'ametist'}
           onRemoveRow={handleRemoveRow}
           selectedItem={selectedItem}
           setSelectedItem={setSelectedItem}

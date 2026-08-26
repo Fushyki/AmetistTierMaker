@@ -5,12 +5,13 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 
+import { ThemeProvider } from './contexts/ThemeContext';
 import Home from './pages/Home';
 
 // Lazy loading das rotas secundárias (Code Splitting sob demanda)
 const Tierlist = lazy(() => import('./pages/Tierlist'));
 const Login = lazy(() => import('./pages/Login'));
-const Admin = lazy(() => import('./pages/Admin'));
+const Profile = lazy(() => import('./pages/Profile'));
 const TemplateMaker = lazy(() => import('./pages/TemplateMaker'));
 const Copa = lazy(() => import('./pages/Copa'));
 
@@ -23,44 +24,47 @@ const PageLoader = () => (
 
 function App() {
   return (
-    <Router>
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Toaster 
-          position="bottom-center"
-          toastOptions={{
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#4CAF50',
-                secondary: '#fff',
+    <ThemeProvider>
+      <Router>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Toaster 
+            position="bottom-center"
+            toastOptions={{
+              style: {
+                background: '#333',
+                color: '#fff',
               },
-            },
-          }}
-        />
-        
-        <Navbar />
-        
-        <main style={{ flex: 1, paddingBottom: '30px' }}>
-          <ErrorBoundary>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/tierlist" element={<Tierlist />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/template-maker" element={<TemplateMaker />} />
-                <Route path="/copa" element={<Copa />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
-        </main>
+              success: {
+                iconTheme: {
+                  primary: '#4CAF50',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
+          
+          <Navbar />
+          
+          <main style={{ flex: 1, paddingBottom: '30px' }}>
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/tierlist" element={<Tierlist />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/admin" element={<Profile />} />
+                  <Route path="/template-maker" element={<TemplateMaker />} />
+                  <Route path="/copa" element={<Copa />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
+          </main>
         
         <Footer />
-      </div>
-    </Router>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 

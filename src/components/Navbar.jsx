@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { User } from 'lucide-react';
 import '../styles/index.css';
 
 export default function Navbar() {
@@ -25,7 +26,9 @@ export default function Navbar() {
         {/* Right Side: Auth */}
         <div className="navbar-auth">
           {user ? (
-            <Link to="/admin" className="nav-btn">Meu Painel</Link>
+            <Link to="/profile" className="nav-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <User size={14} /> Meu Perfil
+            </Link>
           ) : (
             <Link to="/login" className="nav-btn">Entrar</Link>
           )}

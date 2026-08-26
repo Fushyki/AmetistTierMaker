@@ -62,8 +62,8 @@ export default function TierBoard({
           )}
           
           {layoutMode === 'avancado' && groupIndex === 0 && (
-            <div className="tier-row" style={{ marginBottom: '5px' }}>
-              <div className="tier-label" style={{ background: 'transparent', minHeight: 'auto', height: 'auto', opacity: 0 }}></div>
+            <div className="tier-row" style={{ marginBottom: '4px', alignItems: 'center' }}>
+              <div className="tier-label-wrapper" style={{ opacity: 0, pointerEvents: 'none' }}></div>
               <div className={`tier-drop-area grid-${colunas}`}>
                 {Array.from({ length: colunas }).map((_, i) => (
                   <div key={i} className="col-title-box">
@@ -78,21 +78,6 @@ export default function TierBoard({
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') e.target.blur();
                         }}
-                        style={{
-                          width: '100%',
-                          background: 'transparent',
-                          border: 'none',
-                          outline: 'none',
-                          color: 'inherit',
-                          fontFamily: 'inherit',
-                          fontSize: 'inherit',
-                          fontWeight: 'inherit',
-                          letterSpacing: 'inherit',
-                          textTransform: 'inherit',
-                          textAlign: 'center',
-                          cursor: 'text',
-                          padding: '0 2px'
-                        }}
                         title="Clique para editar o título da coluna"
                       />
                     )}
@@ -100,8 +85,8 @@ export default function TierBoard({
                 ))}
               </div>
               {!isPresentationMode && (
-                <div className="tier-settings" style={{ visibility: 'hidden', padding: '5px', display: 'flex', flexDirection: 'column' }}>
-                  <button style={{ color: '#aaa', padding: '5px', background: 'none', border: 'none', display: 'flex', alignItems: 'center' }}><Settings size={16} /></button>
+                <div className="tier-settings-wrapper" style={{ visibility: 'hidden' }}>
+                  <button style={{ color: '#aaa', background: 'none', border: 'none', display: 'flex', alignItems: 'center' }}><Settings size={16} /></button>
                 </div>
               )}
             </div>
