@@ -1,8 +1,9 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, Sparkles, AlertCircle, Check } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
+import { isValidEmail, checkPasswordStrength } from '../utils/authValidators';
 import '../styles/index.css';
 
 export default function Login() {
@@ -24,16 +25,8 @@ export default function Login() {
   const navigate = useNavigate();
 
   // Verificações de segurança de senha
-  const hasMinLength = password.length >= 8;
-  const hasUpper = /[A-Z]/.test(password);
-  const hasLower = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password);
-
-  // Validador de formato de e-mail RFC padrão
-  const isValidEmail = (val) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
-  };
+  const passwordStrength = checkPasswordStrength(password);
+  const { hasMinLength, hasUpper, hasLower, hasNumber, hasSpecial, isValid: isPasswordSecure, missingRules } = passwordStrength;
 
   const clearErrors = () => {
     setEmailError('');
@@ -77,14 +70,7 @@ export default function Login() {
       }
     } else {
       // Regras de Senha Forte no Cadastro
-      const missingRules = [];
-      if (!hasMinLength) missingRules.push('mínimo 8 caracteres');
-      if (!hasUpper) missingRules.push('1 letra maiúscula');
-      if (!hasLower) missingRules.push('1 letra minúscula');
-      if (!hasNumber) missingRules.push('1 número');
-      if (!hasSpecial) missingRules.push('1 caractere especial (!@#$...)');
-
-      if (missingRules.length > 0) {
+      if (!isPasswordSecure) {
         setPasswordError(`A senha precisa ter: ${missingRules.join(', ')}.`);
         hasError = true;
       }
