@@ -49,19 +49,43 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
           className={`tier-label ${rank.c || 'f-rank'}`} 
           style={{
             ...(rank.bgColor ? { backgroundColor: rank.bgColor } : {}),
-            wordBreak: 'break-word',
-            overflow: 'hidden'
+            padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative'
           }}
-          contentEditable={!isPresentationMode}
-          suppressContentEditableWarning
           onContextMenu={isPresentationMode ? undefined : handleRightClick}
-          onBlur={(e) => {
-            if (isPresentationMode) return;
-            const newText = e.currentTarget.textContent.trim();
-            if (newText !== rank.l) onUpdateRow(rank.id, { l: newText });
-          }}
         >
-          {rank.l || 'F'}
+          {isPresentationMode ? (
+            <span style={{ wordBreak: 'break-word', padding: '4px' }}>{rank.l || 'F'}</span>
+          ) : (
+            <input 
+              type="text"
+              value={rank.l || ''}
+              placeholder="F"
+              onChange={(e) => onUpdateRow(rank.id, { l: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.target.blur();
+              }}
+              style={{
+                width: '100%',
+                height: '100%',
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                color: 'inherit',
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                fontWeight: 'inherit',
+                textAlign: 'center',
+                cursor: 'text',
+                padding: '2px 4px',
+                boxSizing: 'border-box'
+              }}
+              title="Clique para editar o nome do rank (Botão direito para trocar a cor)"
+            />
+          )}
         </div>
         {showColorPicker && (
           <div 

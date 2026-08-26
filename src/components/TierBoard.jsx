@@ -8,17 +8,38 @@ export default function TierBoard({ ranksData, items, colunas, columnTitles, lay
       {ranksData.map((grupo, groupIndex) => (
         <div key={grupo.id} className="tier-section-group">
           {layoutMode === 'avancado' && (
-            <div 
-              className="group-header" 
-              contentEditable={!isPresentationMode} 
-              suppressContentEditableWarning
-              onBlur={(e) => {
-                if (isPresentationMode || !onUpdateGroupTitle) return;
-                const newText = e.currentTarget.textContent.trim();
-                if (newText !== grupo.titulo) onUpdateGroupTitle(grupo.id, newText);
-              }}
-            >
-              {grupo.titulo}
+            <div className="group-header">
+              {isPresentationMode ? (
+                <span>{grupo.titulo}</span>
+              ) : (
+                <input 
+                  type="text"
+                  value={grupo.titulo || ''}
+                  onChange={(e) => onUpdateGroupTitle && onUpdateGroupTitle(grupo.id, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') e.target.blur();
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px dashed rgba(255,255,255,0.25)',
+                    outline: 'none',
+                    color: 'inherit',
+                    fontFamily: 'inherit',
+                    fontSize: 'inherit',
+                    fontWeight: 'inherit',
+                    letterSpacing: 'inherit',
+                    textTransform: 'inherit',
+                    textAlign: 'center',
+                    cursor: 'text',
+                    padding: '2px 6px',
+                    width: 'auto',
+                    minWidth: '140px',
+                    maxWidth: '300px'
+                  }}
+                  title="Clique para editar o título do grupo"
+                />
+              )}
             </div>
           )}
           
@@ -27,18 +48,36 @@ export default function TierBoard({ ranksData, items, colunas, columnTitles, lay
               <div className="tier-label" style={{ background: 'transparent', minHeight: 'auto', height: 'auto', opacity: 0 }}></div>
               <div className={`tier-drop-area grid-${colunas}`}>
                 {Array.from({ length: colunas }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="col-title-box" 
-                    contentEditable={!isPresentationMode} 
-                    suppressContentEditableWarning
-                    onBlur={(e) => {
-                      if (isPresentationMode || !onUpdateColumnTitle) return;
-                      const newText = e.currentTarget.textContent.trim();
-                      if (newText !== (columnTitles && columnTitles[i])) onUpdateColumnTitle(i, newText);
-                    }}
-                  >
-                    {columnTitles && columnTitles[i] ? columnTitles[i] : (i === 0 ? 'On-field DPS' : i === 1 ? 'Damage Support' : i === 2 ? 'Pure Support/Sustain' : 'Niche')}
+                  <div key={i} className="col-title-box">
+                    {isPresentationMode ? (
+                      <span>{columnTitles && columnTitles[i] ? columnTitles[i] : `Coluna ${i+1}`}</span>
+                    ) : (
+                      <input 
+                        type="text"
+                        value={columnTitles && columnTitles[i] !== undefined ? columnTitles[i] : ''}
+                        placeholder={i === 0 ? 'On-field DPS' : i === 1 ? 'Damage Support' : i === 2 ? 'Pure Support/Sustain' : 'Niche'}
+                        onChange={(e) => onUpdateColumnTitle && onUpdateColumnTitle(i, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') e.target.blur();
+                        }}
+                        style={{
+                          width: '100%',
+                          background: 'transparent',
+                          border: 'none',
+                          outline: 'none',
+                          color: 'inherit',
+                          fontFamily: 'inherit',
+                          fontSize: 'inherit',
+                          fontWeight: 'inherit',
+                          letterSpacing: 'inherit',
+                          textTransform: 'inherit',
+                          textAlign: 'center',
+                          cursor: 'text',
+                          padding: '0 2px'
+                        }}
+                        title="Clique para editar o título da coluna"
+                      />
+                    )}
                   </div>
                 ))}
               </div>

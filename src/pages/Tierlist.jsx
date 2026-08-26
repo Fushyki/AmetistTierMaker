@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DndContext, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,11 +9,13 @@ import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
 import TierlistControls from '../components/tierlist/TierlistControls';
 import PresentationOverlay from '../components/tierlist/PresentationOverlay';
+import ExportModal from '../components/tierlist/ExportModal';
 import '../styles/index.css';
 
 export default function Tierlist() {
   const { user } = useAuth();
   const [isPresentationMode, setIsPresentationMode] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const {
     layoutMode,
@@ -181,7 +183,7 @@ export default function Tierlist() {
             layoutMode={layoutMode}
             colunas={colunas}
             canUndo={canUndo}
-            onExportImage={() => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`)}
+            onExportImage={() => setIsExportModalOpen(true)}
             onExportJSON={handleExportJSON}
             onImportJSON={handleImportJSON}
             onSaveToCloud={handleSaveToCloud}
@@ -192,6 +194,13 @@ export default function Tierlist() {
             onReset={resetarTierList}
           />
         )}
+
+        <ExportModal 
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          tierlistName={tierlistName}
+          onExport={(format) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName })}
+        />
 
         <div className="dica-texto" style={{ marginBottom: '14px', textAlign: 'center' }}>
           Dica: No celular, clique na imagem e depois clique na área de tier desejada para mover.
