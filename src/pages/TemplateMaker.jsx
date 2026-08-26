@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import { confirmAction } from '../utils/alerts';
+import TierBoard from '../components/TierBoard';
 import { fetchAndParseAPI } from '../utils/apiParser';
 import { processImage } from '../utils/imageProcessor';
 
@@ -25,7 +26,7 @@ const initialRanksClassico = [
 ];
 
 export default function TemplateMaker() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -364,6 +365,14 @@ export default function TemplateMaker() {
       toast.error(err.message || "Erro ao publicar. Verifique suas permissões (RLS) ou se a tabela existe no Supabase.");
     }
   };
+
+  if (authLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', color: '#b062eb', fontSize: '1rem', fontWeight: '600' }}>
+        Carregando...
+      </div>
+    );
+  }
 
   if (!user) {
     return (

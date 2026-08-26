@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import '../styles/index.css';
 
 export default function Admin() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [tierlists, setTierlists] = useState([]);
   const [userTemplates, setUserTemplates] = useState([]);
@@ -132,9 +132,17 @@ export default function Admin() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', color: '#b062eb', fontSize: '1rem', fontWeight: '600' }}>
+        Carregando...
+      </div>
+    );
+  }
+
   if (!user) {
     return (
-      <div className="tierlist-container" style={{ textAlign: 'center', marginTop: '100px' }}>
+      <div className="tierlist-container" style={{ textAlign: 'center', marginTop: '55px' }}>
         <h2>Você não está logado.</h2>
         <Link to="/login" style={{ color: '#ffd700' }}>Fazer Login</Link>
       </div>
