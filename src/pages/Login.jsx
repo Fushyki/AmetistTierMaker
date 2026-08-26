@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, Sparkles } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, Sparkles, AlertCircle } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import '../styles/index.css';
 
@@ -13,29 +13,60 @@ export default function Login() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
-  
+
+  // Estados de erro inline específicos por campo
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [generalError, setGeneralError] = useState('');
+
   const navigate = useNavigate();
+
+  const clearErrors = () => {
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
+    setGeneralError('');
+  };
+
+  const switchTab = (toLogin) => {
+    setIsLogin(toLogin);
+    clearErrors();
+  };
 
   const handleAuth = async (e) => {
     e.preventDefault();
+    clearErrors();
     
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password;
 
-    if (!cleanEmail || !cleanPassword) {
-      toast.error('Por favor, preencha o e-mail e a senha.');
-      return;
+    let hasError = false;
+
+    if (!cleanEmail) {
+      setEmailError('Por favor, informe seu e-mail.');
+      hasError = true;
     }
 
-    if (cleanPassword.length < 6) {
-      toast.error('A senha deve ter pelo menos 6 caracteres.');
-      return;
+    if (!cleanPassword) {
+      setPasswordError('Por favor, digite sua senha.');
+      hasError = true;
+    } else if (cleanPassword.length < 6) {
+      setPasswordError('A senha deve ter pelo menos 6 caracteres.');
+      hasError = true;
     }
 
-    if (!isLogin && cleanPassword !== confirmPassword) {
-      toast.error('As senhas não coincidem!');
-      return;
+    if (!isLogin) {
+      if (!confirmPassword) {
+        setConfirmPasswordError('Por favor, confirme sua senha.');
+        hasError = true;
+      } else if (cleanPassword !== confirmPassword) {
+        setConfirmPasswordError('As senhas não coincidem!');
+        hasError = true;
+      }
     }
+
+    if (hasError) return;
 
     setLoading(true);
     
@@ -47,7 +78,8 @@ export default function Login() {
         });
         
         if (error) {
-          toast.error('E-mail ou senha incorretos.');
+          // Erro de senha/login posicionado diretamente em cima do box da senha
+          setPasswordError('Senha incorreta ou e-mail não cadastrado.');
           return;
         }
         
@@ -60,7 +92,11 @@ export default function Login() {
         });
         
         if (error) {
-          toast.error(error.message || 'Erro ao criar conta.');
+          if (error.message.toLowerCase().includes('email')) {
+            setEmailError(error.message);
+          } else {
+            setPasswordError(error.message || 'Erro ao criar conta.');
+          }
           return;
         }
         
@@ -70,7 +106,7 @@ export default function Login() {
         }
       }
     } catch (err) {
-      toast.error('Erro na autenticação. Tente novamente.');
+      setGeneralError('Ocorreu um erro ao processar. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -78,6 +114,7 @@ export default function Login() {
 
   const handleGoogleLogin = async () => {
     try {
+      clearErrors();
       setLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -87,7 +124,7 @@ export default function Login() {
       });
       if (error) throw error;
     } catch (err) {
-      toast.error('Erro no login do Google: ' + err.message);
+      setGeneralError('Erro no login do Google: ' + err.message);
       setLoading(false);
     }
   };
@@ -134,7 +171,7 @@ export default function Login() {
         >
           <button
             type="button"
-            onClick={() => setIsLogin(true)}
+            onClick={() => switchTab(true)}
             style={{
               flex: 1,
               padding: '11px',
@@ -159,7 +196,7 @@ export default function Login() {
 
           <button
             type="button"
-            onClick={() => setIsLogin(false)}
+            onClick={() => switchTab(false)}
             style={{
               flex: 1,
               padding: '11px',
@@ -222,37 +259,62 @@ export default function Login() {
           <div style={{ flex: 1, height: '1px', backgroundColor: '#2d2d35' }}></div>
         </div>
 
+        {/* Erro Geral (se houver) */}
+        {generalError && (
+          <div className="input-error-badge" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '15px' }}>
+            <AlertCircle size={15} />
+            <span>{generalError}</span>
+          </div>
+        )}
+
         {/* Formulário Principal */}
         <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Campo E-mail */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
             <label style={{ color: '#b5b5c3', fontSize: '0.85rem', fontWeight: '500' }}>E-mail</label>
+            
+            {/* Notificação personalizada em cima do box de E-mail */}
+            {emailError && (
+              <div className="input-error-badge">
+                <AlertCircle size={14} />
+                <span>{emailError}</span>
+              </div>
+            )}
+
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Mail size={18} style={{ position: 'absolute', left: '14px', color: '#6e6e7d' }} />
+              <Mail size={18} style={{ position: 'absolute', left: '14px', color: emailError ? '#ff6b6b' : '#6e6e7d' }} />
               <input 
                 type="email" 
                 placeholder="seu@email.com" 
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={e => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError('');
+                }}
                 required
                 style={{ 
                   width: '100%',
                   padding: '13px 14px 13px 42px', 
                   borderRadius: '12px', 
-                  border: '1px solid #33333d', 
+                  border: emailError ? '1px solid #ff4d4f' : '1px solid #33333d', 
                   background: 'rgba(10, 10, 12, 0.6)', 
                   color: 'white', 
                   outline: 'none', 
                   fontSize: '0.95rem',
+                  boxShadow: emailError ? '0 0 10px rgba(255, 77, 79, 0.3)' : 'none',
                   transition: 'border-color 0.25s, box-shadow 0.25s'
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = '#b062eb';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                  if (!emailError) {
+                    e.target.style.borderColor = '#b062eb';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                  }
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = '#33333d';
-                  e.target.style.boxShadow = 'none';
+                  if (!emailError) {
+                    e.target.style.borderColor = '#33333d';
+                    e.target.style.boxShadow = 'none';
+                  }
                 }}
               />
             </div>
@@ -261,32 +323,49 @@ export default function Login() {
           {/* Campo Senha */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
             <label style={{ color: '#b5b5c3', fontSize: '0.85rem', fontWeight: '500' }}>Senha</label>
+            
+            {/* Notificação personalizada em cima do box da Senha */}
+            {passwordError && (
+              <div className="input-error-badge">
+                <AlertCircle size={14} />
+                <span>{passwordError}</span>
+              </div>
+            )}
+
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Lock size={18} style={{ position: 'absolute', left: '14px', color: '#6e6e7d' }} />
+              <Lock size={18} style={{ position: 'absolute', left: '14px', color: passwordError ? '#ff6b6b' : '#6e6e7d' }} />
               <input 
                 type={showPassword ? 'text' : 'password'} 
                 placeholder="Mínimo 6 caracteres" 
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={e => {
+                  setPassword(e.target.value);
+                  if (passwordError) setPasswordError('');
+                }}
                 required
                 style={{ 
                   width: '100%',
                   padding: '13px 44px 13px 42px', 
                   borderRadius: '12px', 
-                  border: '1px solid #33333d', 
+                  border: passwordError ? '1px solid #ff4d4f' : '1px solid #33333d', 
                   background: 'rgba(10, 10, 12, 0.6)', 
                   color: 'white', 
                   outline: 'none', 
                   fontSize: '0.95rem',
+                  boxShadow: passwordError ? '0 0 10px rgba(255, 77, 79, 0.3)' : 'none',
                   transition: 'border-color 0.25s, box-shadow 0.25s'
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = '#b062eb';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                  if (!passwordError) {
+                    e.target.style.borderColor = '#b062eb';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                  }
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = '#33333d';
-                  e.target.style.boxShadow = 'none';
+                  if (!passwordError) {
+                    e.target.style.borderColor = '#33333d';
+                    e.target.style.boxShadow = 'none';
+                  }
                 }}
               />
               <button
@@ -314,32 +393,49 @@ export default function Login() {
           {!isLogin && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left', animation: 'fadeIn 0.3s ease' }}>
               <label style={{ color: '#b5b5c3', fontSize: '0.85rem', fontWeight: '500' }}>Confirmar Senha</label>
+              
+              {/* Notificação personalizada em cima do box de Confirmação */}
+              {confirmPasswordError && (
+                <div className="input-error-badge">
+                  <AlertCircle size={14} />
+                  <span>{confirmPasswordError}</span>
+                </div>
+              )}
+
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <Lock size={18} style={{ position: 'absolute', left: '14px', color: '#6e6e7d' }} />
+                <Lock size={18} style={{ position: 'absolute', left: '14px', color: confirmPasswordError ? '#ff6b6b' : '#6e6e7d' }} />
                 <input 
                   type={showConfirmPassword ? 'text' : 'password'} 
                   placeholder="Digite novamente sua senha" 
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
+                  onChange={e => {
+                    setConfirmPassword(e.target.value);
+                    if (confirmPasswordError) setConfirmPasswordError('');
+                  }}
                   required
                   style={{ 
                     width: '100%',
                     padding: '13px 44px 13px 42px', 
                     borderRadius: '12px', 
-                    border: '1px solid #33333d', 
+                    border: confirmPasswordError ? '1px solid #ff4d4f' : '1px solid #33333d', 
                     background: 'rgba(10, 10, 12, 0.6)', 
                     color: 'white', 
                     outline: 'none', 
                     fontSize: '0.95rem',
+                    boxShadow: confirmPasswordError ? '0 0 10px rgba(255, 77, 79, 0.3)' : 'none',
                     transition: 'border-color 0.25s, box-shadow 0.25s'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#b062eb';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                    if (!confirmPasswordError) {
+                      e.target.style.borderColor = '#b062eb';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                    }
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#33333d';
-                    e.target.style.boxShadow = 'none';
+                    if (!confirmPasswordError) {
+                      e.target.style.borderColor = '#33333d';
+                      e.target.style.boxShadow = 'none';
+                    }
                   }}
                 />
                 <button
@@ -416,7 +512,7 @@ export default function Login() {
         <div style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
           <button 
             type="button"
-            onClick={() => setIsLogin(!isLogin)} 
+            onClick={() => switchTab(!isLogin)} 
             style={{ 
               background: 'none', 
               border: 'none', 
@@ -443,4 +539,3 @@ export default function Login() {
     </div>
   );
 }
-
