@@ -13,6 +13,7 @@ export default function Login() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   // Estados de erro inline específicos por campo
   const [emailError, setEmailError] = useState('');
@@ -28,7 +29,6 @@ export default function Login() {
   const hasLower = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
   const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password);
-  const isPasswordSecure = hasMinLength && hasUpper && hasLower && hasNumber && hasSpecial;
 
   // Validador de formato de e-mail RFC padrão
   const isValidEmail = (val) => {
@@ -44,6 +44,7 @@ export default function Login() {
 
   const switchTab = (toLogin) => {
     setIsLogin(toLogin);
+    setIsPasswordFocused(false);
     clearErrors();
   };
 
@@ -376,6 +377,20 @@ export default function Login() {
                   setPassword(e.target.value);
                   if (passwordError) setPasswordError('');
                 }}
+                onFocus={(e) => {
+                  setIsPasswordFocused(true);
+                  if (!passwordError) {
+                    e.target.style.borderColor = '#b062eb';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
+                  }
+                }}
+                onBlur={(e) => {
+                  setIsPasswordFocused(false);
+                  if (!passwordError) {
+                    e.target.style.borderColor = '#33333d';
+                    e.target.style.boxShadow = 'none';
+                  }
+                }}
                 required
                 style={{ 
                   width: '100%',
@@ -388,18 +403,6 @@ export default function Login() {
                   fontSize: '0.95rem',
                   boxShadow: passwordError ? '0 0 10px rgba(255, 77, 79, 0.3)' : 'none',
                   transition: 'border-color 0.25s, box-shadow 0.25s'
-                }}
-                onFocus={(e) => {
-                  if (!passwordError) {
-                    e.target.style.borderColor = '#b062eb';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(176, 98, 235, 0.15)';
-                  }
-                }}
-                onBlur={(e) => {
-                  if (!passwordError) {
-                    e.target.style.borderColor = '#33333d';
-                    e.target.style.boxShadow = 'none';
-                  }
                 }}
               />
               <button
@@ -422,18 +425,19 @@ export default function Login() {
               </button>
             </div>
 
-            {/* Checklist Visual de Requisitos de Senha (Apenas em Cadastro) */}
-            {!isLogin && (
+            {/* Checklist Visual de Requisitos de Senha (Apenas ao clicar no box de senha em Cadastro) */}
+            {!isLogin && isPasswordFocused && (
               <div 
                 style={{ 
-                  background: 'rgba(0, 0, 0, 0.3)', 
+                  background: 'rgba(0, 0, 0, 0.35)', 
                   padding: '10px 12px', 
                   borderRadius: '10px', 
                   marginTop: '4px',
                   border: '1px solid #2a2a30',
                   display: 'grid', 
                   gridTemplateColumns: '1fr 1fr', 
-                  gap: '6px' 
+                  gap: '6px',
+                  animation: 'fadeIn 0.2s ease-in-out'
                 }}
               >
                 <span style={{ fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '6px', color: hasMinLength ? '#4ade80' : '#8e8e99', fontWeight: hasMinLength ? '600' : '400', transition: 'all 0.2s' }}>
