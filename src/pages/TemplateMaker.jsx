@@ -5,8 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import { confirmAction } from '../utils/alerts';
-import TierBoard from '../components/TierBoard';
 import { fetchAndParseAPI } from '../utils/apiParser';
+import { processImage } from '../utils/imageProcessor';
 
 const initialRanksAvancado = [
   { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
@@ -90,42 +90,6 @@ export default function TemplateMaker() {
 
   const fileInputRef = useRef(null);
   const coverInputRef = useRef(null);
-
-  // object-fit: cover helper via Canvas
-  const processImage = (file, targetWidth, targetHeight) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const w = targetWidth || img.width;
-          const h = targetHeight || img.height;
-          
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = w;
-          canvas.height = h;
-          
-          const scale = Math.max(w / img.width, h / img.height);
-          const newW = img.width * scale;
-          const newH = img.height * scale;
-          const x = (w - newW) / 2;
-          const y = (h - newH) / 2;
-          
-          ctx.drawImage(img, x, y, newW, newH);
-          resolve({
-            dataUrl: canvas.toDataURL('image/webp', 0.85),
-            width: w,
-            height: h
-          });
-        };
-        img.onerror = reject;
-        img.src = e.target.result;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
 
   const handleCoverUpload = async (e) => {
     const file = e.target.files[0];
