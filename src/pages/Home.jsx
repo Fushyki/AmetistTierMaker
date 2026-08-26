@@ -101,6 +101,8 @@ export default function Home() {
                       <img 
                         src={template.cover_image} 
                         alt={template.name} 
+                        loading="lazy"
+                        decoding="async"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         onError={(e) => { e.target.src = 'https://via.placeholder.com/300x160?text=Sem+Capa' }}
                       />

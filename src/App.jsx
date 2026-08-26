@@ -5,8 +5,9 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Lazy loading das rotas (Code Splitting)
-const Home = lazy(() => import('./pages/Home'));
+import Home from './pages/Home';
+
+// Lazy loading das rotas secundárias (Code Splitting sob demanda)
 const Tierlist = lazy(() => import('./pages/Tierlist'));
 const Login = lazy(() => import('./pages/Login'));
 const Admin = lazy(() => import('./pages/Admin'));
@@ -16,7 +17,7 @@ const Copa = lazy(() => import('./pages/Copa'));
 // Componente de fallback (carregamento)
 const PageLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-    <div style={{ color: '#b062eb', fontSize: '1.2rem', fontWeight: 'bold' }}>Carregando...</div>
+    <div style={{ color: '#b062eb', fontSize: '1rem', fontWeight: '600' }}>Carregando...</div>
   </div>
 );
 
@@ -42,7 +43,7 @@ function App() {
         
         <Navbar />
         
-        <main style={{ flex: 1, paddingTop: '70px', paddingBottom: '40px' }}>
+        <main style={{ flex: 1, paddingBottom: '30px' }}>
           <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
