@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../services/supabaseClient';
 import { isAdmin } from '../utils/admin';
 import { confirmAction } from '../utils/alerts';
+import { Trash2, Pencil } from 'lucide-react';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
 import CategoryBadge, { CategoryIcon } from '../components/CategoryBadge';
 import toast from 'react-hot-toast';
@@ -60,7 +61,8 @@ export default function Home() {
   };
 
   const filteredTemplates = templates.filter(t => {
-    const matchesSearch = t.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const name = t.name || '';
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
     const itemCat = t.data?.category || 'games';
     const matchesCat = selectedCategory === 'todos' || itemCat === selectedCategory;
     return matchesSearch && matchesCat;
