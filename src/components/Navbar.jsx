@@ -11,10 +11,10 @@ export default function Navbar() {
       <div className="navbar-container">
         
         {/* Left Side: Logo */}
-        <div className="navbar-logo">
+        <Link to="/" className="navbar-logo">
           <img src="/ametist-logo.png" alt="Ametist Icon" className="navbar-icon" />
           <img src="/ametist-text.png" alt="Ametist Logo Text" className="navbar-text" />
-        </div>
+        </Link>
         
         {/* Center: Links */}
         <div className="navbar-links">

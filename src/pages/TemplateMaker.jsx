@@ -403,17 +403,17 @@ export default function TemplateMaker() {
 
   if (!user) {
     return (
-      <div className="container" style={{ padding: '40px 20px', maxWidth: '600px', margin: '100px auto', color: '#fff', textAlign: 'center' }}>
-        <h1 style={{ color: '#b062eb', marginBottom: '20px' }}>Acesso Restrito</h1>
-        <div style={{ background: '#212124', padding: '30px', borderRadius: '12px', border: '1px solid #3a3a40' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '15px' }}>🔒</div>
-          <h2 style={{ marginBottom: '15px' }}>Criar modelo é uma função exclusiva para membros</h2>
-          <p style={{ color: '#aaa', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '30px' }}>
+      <div className="container" style={{ padding: '20px 15px', maxWidth: '520px', margin: '55px auto 20px', color: '#fff', textAlign: 'center' }}>
+        <h1 style={{ color: '#b062eb', marginBottom: '14px', fontSize: '1.4rem' }}>Acesso Restrito</h1>
+        <div style={{ background: '#18181b', padding: '20px', borderRadius: '10px', border: '1px solid #28282e' }}>
+          <div style={{ fontSize: '2.4rem', marginBottom: '10px' }}>🔒</div>
+          <h2 style={{ marginBottom: '10px', fontSize: '1.15rem' }}>Criar modelo é uma função exclusiva para membros</h2>
+          <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '20px' }}>
             Crie sua conta gratuitamente para salvar suas Tier Lists e criar seus templates, além de continuar editando elas de qualquer dispositivo, a qualquer momento.
           </p>
           <button 
             onClick={() => navigate('/login')}
-            style={{ padding: '15px 30px', fontSize: '1.2rem', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+            style={{ padding: '10px 22px', fontSize: '0.95rem', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
           >
             Fazer Login / Criar Conta
           </button>
@@ -423,10 +423,10 @@ export default function TemplateMaker() {
   }
 
   return (
-    <div className="container" style={{ padding: '20px', maxWidth: '900px', margin: '0 auto', color: '#fff' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '30px', color: '#b062eb' }}>Criador de Modelos</h1>
+    <div className="container" style={{ padding: '10px 15px', maxWidth: '880px', margin: '55px auto 20px', color: '#fff' }}>
+      <h1 style={{ textAlign: 'center', marginBottom: '16px', color: '#b062eb', fontSize: '1.4rem' }}>Criador de Modelos</h1>
       
-      <div className="control-card" style={{ padding: '20px', marginBottom: '20px' }}>
+      <div className="control-card" style={{ padding: '14px', marginBottom: '14px' }}>
         <h3>Informações do Template</h3>
         <input 
           type="text" 

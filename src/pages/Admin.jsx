@@ -146,39 +146,39 @@ export default function Admin() {
   const templateCardBg = '#212124';
 
   return (
-    <div className="tierlist-container" style={{ maxWidth: '800px', margin: '50px auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', borderBottom: '1px solid #333', paddingBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
-        <h1 style={{ margin: 0 }}>Painel do Usuário</h1>
-        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ color: '#888', wordBreak: 'break-all' }}>{user.email}</span>
-          <button onClick={handleLogout} style={{ padding: '8px 16px', backgroundColor: '#ff4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+    <div className="tierlist-container" style={{ maxWidth: '880px', margin: '55px auto 20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #28282e', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+        <h1 style={{ margin: 0, fontSize: '1.4rem' }}>Painel do Usuário</h1>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ color: '#888', fontSize: '0.85rem', wordBreak: 'break-all' }}>{user.email}</span>
+          <button onClick={handleLogout} style={{ padding: '6px 14px', backgroundColor: '#ff4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600' }}>
             Sair
           </button>
         </div>
       </div>
       
-      <div style={{ background: containerBg, padding: '20px', borderRadius: '12px', border: '1px solid #2a2a2a' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3>Suas Tier Lists Salvas na Nuvem</h3>
+      <div style={{ background: containerBg, padding: '16px', borderRadius: '10px', border: '1px solid #28282e' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+          <h3 style={{ margin: 0, fontSize: '1.05rem' }}>Suas Tier Lists Salvas na Nuvem</h3>
         </div>
         
         {loading ? (
-          <p>Carregando...</p>
+          <p style={{ fontSize: '0.85rem' }}>Carregando...</p>
         ) : tierlists.length === 0 ? (
-          <p style={{ color: '#888', fontSize: '0.9rem' }}>Nenhuma Tier List salva ainda.</p>
+          <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>Nenhuma Tier List salva ainda.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {tierlists.map(t => (
-              <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: cardBg, padding: '15px', borderRadius: '8px', flexWrap: 'wrap', gap: '10px' }}>
-                <span style={{ fontWeight: 'bold', color: 'white', wordBreak: 'break-word' }}>{t.name}</span>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  <button onClick={() => handleRename(t.id, t.name)} style={{ padding: '8px 15px', backgroundColor: '#555', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', flex: 1 }}>
+              <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: cardBg, padding: '10px 14px', borderRadius: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                <span style={{ fontWeight: '600', color: 'white', fontSize: '0.9rem', wordBreak: 'break-word' }}>{t.name}</span>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <button onClick={() => handleRename(t.id, t.name)} style={{ padding: '5px 10px', backgroundColor: '#3a3a40', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
                     Renomear
                   </button>
-                  <button onClick={() => handleEdit(t)} style={{ padding: '8px 15px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', flex: 1 }}>
+                  <button onClick={() => handleEdit(t)} style={{ padding: '5px 12px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}>
                     Editar
                   </button>
-                  <button onClick={() => handleDelete(t.id)} style={{ padding: '8px 15px', backgroundColor: 'transparent', color: '#ff4444', border: '1px solid #ff4444', borderRadius: '4px', cursor: 'pointer', flex: 1 }}>
+                  <button onClick={() => handleDelete(t.id)} style={{ padding: '5px 10px', backgroundColor: 'transparent', color: '#ff4444', border: '1px solid #ff4444', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
                     Deletar
                   </button>
                 </div>
@@ -188,22 +188,22 @@ export default function Admin() {
         )}
       </div>
 
-      <div style={{ background: containerBg, padding: '20px', borderRadius: '12px', border: '1px solid #2a2a2a', marginTop: '30px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
-          <h3>Seus Modelos Criados (Templates)</h3>
+      <div style={{ background: containerBg, padding: '16px', borderRadius: '10px', border: '1px solid #28282e', marginTop: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+          <h3 style={{ margin: 0, fontSize: '1.05rem' }}>Seus Modelos Criados (Templates)</h3>
           
-          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             <input 
               type="text" 
               placeholder="Buscar seus templates..." 
               value={templateSearchTerm}
               onChange={(e) => setTemplateSearchTerm(e.target.value)}
-              style={{ padding: '10px 15px', borderRadius: '8px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff', minWidth: '250px' }}
+              style={{ padding: '7px 12px', borderRadius: '6px', border: '1px solid #33333d', backgroundColor: '#18181b', color: '#fff', fontSize: '0.85rem', minWidth: '200px' }}
             />
             
             <button 
               onClick={() => setSortDateAsc(!sortDateAsc)}
-              style={{ padding: '10px 15px', backgroundColor: '#333', color: '#fff', border: '1px solid #555', borderRadius: '8px', cursor: 'pointer' }}
+              style={{ padding: '7px 12px', backgroundColor: '#28282d', color: '#fff', border: '1px solid #444', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
             >
               Data ({sortDateAsc ? 'Antigos' : 'Recentes'})
             </button>
@@ -211,9 +211,9 @@ export default function Admin() {
         </div>
         
         {loading ? (
-          <p>Carregando...</p>
+          <p style={{ fontSize: '0.85rem' }}>Carregando...</p>
         ) : userTemplates.length === 0 ? (
-          <p style={{ color: '#888', fontSize: '0.9rem' }}>Nenhum template criado ainda.</p>
+          <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>Nenhum template criado ainda.</p>
         ) : (() => {
           const filtered = userTemplates
             .filter(t => t.name.toLowerCase().includes(templateSearchTerm.toLowerCase()))
@@ -223,44 +223,44 @@ export default function Admin() {
               return sortDateAsc ? dateA - dateB : dateB - dateA;
             });
 
-          if (filtered.length === 0) return <p style={{ color: '#888', fontSize: '0.9rem' }}>Nenhum template encontrado com essa busca.</p>;
+          if (filtered.length === 0) return <p style={{ color: '#888', fontSize: '0.85rem' }}>Nenhum template encontrado com essa busca.</p>;
 
           return (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px' }}>
               {filtered.map(template => (
                 <div key={template.id} style={{ position: 'relative' }}>
                   <Link to={`/tierlist?templateId=${template.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div className="template-card" style={{ backgroundColor: templateCardBg, borderRadius: '12px', overflow: 'hidden', transition: 'transform 0.2s', border: template.is_public ? '2px solid #4CAF50' : '2px solid #f44336' }}>
-                      <div style={{ width: '100%', height: '160px', overflow: 'hidden', position: 'relative' }}>
+                    <div className="template-card" style={{ backgroundColor: templateCardBg, borderRadius: '10px', overflow: 'hidden', transition: 'transform 0.2s', border: template.is_public ? '2px solid #4CAF50' : '2px solid #f44336' }}>
+                      <div style={{ width: '100%', height: '120px', overflow: 'hidden', position: 'relative' }}>
                         <img 
                           src={template.cover_image} 
                           alt={template.name} 
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                           onError={(e) => { e.target.src = 'https://via.placeholder.com/300x160?text=Sem+Capa' }}
                         />
-                        <div style={{ position: 'absolute', bottom: '10px', left: '10px', backgroundColor: 'rgba(0,0,0,0.7)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', color: template.is_public ? '#4CAF50' : '#f44336', fontWeight: 'bold' }}>
+                        <div style={{ position: 'absolute', bottom: '6px', left: '6px', backgroundColor: 'rgba(0,0,0,0.75)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.72rem', color: template.is_public ? '#4CAF50' : '#f44336', fontWeight: 'bold' }}>
                           {template.is_public ? 'Público' : 'Privado'}
                         </div>
                       </div>
-                      <div style={{ padding: '15px' }}>
-                        <h3 style={{ margin: '0 0 10px 0', fontSize: '1.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{template.name}</h3>
-                        <p style={{ margin: 0, color: '#aaa', fontSize: '0.9rem' }}>{new Date(template.created_at).toLocaleDateString()}</p>
+                      <div style={{ padding: '10px 12px' }}>
+                        <h3 style={{ margin: '0 0 4px 0', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{template.name}</h3>
+                        <p style={{ margin: 0, color: '#777', fontSize: '0.78rem' }}>{new Date(template.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
                   </Link>
                   <button 
                     onClick={() => handleDeleteTemplate(template.id)}
-                    style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255,0,0,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(255,0,0,0.85)', color: '#fff', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     title="Excluir Template"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={15} />
                   </button>
                   <Link to={`/template-maker?editTemplateId=${template.id}`}>
                     <button 
-                      style={{ position: 'absolute', top: '10px', right: '55px', backgroundColor: 'rgba(33, 150, 243, 0.9)', color: '#fff', border: 'none', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      style={{ position: 'absolute', top: '8px', right: '44px', backgroundColor: 'rgba(33, 150, 243, 0.9)', color: '#fff', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       title="Editar Template"
                     >
-                      <Pencil size={18} />
+                      <Pencil size={15} />
                     </button>
                   </Link>
                 </div>
