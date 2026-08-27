@@ -29,7 +29,7 @@ import '../styles/index.css';
 
 export default function Profile() {
   const { user, loading: authLoading } = useAuth();
-  const { siteTheme, setSiteTheme, uiDensity, setUiDensity, availableThemes } = useTheme();
+  const { siteTheme, setSiteTheme, uiDensity, setUiDensity, availableThemes, activeTheme } = useTheme();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('tierlists'); // 'tierlists', 'templates', 'visual', 'account'
