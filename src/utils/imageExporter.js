@@ -33,20 +33,24 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
       stagingContainer.style.position = 'fixed';
       stagingContainer.style.top = '0';
       stagingContainer.style.left = '-15000px';
-      stagingContainer.style.width = '1120px';
-      stagingContainer.style.minHeight = '2000px';
-      stagingContainer.style.overflow = 'hidden';
+      stagingContainer.style.width = '1080px';
+      stagingContainer.style.height = 'auto';
+      stagingContainer.style.margin = '0';
+      stagingContainer.style.padding = '0';
+      stagingContainer.style.overflow = 'visible';
       stagingContainer.style.pointerEvents = 'none';
       stagingContainer.style.zIndex = '-999999';
 
       const storyWrapper = document.createElement('div');
       storyWrapper.id = 'story-export-temp';
-      storyWrapper.className = `tierlist-container theme-${themeName}`;
+      // Usamos apenas theme-${themeName} para herdar cores sem herdar margins de .tierlist-container
+      storyWrapper.className = `theme-${themeName}`;
       storyWrapper.style.width = '1080px';
       storyWrapper.style.minHeight = '1920px';
-      storyWrapper.style.padding = '80px 45px';
+      storyWrapper.style.margin = '0';
+      storyWrapper.style.padding = '70px 45px';
       storyWrapper.style.backgroundColor = '#0b0b0f';
-      storyWrapper.style.backgroundImage = `radial-gradient(circle at 50% 12%, ${accent}33 0%, transparent 50%), radial-gradient(circle at 50% 88%, ${accent}22 0%, transparent 50%)`;
+      storyWrapper.style.backgroundImage = `radial-gradient(circle at 50% 10%, ${accent}33 0%, transparent 50%), radial-gradient(circle at 50% 90%, ${accent}25 0%, transparent 50%)`;
       storyWrapper.style.display = 'flex';
       storyWrapper.style.flexDirection = 'column';
       storyWrapper.style.justifyContent = 'space-between';
@@ -54,6 +58,7 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
       storyWrapper.style.fontFamily = "'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif";
       storyWrapper.style.color = '#ffffff';
       storyWrapper.style.boxSizing = 'border-box';
+      storyWrapper.style.border = 'none';
 
       // Header
       const header = document.createElement('div');
@@ -75,7 +80,7 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
 
       // Clone Board
       const boardClone = boardElement.cloneNode(true);
-      boardClone.id = 'board-story-clone';
+      boardClone.id = 'board';
       boardClone.className = `${boardElement.className} clean-mode`;
       boardClone.style.width = '100%';
       boardClone.style.maxWidth = '990px';
@@ -127,16 +132,34 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
 
       await new Promise(r => setTimeout(r, 120));
 
+      const finalHeight = Math.max(1920, storyWrapper.scrollHeight || 1920);
+
       dataUrl = await htmlToImage.toPng(storyWrapper, {
-        pixelRatio: 1.8,
+        pixelRatio: 2,
         cacheBust: true,
-        backgroundColor: '#0b0b0f'
+        backgroundColor: '#0b0b0f',
+        width: 1080,
+        height: finalHeight,
+        canvasWidth: 1080 * 2,
+        canvasHeight: finalHeight * 2,
+        style: {
+          margin: '0',
+          top: '0',
+          left: '0',
+          position: 'static',
+          transform: 'none',
+          boxSizing: 'border-box'
+        }
       });
     } else {
       dataUrl = await htmlToImage.toPng(boardElement, {
         backgroundColor: '#141417',
         pixelRatio: 2,
         cacheBust: true,
+        style: {
+          margin: '0',
+          transform: 'none'
+        }
       });
     }
 
