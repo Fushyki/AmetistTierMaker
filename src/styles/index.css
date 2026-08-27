@@ -1,15 +1,103 @@
-/* 1. CONFIGURAÇÕES GERAIS E ESCALA COMPACTA */
+/* 1. SISTEMA GLOBAL DE TEMAS E ACENTOS */
+:root,
+html[data-theme="ametist"],
+body.theme-ametist {
+    --accent-color: #b062eb;
+    --accent-hover: #c482f3;
+    --accent-glow: rgba(176, 98, 235, 0.3);
+    --accent-border: rgba(176, 98, 235, 0.45);
+    --accent-gradient: linear-gradient(135deg, #b062eb 0%, #7928ca 100%);
+    --accent-subtle: rgba(176, 98, 235, 0.15);
+    --bg-card: #101014;
+    --border-card: #282834;
+}
+
+html[data-theme="cyberpunk"],
+body.theme-cyberpunk {
+    --accent-color: #00ffcc;
+    --accent-hover: #33ffdd;
+    --accent-glow: rgba(0, 255, 204, 0.35);
+    --accent-border: rgba(0, 255, 204, 0.5);
+    --accent-gradient: linear-gradient(135deg, #00ffcc 0%, #ff0055 100%);
+    --accent-subtle: rgba(0, 255, 204, 0.15);
+    --bg-card: #090d14;
+    --border-card: #1c2b3e;
+}
+
+html[data-theme="gold"],
+body.theme-gold {
+    --accent-color: #ffd700;
+    --accent-hover: #ffe247;
+    --accent-glow: rgba(255, 215, 0, 0.35);
+    --accent-border: rgba(255, 215, 0, 0.5);
+    --accent-gradient: linear-gradient(135deg, #ffd700 0%, #b45309 100%);
+    --accent-subtle: rgba(255, 215, 0, 0.15);
+    --bg-card: #11100b;
+    --border-card: #352d18;
+}
+
+html[data-theme="emerald"],
+body.theme-emerald {
+    --accent-color: #10b981;
+    --accent-hover: #34d399;
+    --accent-glow: rgba(16, 185, 129, 0.35);
+    --accent-border: rgba(16, 185, 129, 0.5);
+    --accent-gradient: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    --accent-subtle: rgba(16, 185, 129, 0.15);
+    --bg-card: #09130f;
+    --border-card: #163628;
+}
+
+html[data-theme="pastel"],
+body.theme-pastel {
+    --accent-color: #f472b6;
+    --accent-hover: #f9a8d4;
+    --accent-glow: rgba(244, 114, 182, 0.35);
+    --accent-border: rgba(244, 114, 182, 0.5);
+    --accent-gradient: linear-gradient(135deg, #f472b6 0%, #a855f7 100%);
+    --accent-subtle: rgba(244, 114, 182, 0.15);
+    --bg-card: #171018;
+    --border-card: #38223b;
+}
+
+html[data-theme="monochrome"],
+body.theme-monochrome {
+    --accent-color: #e4e4e7;
+    --accent-hover: #ffffff;
+    --accent-glow: rgba(255, 255, 255, 0.2);
+    --accent-border: rgba(255, 255, 255, 0.4);
+    --accent-gradient: linear-gradient(135deg, #e4e4e7 0%, #52525b 100%);
+    --accent-subtle: rgba(255, 255, 255, 0.1);
+    --bg-card: #09090b;
+    --border-card: #282830;
+}
+
+/* ESCALA E DENSIDADE DA INTERFACE */
 html {
     font-size: 14px;
     box-sizing: border-box;
+    transition: font-size 0.2s ease;
 }
 
-[data-density="spacious"] {
-    font-size: 15.5px;
-}
-
+html[data-density="compact"],
 [data-density="compact"] {
-    font-size: 14px;
+    font-size: 13px !important;
+}
+
+html[data-density="spacious"],
+[data-density="spacious"] {
+    font-size: 16px !important;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-15px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 *, *:before, *:after {
@@ -68,7 +156,7 @@ h1 {
 }
 
 .controls button:hover {
-    background: #b062eb;
+    background: var(--accent-color);
     color: black;
 }
 
@@ -625,9 +713,9 @@ h1 {
 .navbar-links { display: flex; gap: 16px; justify-content: center; flex: 1; }
 .navbar-auth { display: flex; justify-content: flex-end; flex: 1; }
 .nav-item { color: #bbb; text-decoration: none; font-weight: 500; font-size: 0.85rem; transition: color 0.2s; white-space: nowrap; }
-.nav-item:hover { color: #b062eb; }
-.nav-btn { background: #b062eb; color: #fff; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.82rem; transition: opacity 0.2s; white-space: nowrap; }
-.nav-btn:hover { opacity: 0.9; }
+.nav-item:hover { color: var(--accent-color); }
+.nav-btn { background: var(--accent-gradient); color: #fff; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.82rem; transition: all 0.2s; white-space: nowrap; box-shadow: 0 0 12px var(--accent-glow); }
+.nav-btn:hover { filter: brightness(1.15); }
 
 @media (max-width: 768px) {
     .navbar-container { padding: 0 8px; }
@@ -649,27 +737,27 @@ h1 {
     display: flex; 
     flex-wrap: wrap; 
     gap: 12px; 
-    background: #141118; 
+    background: var(--bg-card); 
     padding: 12px 16px; 
     border-radius: 10px; 
     margin-bottom: 15px; 
-    border: 1px solid #221a2b; 
+    border: 1px solid var(--border-card); 
 }
 
 .control-card { flex: 1 1 200px; display: flex; flex-direction: column; gap: 8px; }
-.control-card h3 { margin: 0; color: #b062eb; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; border-bottom: 1px solid #221a2b; padding-bottom: 4px; text-align: center; }
+.control-card h3 { margin: 0; color: var(--accent-color); text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; border-bottom: 1px solid var(--accent-border); padding-bottom: 4px; text-align: center; }
 .btn-grid { display: flex; flex-direction: column; gap: 6px; }
-.btn-primary { background: #8b5cf6; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: background 0.2s; }
-.btn-primary:hover { background: #7c3aed; }
-.btn-secondary { background: #33274d; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.82rem; cursor: pointer; transition: background 0.2s; }
-.btn-secondary:hover { background: #423263; }
-.btn-active { background: #b062eb; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem; cursor: pointer; }
+.btn-primary { background: var(--accent-gradient); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 10px var(--accent-glow); }
+.btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-secondary { background: var(--accent-subtle); color: white; border: 1px solid var(--accent-border); padding: 8px 12px; border-radius: 6px; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; }
+.btn-secondary:hover { background: var(--accent-border); }
+.btn-active { background: var(--accent-color); color: #000; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.82rem; cursor: pointer; box-shadow: 0 0 12px var(--accent-glow); }
 .btn-danger { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 8px 12px; border-radius: 6px; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; }
 .btn-danger:hover { background: #ef4444; color: white; }
 .btn-danger.outline { border: 1px dashed #ef4444; }
-.col-selector { display: flex; align-items: center; justify-content: space-between; background: #221a2b; padding: 6px 12px; border-radius: 6px; color: white; }
+.col-selector { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); padding: 6px 12px; border-radius: 6px; color: white; border: 1px solid var(--accent-border); }
 .col-btn { width: 26px; height: 26px; border-radius: 50%; border: none; background: transparent; color: #888; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
-.col-btn.active { background: #b062eb; color: white; font-weight: bold; }
+.col-btn.active { background: var(--accent-color); color: #000; font-weight: bold; }
 
 /* 10. OTIMIZAÇÃO PARA CELULARES */
 @media (max-width: 768px) {
@@ -789,11 +877,21 @@ h1 {
   40%, 80% { transform: translateX(4px); }
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+.template-card {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.template-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 6px 20px var(--accent-glow) !important;
+  transform: translateY(-2px);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 10px var(--accent-glow) !important;
 }

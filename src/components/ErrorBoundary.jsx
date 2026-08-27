@@ -24,14 +24,24 @@ class ErrorBoundary extends React.Component {
               <AlertTriangle size={36} color="#f59e0b" />
             </div>
           </div>
-          <h2 style={{ color: '#ff4444' }}>Ops! Algo deu errado.</h2>
-          <p style={{ color: '#aaa', marginBottom: '30px' }}>Nós encontramos um erro inesperado nesta página.</p>
-          <button 
-            onClick={() => window.location.href = '/'}
-            style={{ padding: '12px 24px', backgroundColor: '#b062eb', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            Voltar para o Início
-          </button>
+          <h2 style={{ color: '#ff5555', fontSize: '1.4rem', marginBottom: '8px' }}>Ops! Algo deu errado.</h2>
+          <p style={{ color: '#aaa', marginBottom: '24px', fontSize: '0.9rem' }}>Nós encontramos um erro inesperado nesta página.</p>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button 
+              onClick={() => this.setState({ hasError: false, error: null })}
+              className="btn-primary"
+              style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Tentar Novamente
+            </button>
+            <button 
+              onClick={() => window.location.href = '/'}
+              className="btn-secondary"
+              style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Voltar para o Início
+            </button>
+          </div>
         </div>
       );
     }

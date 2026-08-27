@@ -218,33 +218,33 @@ export default function Profile() {
             width: '64px',
             height: '64px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #b062eb 0%, #7928ca 100%)',
+            background: activeTheme?.gradient || 'linear-gradient(135deg, #b062eb 0%, #7928ca 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '1.6rem',
             fontWeight: '800',
             color: '#fff',
-            boxShadow: '0 0 20px rgba(176,98,235,0.4)'
+            boxShadow: `0 0 20px ${activeTheme?.accentColor || '#b062eb'}55`
           }}>
-            {(user.email || 'A')[0].toUpperCase()}
+            {((user?.email || user?.user_metadata?.display_name || 'U')[0]).toUpperCase()}
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#fff', fontWeight: '700' }}>
-                {user.user_metadata?.display_name || user.email.split('@')[0]}
+                {user?.user_metadata?.display_name || (user?.email ? user.email.split('@')[0] : 'Usuário')}
               </h2>
               {isAdmin(user) ? (
                 <span style={{ fontSize: '0.72rem', padding: '2px 8px', background: 'rgba(239,68,68,0.2)', border: '1px solid #ef4444', color: '#f87171', borderRadius: '4px', fontWeight: 'bold' }}>
                   ADMIN
                 </span>
               ) : (
-                <span style={{ fontSize: '0.72rem', padding: '2px 8px', background: 'rgba(176,98,235,0.2)', border: '1px solid rgba(176,98,235,0.4)', color: '#d8b4fe', borderRadius: '4px', fontWeight: '600' }}>
+                <span style={{ fontSize: '0.72rem', padding: '2px 8px', background: `${activeTheme?.accentColor || '#b062eb'}22`, border: `1px solid ${activeTheme?.accentColor || '#b062eb'}66`, color: activeTheme?.accentColor || '#d8b4fe', borderRadius: '4px', fontWeight: '600' }}>
                   MEMBRO VIP
                 </span>
               )}
             </div>
-            <p style={{ margin: 0, color: '#8e8e99', fontSize: '0.85rem' }}>{user.email}</p>
+            <p style={{ margin: 0, color: '#8e8e99', fontSize: '0.85rem' }}>{user?.email || 'Conta Ametist'}</p>
           </div>
         </div>
 
@@ -264,8 +264,8 @@ export default function Profile() {
           style={{
             padding: '9px 18px',
             borderRadius: '10px',
-            border: activeTab === 'tierlists' ? '1px solid #b062eb' : '1px solid transparent',
-            backgroundColor: activeTab === 'tierlists' ? 'rgba(176,98,235,0.18)' : '#17171c',
+            border: activeTab === 'tierlists' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid transparent',
+            backgroundColor: activeTab === 'tierlists' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
             color: activeTab === 'tierlists' ? '#ffffff' : '#9999a5',
             fontWeight: activeTab === 'tierlists' ? '700' : '500',
             fontSize: '0.88rem',
@@ -273,10 +273,11 @@ export default function Profile() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            boxShadow: activeTab === 'tierlists' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
           }}
         >
-          <Layers size={16} color={activeTab === 'tierlists' ? '#b062eb' : '#888'} />
+          <Layers size={16} color={activeTab === 'tierlists' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
           Minhas Tier Lists ({tierlists.length})
         </button>
 
@@ -285,8 +286,8 @@ export default function Profile() {
           style={{
             padding: '9px 18px',
             borderRadius: '10px',
-            border: activeTab === 'templates' ? '1px solid #b062eb' : '1px solid transparent',
-            backgroundColor: activeTab === 'templates' ? 'rgba(176,98,235,0.18)' : '#17171c',
+            border: activeTab === 'templates' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid transparent',
+            backgroundColor: activeTab === 'templates' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
             color: activeTab === 'templates' ? '#ffffff' : '#9999a5',
             fontWeight: activeTab === 'templates' ? '700' : '500',
             fontSize: '0.88rem',
@@ -294,10 +295,11 @@ export default function Profile() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            boxShadow: activeTab === 'templates' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
           }}
         >
-          <Sparkles size={16} color={activeTab === 'templates' ? '#b062eb' : '#888'} />
+          <Sparkles size={16} color={activeTab === 'templates' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
           Meus Modelos ({userTemplates.length})
         </button>
 
@@ -306,8 +308,8 @@ export default function Profile() {
           style={{
             padding: '9px 18px',
             borderRadius: '10px',
-            border: activeTab === 'visual' ? '1px solid #b062eb' : '1px solid transparent',
-            backgroundColor: activeTab === 'visual' ? 'rgba(176,98,235,0.18)' : '#17171c',
+            border: activeTab === 'visual' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid transparent',
+            backgroundColor: activeTab === 'visual' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
             color: activeTab === 'visual' ? '#ffffff' : '#9999a5',
             fontWeight: activeTab === 'visual' ? '700' : '500',
             fontSize: '0.88rem',
@@ -315,10 +317,11 @@ export default function Profile() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            boxShadow: activeTab === 'visual' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
           }}
         >
-          <Palette size={16} color={activeTab === 'visual' ? '#b062eb' : '#888'} />
+          <Palette size={16} color={activeTab === 'visual' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
           Personalização & Visuais
         </button>
 
@@ -327,8 +330,8 @@ export default function Profile() {
           style={{
             padding: '9px 18px',
             borderRadius: '10px',
-            border: activeTab === 'account' ? '1px solid #b062eb' : '1px solid transparent',
-            backgroundColor: activeTab === 'account' ? 'rgba(176,98,235,0.18)' : '#17171c',
+            border: activeTab === 'account' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid transparent',
+            backgroundColor: activeTab === 'account' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
             color: activeTab === 'account' ? '#ffffff' : '#9999a5',
             fontWeight: activeTab === 'account' ? '700' : '500',
             fontSize: '0.88rem',
@@ -336,10 +339,11 @@ export default function Profile() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            boxShadow: activeTab === 'account' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
           }}
         >
-          <KeyRound size={16} color={activeTab === 'account' ? '#b062eb' : '#888'} />
+          <KeyRound size={16} color={activeTab === 'account' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
           Segurança da Conta
         </button>
       </div>
@@ -527,10 +531,7 @@ export default function Profile() {
                 return (
                   <div
                     key={themeItem.id}
-                    onClick={() => {
-                      setSiteTheme(themeItem.id);
-                      toast.success(`Tema ${themeItem.name} ativado!`);
-                    }}
+                    onClick={() => setSiteTheme(themeItem.id)}
                     style={{
                       padding: '16px',
                       borderRadius: '12px',
@@ -574,7 +575,7 @@ export default function Profile() {
 
           <div className="control-card" style={{ padding: '22px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <Sliders size={20} color="#b062eb" />
+              <Sliders size={20} color={activeTheme?.accentColor || "#b062eb"} />
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Densidade e Escala Visual</h3>
             </div>
             <p style={{ color: '#aaa', fontSize: '0.88rem', margin: '0 0 16px 0' }}>
@@ -583,18 +584,17 @@ export default function Profile() {
 
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button
-                onClick={() => {
-                  setUiDensity('compact');
-                  toast.success('Escala Compacta (100% Nativo) selecionada!');
-                }}
+                type="button"
+                onClick={() => setUiDensity('compact')}
                 style={{
                   padding: '12px 20px',
                   borderRadius: '10px',
-                  border: uiDensity === 'compact' ? '1.5px solid #b062eb' : '1px solid #2e2e38',
-                  backgroundColor: uiDensity === 'compact' ? 'rgba(176,98,235,0.18)' : '#17171c',
+                  border: uiDensity === 'compact' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #2e2e38',
+                  backgroundColor: uiDensity === 'compact' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
                   color: uiDensity === 'compact' ? '#fff' : '#aaa',
                   cursor: 'pointer',
-                  textAlign: 'left'
+                  textAlign: 'left',
+                  boxShadow: uiDensity === 'compact' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
                 }}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Compacto (Recomendado)</div>
@@ -602,18 +602,17 @@ export default function Profile() {
               </button>
 
               <button
-                onClick={() => {
-                  setUiDensity('spacious');
-                  toast.success('Escala Confortável selecionada!');
-                }}
+                type="button"
+                onClick={() => setUiDensity('spacious')}
                 style={{
                   padding: '12px 20px',
                   borderRadius: '10px',
-                  border: uiDensity === 'spacious' ? '1.5px solid #b062eb' : '1px solid #2e2e38',
-                  backgroundColor: uiDensity === 'spacious' ? 'rgba(176,98,235,0.18)' : '#17171c',
+                  border: uiDensity === 'spacious' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #2e2e38',
+                  backgroundColor: uiDensity === 'spacious' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
                   color: uiDensity === 'spacious' ? '#fff' : '#aaa',
                   cursor: 'pointer',
-                  textAlign: 'left'
+                  textAlign: 'left',
+                  boxShadow: uiDensity === 'spacious' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
                 }}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Confortável</div>

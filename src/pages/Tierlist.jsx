@@ -204,7 +204,7 @@ export default function Tierlist() {
           isOpen={isExportModalOpen}
           onClose={() => setIsExportModalOpen(false)}
           tierlistName={tierlistName}
-          onExport={(format) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: theme || siteTheme || 'ametist' })}
+          onExport={(format) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: siteTheme || theme || 'ametist' })}
         />
 
         <div className="dica-texto" style={{ marginBottom: '14px', textAlign: 'center' }}>
@@ -217,7 +217,7 @@ export default function Tierlist() {
           colunas={colunas}
           columnTitles={columnTitles}
           layoutMode={layoutMode}
-          theme={theme || siteTheme || 'ametist'}
+          theme={siteTheme || theme || 'ametist'}
           onRemoveRow={handleRemoveRow}
           selectedItem={selectedItem}
           setSelectedItem={setSelectedItem}
