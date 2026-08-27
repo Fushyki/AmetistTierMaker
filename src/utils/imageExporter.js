@@ -13,9 +13,10 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
     return;
   }
 
-  let storyWrapper = null;
+  let stagingContainer = null;
 
   try {
+    toast.loading(format === 'story' ? 'Renderizando Story 9:16...' : 'Renderizando Imagem 16:9...', { id: 'img-export' });
     const htmlToImage = await import('html-to-image');
     boardElement.classList.add('clean-mode');
 
@@ -26,15 +27,21 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
       const themeObj = getThemeById(themeName);
       const accent = themeObj.accentColor || '#b062eb';
 
-      storyWrapper = document.createElement('div');
+      // Contêiner de isolamento 100% fora da tela (evita qualquer glitch visual no monitor)
+      stagingContainer = document.createElement('div');
+      stagingContainer.id = 'story-export-staging';
+      stagingContainer.style.position = 'fixed';
+      stagingContainer.style.top = '0';
+      stagingContainer.style.left = '-15000px';
+      stagingContainer.style.width = '1120px';
+      stagingContainer.style.minHeight = '2000px';
+      stagingContainer.style.overflow = 'hidden';
+      stagingContainer.style.pointerEvents = 'none';
+      stagingContainer.style.zIndex = '-999999';
+
+      const storyWrapper = document.createElement('div');
       storyWrapper.id = 'story-export-temp';
       storyWrapper.className = `tierlist-container theme-${themeName}`;
-      storyWrapper.style.position = 'fixed';
-      storyWrapper.style.top = '0';
-      storyWrapper.style.left = '0';
-      storyWrapper.style.zIndex = '-9999';
-      storyWrapper.style.pointerEvents = 'none';
-      storyWrapper.style.opacity = '1';
       storyWrapper.style.width = '1080px';
       storyWrapper.style.minHeight = '1920px';
       storyWrapper.style.padding = '80px 45px';
@@ -104,7 +111,8 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
       storyWrapper.appendChild(header);
       storyWrapper.appendChild(boardClone);
       storyWrapper.appendChild(footer);
-      document.body.appendChild(storyWrapper);
+      stagingContainer.appendChild(storyWrapper);
+      document.body.appendChild(stagingContainer);
 
       // Esperar todas as imagens terminarem o carregamento
       const allImages = Array.from(storyWrapper.querySelectorAll('img'));
@@ -136,14 +144,14 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
     link.download = filename;
     link.href = dataUrl;
     link.click();
-    toast.success(format === 'story' ? 'Story 9:16 gerado com sucesso!' : 'Imagem 16:9 gerada com sucesso!');
+    toast.success(format === 'story' ? 'Story 9:16 gerado com sucesso!' : 'Imagem 16:9 gerada com sucesso!', { id: 'img-export' });
   } catch (error) {
     console.error('Erro ao salvar imagem:', error);
-    toast.error('Houve um erro ao gerar a imagem: ' + (error.message || error));
+    toast.error('Houve um erro ao gerar a imagem: ' + (error.message || error), { id: 'img-export' });
   } finally {
     boardElement.classList.remove('clean-mode');
-    if (storyWrapper && storyWrapper.parentNode) {
-      storyWrapper.parentNode.removeChild(storyWrapper);
+    if (stagingContainer && stagingContainer.parentNode) {
+      stagingContainer.parentNode.removeChild(stagingContainer);
     }
   }
 }
