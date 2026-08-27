@@ -288,9 +288,9 @@ export function useTierlistState(user) {
 
   const resetarTierList = async () => {
     const isConfirmed = await confirmAction(
-      'Limpar Quadro',
-      'Tem certeza que deseja limpar a tier list? Todas as imagens voltarão para o inventário.',
-      'Sim, limpar'
+      'Resetar Tier List',
+      'Tem certeza que deseja resetar? Todas as imagens voltarão para o inventário.',
+      'Sim, resetar'
     );
     if (isConfirmed) {
       saveHistoryState(items, ranksData);

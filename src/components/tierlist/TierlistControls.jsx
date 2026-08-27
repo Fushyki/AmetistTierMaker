@@ -131,7 +131,7 @@ export default function TierlistControls({
               <RotateCcw size={14} /> Desfazer
             </button>
             <button onClick={onReset} className="btn-danger outline" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-              <RefreshCw size={14} /> Resetar Tabuleiro
+              <RefreshCw size={14} /> Resetar
             </button>
           </div>
         </div>
