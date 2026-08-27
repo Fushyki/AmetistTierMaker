@@ -194,10 +194,60 @@ export async function importGameCharacters(query) {
     };
   }
 
-  // 3. Genshin Impact (API Lunaris / Project Amber Oficial - Atualizada)
-  if (q.includes('genshin') || q.includes('genshin impact') || q.includes('lunaris') || q.includes('amber')) {
+  // 3. Genshin Impact (API Lunaris Oficial com Auto-Update Dinâmico)
+  if (q.includes('genshin') || q.includes('genshin impact') || q.includes('lunaris') || q.includes('amber') || q.includes('charlist.json')) {
     try {
-      // Nova API Oficial do Lunaris / Project Amber (gi.yatta.moe) com 134+ personagens incluindo Natlan
+      let charlistUrl = '';
+
+      // Se o usuário colou uma URL direta do Lunaris:
+      if (query.includes('api.lunaris.moe/data/')) {
+        charlistUrl = query.trim();
+      } else {
+        // Busca a versão mais recente dinamicamente (ex: 7.0.52.2) para nunca ficar desatualizado
+        try {
+          const versionRes = await fetch('https://api.lunaris.moe/data/version.json');
+          if (versionRes.ok) {
+            const { version } = await versionRes.json();
+            charlistUrl = `https://api.lunaris.moe/data/${version}/charlist.json`;
+          }
+        } catch (verErr) {
+          console.warn('Erro ao obter versão mais recente do Lunaris:', verErr);
+        }
+        if (!charlistUrl) {
+          charlistUrl = 'https://api.lunaris.moe/data/7.0.52.2/charlist.json';
+        }
+      }
+
+      const lunarisRes = await fetch(charlistUrl);
+      if (lunarisRes.ok) {
+        const charData = await lunarisRes.json();
+        const items = Object.entries(charData)
+          .filter(([id, c]) => c && c.CardImg && (c.ptName || c.enName))
+          .map(([id, c], i) => ({
+            id: `genshin-${id}-${Date.now()}`,
+            src: `https://lunaris.moe/assets/UI/${c.CardImg}.png`,
+            nome: c.ptName || c.enName,
+            tierId: null,
+            colIndex: null,
+            uploadIndex: Date.now() + i
+          }));
+
+        if (items.length > 0) {
+          return {
+            title: 'Genshin Impact - Todos os Personagens',
+            cover: 'https://lunaris.moe/assets/UI/UI_Gacha_AvatarImg_Furina.png',
+            items,
+            category: 'games',
+            sourceLabel: `API Lunaris (${items.length} Personagens)`
+          };
+        }
+      }
+    } catch (errLunaris) {
+      console.warn('Fallback para API secundária de Genshin:', errLunaris);
+    }
+
+    // Fallback 1: Project Amber (gi.yatta.moe)
+    try {
       const yattaRes = await fetch('https://gi.yatta.moe/api/v2/pt/avatar');
       const yattaData = await yattaRes.json();
       const rawList = Object.values(yattaData?.data?.items || {});
@@ -217,14 +267,14 @@ export async function importGameCharacters(query) {
           cover: 'https://gi.yatta.moe/assets/UI/UI_Gacha_AvatarImg_Furina.png',
           items,
           category: 'games',
-          sourceLabel: 'Lunaris / Project Amber (134+ Personagens)'
+          sourceLabel: 'Project Amber (134+ Personagens)'
         };
       }
     } catch (e) {
-      console.warn('Fallback para API secundária de Genshin:', e);
+      console.warn('Fallback para genshin.jmp.blue:', e);
     }
 
-    // Fallback secundário
+    // Fallback 2: genshin.jmp.blue
     const genshinRes = await fetch('https://genshin.jmp.blue/characters');
     const characters = await genshinRes.json();
 
@@ -322,8 +372,8 @@ export async function autoImport(input, categoryMode = 'auto') {
   // MODO INTELIGENTE (Auto Detectar)
   const lower = trimmed.toLowerCase();
 
-  // 1. Detecção direta de Jogos populares
-  if (lower.includes('lol') || lower.includes('league') || lower.includes('brawl') || lower.includes('genshin') || lower.includes('pokemon') || lower.includes('pokémon')) {
+  // 1. Detecção direta de Jogos populares ou URLs de API
+  if (lower.includes('lol') || lower.includes('league') || lower.includes('brawl') || lower.includes('genshin') || lower.includes('lunaris') || lower.includes('charlist') || lower.includes('pokemon') || lower.includes('pokémon') || lower.includes('star rail') || lower.includes('hsr')) {
     try {
       return await importGameCharacters(trimmed);
     } catch {
