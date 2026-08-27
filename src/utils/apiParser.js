@@ -15,7 +15,7 @@ export const fetchAndParseAPI = async (apiConfig) => {
     let allItems = [];
 
     for (let p = 1; p <= pages; p++) {
-      let currentUrl = apiConfig.url || "";
+      let currentUrl = (apiConfig.url || "").trim().replace(/\r?\n|\r/g, '').replace(/\s+/g, '');
       if (currentUrl.includes('[PAGE]')) {
         currentUrl = currentUrl.replace('[PAGE]', p);
       }
@@ -27,6 +27,11 @@ export const fetchAndParseAPI = async (apiConfig) => {
           break; // Stop fetching more pages if we hit a 404, 429, etc.
         }
         const data = await res.json();
+
+        // Verifica se a API retornou um objeto de erro direto (ex: Wikipedia toomanyvalues)
+        if (data.error) {
+          throw new Error(data.error.info || data.error.message || 'A API retornou um erro interno.');
+        }
         
         // 1. Achar a lista
         let listData = getNestedValue(data, apiConfig.arrayPath);
@@ -63,12 +68,12 @@ export const fetchAndParseAPI = async (apiConfig) => {
             colIndex: null,
             uploadIndex: Date.now() + index + (p * 1000)
           };
-        });
+        }).filter(item => Boolean(item.src));
 
         allItems = [...allItems, ...items];
       } catch (pageError) {
         console.warn(`Erro na página ${p}:`, pageError);
-        break; // Break the loop on network error or JSON parse error
+        throw pageError;
       }
 
       if (!(apiConfig.url || "").includes('[PAGE]') || pages === 1) {
@@ -76,7 +81,11 @@ export const fetchAndParseAPI = async (apiConfig) => {
       }
       
       // Delay de segurança anti-rate-limit (ex: Jikan limite 3/sec)
-      if (p < pages) await new Promise(r => setTimeout(r, 600)); // Increased to 600ms to be safer
+      if (p < pages) await new Promise(r => setTimeout(r, 600));
+    }
+
+    if (allItems.length === 0) {
+      throw new Error("Nenhum item válido com imagem foi encontrado com essas configurações.");
     }
 
     return allItems;
