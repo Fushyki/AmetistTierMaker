@@ -10,7 +10,7 @@ import { fetchAndParseAPI } from '../utils/apiParser';
 import { processImage } from '../utils/imageProcessor';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
 import { autoImport } from '../utils/autoImporter';
-import { Sparkles, Zap, Flame, Music, Lock, X, Loader2, Search, Check, AlertCircle, Gamepad2 } from 'lucide-react';
+import { Sparkles, Zap, Flame, Music, Lock, X, Loader2, Search, Check, AlertCircle, Gamepad2, Globe, Film } from 'lucide-react';
 import { toast, notify } from '../utils/notifications';
 
 const initialRanksAvancado = [
@@ -605,19 +605,20 @@ export default function TemplateMaker() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: activeTheme?.accentColor || '#b062eb' }}>
               <Sparkles size={20} />
-              <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff' }}>Importação Automática em 1 Clique</h4>
+              <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff' }}>Importação Automática Universal</h4>
             </div>
             <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 16px 0', lineHeight: '1.4' }}>
-              Pesquise qualquer <strong>Anime</strong> (AniList), <strong>Jogo</strong> (LoL, Genshin, Pokémon), <strong>Hipercarros</strong> ou <strong>Artista Musical</strong> (Apple Music). O Ametist buscará todos os itens, imagens HD, título e capa automaticamente!
+              Busca aberta e universal! Pesquise <strong>qualquer tema do mundo</strong> (Filmes, Séries, Heróis, Dinossauros, Países, Carros, Animes, Jogos ou Músicas em HD). O Ametist buscará todos os itens e imagens automaticamente!
             </p>
 
             {/* Categorias de busca */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
               {[
-                { id: 'auto', label: 'Tudo (Auto Detectar)', icon: Zap },
+                { id: 'auto', label: 'Tudo (Universal)', icon: Globe },
+                { id: 'movies', label: 'Filmes & Séries', icon: Film },
                 { id: 'anime', label: 'Animes & Mangás', icon: Flame },
                 { id: 'games', label: 'Jogos & Personagens', icon: Gamepad2 },
-                { id: 'music', label: 'Músicas & Artistas', icon: Music },
+                { id: 'music', label: 'Músicas (Last.fm HD)', icon: Music },
               ].map(cat => {
                 const isSelected = autoCategory === cat.id;
                 const IconComp = cat.icon;
@@ -657,7 +658,13 @@ export default function TemplateMaker() {
                 <Search size={18} color="#777" style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
                 <input 
                   type="text" 
-                  placeholder="Digite um Anime, Jogo, Carros (ex: Hipercarros, Ferrari) ou Artista..."
+                  placeholder={
+                    autoCategory === 'anime' ? "Ex: Jujutsu Kaisen, Naruto, Bleach, Attack on Titan..." :
+                    autoCategory === 'games' ? "Ex: League of Legends, Brawl Stars, Genshin Impact, Pokemon..." :
+                    autoCategory === 'movies' ? "Ex: Breaking Bad, Stranger Things, Game of Thrones, The Boys..." :
+                    autoCategory === 'music' ? "Ex: The Weeknd, Travis Scott, Taylor Swift, Matuê, Kanye West..." :
+                    "Digite QUALQUER tema (ex: Dinossauros, Marvel, Breaking Bad, The Weeknd, Hipercarros)..."
+                  }
                   value={autoQuery}
                   onChange={(e) => {
                     setAutoQuery(e.target.value);
@@ -712,14 +719,14 @@ export default function TemplateMaker() {
               <span style={{ fontWeight: '500' }}>Sugestões:</span>
               {[
                 { label: 'Hipercarros', q: 'hipercarros', cat: 'auto' },
-                { label: 'Ferrari', q: 'ferrari', cat: 'auto' },
+                { label: 'Dinossauros', q: 'dinossauros', cat: 'auto' },
+                { label: 'Breaking Bad', q: 'Breaking Bad', cat: 'movies' },
+                { label: 'The Weeknd', q: 'The Weeknd', cat: 'music' },
                 { label: 'League of Legends', q: 'LoL', cat: 'games' },
-                { label: 'Brawl Stars', cat: 'games' },
-                { label: 'Genshin Impact', cat: 'games' },
-                { label: 'Honkai: Star Rail', q: 'Honkai', cat: 'games' },
-                { label: 'Pokémon (151)', q: 'Pokemon', cat: 'games' },
+                { label: 'Genshin Impact', q: 'Genshin', cat: 'games' },
+                { label: 'Heróis da Marvel', q: 'Heróis da Marvel', cat: 'auto' },
                 { label: 'Jujutsu Kaisen', cat: 'anime' },
-                { label: 'The Weeknd', cat: 'music' }
+                { label: 'Brawl Stars', cat: 'games' }
               ].map(sug => (
                 <button
                   type="button"

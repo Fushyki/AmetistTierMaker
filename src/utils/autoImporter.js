@@ -1,9 +1,12 @@
 /**
- * Utilitário de Importação Automática Inteligente do Ametist
+ * Utilitário de Importação Automática Inteligente do Ametist (Universal Engine)
  * Suporta:
  * 1. Animes & Mangás (AniList GraphQL Oficial)
- * 2. Jogos (League of Legends, Brawl Stars, Genshin Impact, Pokémon)
- * 3. Músicas & Discografia (Apple Music / iTunes HD API)
+ * 2. Músicas & Discografias HD (Last.fm Music API - Sem clones/karaoke)
+ * 3. Séries, Filmes & Elencos (TVMaze HD Cast API)
+ * 4. Jogos (League of Legends, Brawl Stars, Genshin Impact, Honkai Star Rail, Pokémon)
+ * 5. Carros & Hipercarros (Coleção Oficial Wikimedia Motors)
+ * 6. Busca Universal Definitiva (Wikipedia Multilíngue para qualquer assunto)
  */
 
 export async function importAnimeCharacters(queryOrUrl) {
@@ -87,37 +90,87 @@ export async function importAnimeCharacters(queryOrUrl) {
     cover,
     items,
     category: 'animes',
-    sourceLabel: 'AniList (Anime)'
+    sourceLabel: `AniList Anime (${items.length} Personagens)`
   };
 }
 
-export async function importMusic(queryOrUrl, entity = 'album') {
+// 2. Músicas & Discografias (Last.fm HD API - Oficial, sem lixo de karaoke)
+export async function importMusic(queryOrUrl) {
   let cleanQuery = queryOrUrl.trim();
-  cleanQuery = cleanQuery.replace(/https?:\/\/(open\.spotify\.com|music\.apple\.com)\/[^\s]+/i, '').trim() || cleanQuery;
+  cleanQuery = cleanQuery
+    .replace(/https?:\/\/(open\.spotify\.com\/(album|artist|track)\/|music\.apple\.com\/[^\/]+\/(album|artist)\/)/i, '')
+    .replace(/[\?#].*$/, '')
+    .trim() || cleanQuery;
 
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanQuery)}&entity=${entity}&limit=50`;
-  const response = await fetch(url);
-  const data = await response.json();
+  const LASTFM_KEY = 'b25b959554ed76058ac220b7b2e0a026';
 
-  if (!data.results || data.results.length === 0) {
-    throw new Error(`Nenhum(a) ${entity === 'album' ? 'álbum' : 'música'} encontrado(a) para "${cleanQuery}".`);
+  try {
+    // 1. Tenta buscar os Melhores Álbuns do Artista no Last.fm
+    const artistUrl = `https://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist=${encodeURIComponent(cleanQuery)}&api_key=${LASTFM_KEY}&format=json&limit=50`;
+    const res = await fetch(artistUrl);
+    const data = await res.json();
+    let rawAlbums = data.topalbums?.album || [];
+
+    // 2. Se não encontrou por artista, busca por Nome de Álbum / Termo Musical
+    if (!Array.isArray(rawAlbums) || rawAlbums.length < 2) {
+      const albumUrl = `https://ws.audioscrobbler.com/2.0/?method=album.search&album=${encodeURIComponent(cleanQuery)}&api_key=${LASTFM_KEY}&format=json&limit=50`;
+      const searchRes = await fetch(albumUrl);
+      const searchData = await searchRes.json();
+      rawAlbums = searchData.results?.albummatches?.album || [];
+    }
+
+    if (Array.isArray(rawAlbums) && rawAlbums.length > 0) {
+      const items = rawAlbums
+        .map((a, index) => {
+          const imgRaw = a.image?.[a.image.length - 1]?.['#text'] || a.image?.[0]?.['#text'] || '';
+          // Substitui resolução para 700x700 HD
+          const imgHd = imgRaw.replace(/\/300x300\//, '/700x700/');
+          const artistPrefix = a.artist?.name ? `${a.artist.name} - ` : '';
+          return {
+            id: `music-lastfm-${index}-${Date.now()}`,
+            src: imgHd,
+            nome: `${artistPrefix}${a.name}` || 'Álbum',
+            tierId: null,
+            colIndex: null,
+            uploadIndex: Date.now() + index
+          };
+        })
+        .filter(a => Boolean(a.src) && a.nome !== '(null)' && !a.src.includes('2a96cbd8b46e442fc41c2b86b821562f'));
+
+      if (items.length > 0) {
+        const artistName = rawAlbums[0]?.artist?.name || cleanQuery;
+        return {
+          title: `Discografia - ${artistName}`,
+          cover: items[0]?.src || null,
+          items,
+          category: 'musica',
+          sourceLabel: `Last.fm Music HD (${items.length} Álbuns)`
+        };
+      }
+    }
+  } catch (errLastFm) {
+    console.warn('Fallback Last.fm:', errLastFm);
   }
 
+  // Fallback seguro em caso de indisponibilidade
+  const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanQuery)}&entity=album&limit=40`;
+  const resItunes = await fetch(itunesUrl);
+  const dataItunes = await resItunes.json();
   const seen = new Set();
   const items = [];
 
-  for (let i = 0; i < data.results.length; i++) {
-    const item = data.results[i];
-    const name = entity === 'album' ? item.collectionName : item.trackName;
+  for (let i = 0; i < (dataItunes.results || []).length; i++) {
+    const item = dataItunes.results[i];
+    const name = item.collectionName;
     const rawArtwork = item.artworkUrl100 || item.artworkUrl60;
     const src = rawArtwork ? rawArtwork.replace('100x100bb', '600x600bb') : null;
 
     if (name && src && !seen.has(name.toLowerCase())) {
       seen.add(name.toLowerCase());
       items.push({
-        id: `music-${entity}-${item.collectionId || item.trackId || i}-${Date.now()}`,
+        id: `music-itunes-${item.collectionId || i}-${Date.now()}`,
         src,
-        nome: name,
+        nome: `${item.artistName} - ${name}`,
         tierId: null,
         colIndex: null,
         uploadIndex: Date.now() + i
@@ -125,18 +178,61 @@ export async function importMusic(queryOrUrl, entity = 'album') {
     }
   }
 
-  const first = data.results[0];
-  const title = entity === 'album' 
-    ? `Discografia - ${first.artistName}` 
-    : `Melhores Músicas - ${first.artistName}`;
-  const cover = items[0]?.src || null;
+  if (items.length === 0) {
+    throw new Error(`Nenhum álbum ou discografia encontrada para "${cleanQuery}".`);
+  }
 
   return {
-    title,
-    cover,
+    title: `Discografia - ${cleanQuery}`,
+    cover: items[0]?.src || null,
     items,
     category: 'musica',
-    sourceLabel: 'Apple Music (Discografia)'
+    sourceLabel: `Music HD (${items.length} Álbuns)`
+  };
+}
+
+// 3. Séries, Filmes & Elencos (TVMaze HD Cast API)
+export async function importTVSeries(query) {
+  const cleanQ = query.trim();
+  const searchUrl = `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(cleanQ)}`;
+  const res = await fetch(searchUrl);
+  const shows = await res.json();
+
+  if (!shows || shows.length === 0) {
+    throw new Error(`Nenhuma série encontrada para "${cleanQ}".`);
+  }
+
+  const show = shows[0].show;
+  const castUrl = `https://api.tvmaze.com/shows/${show.id}/cast`;
+  const castRes = await fetch(castUrl);
+  const cast = await castRes.json();
+
+  const items = cast
+    .map((c, index) => {
+      const src = c.character?.image?.original || c.person?.image?.original || c.person?.image?.medium;
+      const charName = c.character?.name || c.person?.name || `Personagem ${index + 1}`;
+      const actorName = c.person?.name ? ` (${c.person.name})` : '';
+      return {
+        id: `tv-cast-${c.character?.id || c.person?.id || index}-${Date.now()}`,
+        src,
+        nome: `${charName}${actorName}`,
+        tierId: null,
+        colIndex: null,
+        uploadIndex: Date.now() + index
+      };
+    })
+    .filter(it => Boolean(it.src));
+
+  if (items.length < 3) {
+    throw new Error(`Elenco insuficiente encontrado para "${show.name}".`);
+  }
+
+  return {
+    title: `${show.name} - Personagens / Elenco`,
+    cover: show.image?.original || show.image?.medium || items[0]?.src || null,
+    items,
+    category: 'filmes',
+    sourceLabel: `TVMaze (${items.length} Personagens)`
   };
 }
 
@@ -166,7 +262,7 @@ export async function importGameCharacters(query) {
       cover: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg',
       items,
       category: 'games',
-      sourceLabel: 'Riot Games (Data Dragon)'
+      sourceLabel: `Riot Games (${items.length} Campeões)`
     };
   }
 
@@ -190,101 +286,85 @@ export async function importGameCharacters(query) {
       cover: items[0]?.src || null,
       items,
       category: 'games',
-      sourceLabel: 'Brawl Stars API'
+      sourceLabel: `Brawl Stars (${items.length} Brawlers)`
     };
   }
 
-  // 3. Genshin Impact (API Lunaris Oficial com Auto-Update Dinâmico)
+  // 3. Genshin Impact (API Lunaris Oficial)
   if (q.includes('genshin') || q.includes('genshin impact') || q.includes('lunaris') || q.includes('amber') || q.includes('charlist.json')) {
     try {
       let charlistUrl = '';
-
-      // Se o usuário colou uma URL direta do Lunaris:
-      if (query.includes('api.lunaris.moe/data/')) {
-        charlistUrl = query.trim();
-      } else {
-        // Busca a versão mais recente dinamicamente (ex: 7.0.52.2) para nunca ficar desatualizado
-        try {
-          const versionRes = await fetch('https://api.lunaris.moe/data/version.json');
-          if (versionRes.ok) {
-            const { version } = await versionRes.json();
-            charlistUrl = `https://api.lunaris.moe/data/${version}/charlist.json`;
+      try {
+        const htmlRes = await fetch('https://genshin.lunaris.network/');
+        const html = await htmlRes.text();
+        const scriptMatch = html.match(/\/assets\/index-[^"']+\.js/);
+        if (scriptMatch) {
+          const jsRes = await fetch(`https://genshin.lunaris.network${scriptMatch[0]}`);
+          const jsText = await jsRes.text();
+          const charMatch = jsText.match(/data\/charlist\.[a-f0-9]+\.json/i) || jsText.match(/"([^"]*charlist[^"]*\.json)"/i);
+          if (charMatch) {
+            charlistUrl = `https://genshin.lunaris.network/${charMatch[1] || charMatch[0]}`;
           }
-        } catch (verErr) {
-          console.warn('Erro ao obter versão mais recente do Lunaris:', verErr);
         }
-        if (!charlistUrl) {
-          charlistUrl = 'https://api.lunaris.moe/data/7.0.52.2/charlist.json';
-        }
+      } catch (scrapeErr) {
+        console.warn('Scraper Lunaris falhou:', scrapeErr);
       }
 
-      const lunarisRes = await fetch(charlistUrl);
-      if (lunarisRes.ok) {
-        const charData = await lunarisRes.json();
-        const items = Object.entries(charData)
-          .filter(([id, c]) => c && c.CardImg && (c.ptName || c.enName))
-          .map(([id, c], i) => ({
-            id: `genshin-${id}-${Date.now()}`,
-            src: `https://lunaris.moe/assets/UI/${c.CardImg}.png`,
-            nome: c.ptName || c.enName,
+      if (!charlistUrl) {
+        charlistUrl = 'https://genshin.lunaris.network/data/charlist.6c43fa98.json';
+      }
+
+      const res = await fetch(charlistUrl);
+      const data = await res.json();
+      
+      const charArray = Array.isArray(data) 
+        ? data 
+        : (data.items || data.characters || (data.data && Array.isArray(data.data) ? data.data : Object.values(data)));
+        
+      if (Array.isArray(charArray) && charArray.length > 0) {
+        const items = charArray.map((c, index) => {
+          const name = c.name || c.id || c.title || `Personagem ${index + 1}`;
+          let imgPath = c.icon || c.avatar || c.img || c.image || (c.id ? `${c.id}.png` : '');
+          
+          let fullSrc = imgPath;
+          if (imgPath && !imgPath.startsWith('http')) {
+            const cleanPath = imgPath.replace(/^\/+/, '');
+            fullSrc = `https://genshin.lunaris.network/assets/characters/${cleanPath.includes('/') ? cleanPath.split('/').pop() : cleanPath}`;
+          }
+          
+          return {
+            id: `genshin-${c.id || index}-${Date.now()}`,
+            nome: name,
+            src: fullSrc,
             tierId: null,
             colIndex: null,
-            uploadIndex: Date.now() + i
-          }));
+            uploadIndex: Date.now() + index
+          };
+        }).filter(item => Boolean(item.src));
 
         if (items.length > 0) {
           return {
-            title: 'Genshin Impact - Todos os Personagens',
-            cover: 'https://lunaris.moe/assets/UI/UI_Gacha_AvatarImg_Furina.png',
+            title: 'Genshin Impact - Personagens',
+            cover: items[0]?.src || 'https://genshin.lunaris.network/assets/characters/UI_AvatarIcon_Aether.png',
             items,
             category: 'games',
-            sourceLabel: `API Lunaris (${items.length} Personagens)`
+            sourceLabel: `Lunaris Network (${items.length} Personagens)`
           };
         }
       }
-    } catch (errLunaris) {
-      console.warn('Fallback para API secundária de Genshin:', errLunaris);
-    }
-
-    // Fallback 1: Project Amber (gi.yatta.moe)
-    try {
-      const yattaRes = await fetch('https://gi.yatta.moe/api/v2/pt/avatar');
-      const yattaData = await yattaRes.json();
-      const rawList = Object.values(yattaData?.data?.items || {});
-
-      if (rawList.length > 0) {
-        const items = rawList.map((c, i) => ({
-          id: `genshin-${c.id || i}-${Date.now()}`,
-          src: `https://gi.yatta.moe/assets/UI/${c.icon}.png`,
-          nome: c.name,
-          tierId: null,
-          colIndex: null,
-          uploadIndex: Date.now() + i
-        })).filter(it => Boolean(it.src && it.nome));
-
-        return {
-          title: 'Genshin Impact - Todos os Personagens',
-          cover: 'https://gi.yatta.moe/assets/UI/UI_Gacha_AvatarImg_Furina.png',
-          items,
-          category: 'games',
-          sourceLabel: 'Project Amber (134+ Personagens)'
-        };
-      }
     } catch (e) {
-      console.warn('Fallback para genshin.jmp.blue:', e);
+      console.warn('Lunaris fallback para Genshin.dev:', e);
     }
 
-    // Fallback 2: genshin.jmp.blue
-    const genshinRes = await fetch('https://genshin.jmp.blue/characters');
-    const characters = await genshinRes.json();
-
-    const items = characters.map((slug, i) => ({
-      id: `genshin-${slug}-${Date.now()}`,
-      src: `https://genshin.jmp.blue/characters/${slug}/icon-big`,
-      nome: slug.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' '),
+    const res = await fetch('https://genshin.jmp.blue/characters');
+    const characters = await res.json();
+    const items = characters.map((charName, index) => ({
+      id: `genshin-${charName}-${Date.now()}`,
+      src: `https://genshin.jmp.blue/characters/${charName}/icon-big`,
+      nome: charName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
       tierId: null,
       colIndex: null,
-      uploadIndex: Date.now() + i
+      uploadIndex: Date.now() + index
     }));
 
     return {
@@ -292,62 +372,42 @@ export async function importGameCharacters(query) {
       cover: items[0]?.src || null,
       items,
       category: 'games',
-      sourceLabel: 'Genshin Impact Data'
+      sourceLabel: `Genshin API (${items.length} Personagens)`
     };
   }
 
-  // 4. Honkai: Star Rail (API Nanoka Oficial - hsr.nanoka.cc)
+  // 4. Honkai: Star Rail (Nanoka + StarRailRes)
   if (q.includes('honkai') || q.includes('star rail') || q.includes('hsr') || q.includes('nanoka')) {
     try {
-      let version = '4.4.55';
-      try {
-        const pageRes = await fetch('https://hsr.nanoka.cc/character', { headers: { 'User-Agent': 'Mozilla/5.0' } });
-        if (pageRes.ok) {
-          const html = await pageRes.text();
-          const match = html.match(/https:\/\/static\.nanoka\.cc\/hsr\/([\d.]+)\/character\.json/);
-          if (match && match[1]) version = match[1];
-        }
-      } catch (errVer) {
-        console.warn('Erro ao consultar versão do Nanoka:', errVer);
-      }
-
-      const hsrRes = await fetch(`https://static.nanoka.cc/hsr/${version}/character.json`);
-      if (hsrRes.ok) {
-        const hsrData = await hsrRes.json();
-        const elementMap = {
-          Physical: 'Físico',
-          Fire: 'Fogo',
-          Ice: 'Gelo',
-          Thunder: 'Raio',
-          Wind: 'Vento',
-          Quantum: 'Quântico',
-          Imaginary: 'Imaginário'
-        };
-
-        const items = Object.entries(hsrData)
-          .filter(([id, c]) => Boolean(c && (c.en || c.name)))
-          .map(([id, c], i) => {
-            let name = c.en || c.name || `Personagem ${id}`;
-            if (name === '{NICKNAME}' || id.startsWith('800')) {
-              const elem = elementMap[c.damageType] || c.damageType || 'Físico';
-              const gender = id.endsWith('1') || id.endsWith('3') || id.endsWith('5') || id.endsWith('7') || id.endsWith('9') ? 'M' : 'F';
-              name = `Desbravador (${elem}) [${gender}]`;
-            }
-
+      const htmlRes = await fetch('https://hsr.nanoka.cc/');
+      const html = await htmlRes.text();
+      const nodeMatch = html.match(/assets\/nodes\/character-list\.[a-zA-Z0-9_-]+\.js/);
+      
+      if (nodeMatch) {
+        const jsRes = await fetch(`https://hsr.nanoka.cc/${nodeMatch[0]}`);
+        const jsText = await jsRes.text();
+        const jsonMatch = jsText.match(/https:\/\/api\.nanoka\.cc\/manifest\/hsr\/v\d+\/character\.json/);
+        
+        if (jsonMatch) {
+          const apiRes = await fetch(jsonMatch[0]);
+          const apiData = await apiRes.json();
+          
+          const items = Object.values(apiData).map((c, i) => {
+            const rawImg = c.avatar_drawcard || c.avatar_icon || '';
+            const finalImg = rawImg ? `https://static.nanoka.cc${rawImg}` : '';
             return {
-              id: `hsr-${id}-${Date.now()}`,
-              src: `https://static.nanoka.cc/assets/hsr/avatarshopicon/${id}.webp`,
-              nome: name,
+              id: `hsr-nanoka-${c.id || i}-${Date.now()}`,
+              src: finalImg,
+              nome: c.name || c.id,
               tierId: null,
               colIndex: null,
               uploadIndex: Date.now() + i
             };
-          });
+          }).filter(it => Boolean(it.src));
 
-        if (items.length > 0) {
           return {
-            title: 'Honkai: Star Rail - Todos os Personagens',
-            cover: 'https://static.nanoka.cc/assets/hsr/avatardrawcard/1308.webp', // Acheron
+            title: 'Honkai: Star Rail - Personagens',
+            cover: 'https://static.nanoka.cc/assets/hsr/avatardrawcard/1308.webp',
             items,
             category: 'games',
             sourceLabel: `Nanoka HSR (${items.length} Personagens)`
@@ -358,7 +418,6 @@ export async function importGameCharacters(query) {
       console.warn('Fallback para StarRailRes:', errNanoka);
     }
 
-    // Fallback: StarRailRes
     const hsrRes = await fetch('https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/index_new/en/characters.json');
     const hsrData = await hsrRes.json();
 
@@ -376,16 +435,17 @@ export async function importGameCharacters(query) {
       cover: items[0]?.src || null,
       items,
       category: 'games',
-      sourceLabel: 'StarRailRes'
+      sourceLabel: `StarRailRes (${items.length} Personagens)`
     };
   }
 
-  // 4. Pokémon (Kanto Gen 1 padrão ou todas)
+  // 5. Pokémon (Kanto Gen 1 a Gen 9)
   if (q.includes('pokemon') || q.includes('pokémon')) {
     let limit = 151;
     let title = 'Pokémon - 1ª Geração (Kanto)';
     if (q.includes('gen 2') || q.includes('johto')) { limit = 251; title = 'Pokémon - 1ª e 2ª Geração'; }
-    else if (q.includes('all') || q.includes('todos')) { limit = 386; title = 'Pokémon - Clássicos'; }
+    else if (q.includes('gen 3') || q.includes('hoenn')) { limit = 386; title = 'Pokémon - Até 3ª Geração'; }
+    else if (q.includes('all') || q.includes('todos')) { limit = 1000; title = 'Pokémon - Todos os Clássicos'; }
 
     const pokeRes = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}`);
     const pokeData = await pokeRes.json();
@@ -404,14 +464,14 @@ export async function importGameCharacters(query) {
       cover: items[0]?.src || null,
       items,
       category: 'games',
-      sourceLabel: 'PokeAPI'
+      sourceLabel: `PokeAPI (${items.length} Pokémons)`
     };
   }
 
-  throw new Error(`Jogo "${query}" não possui base de dados direta. Tente: LoL, Brawl Stars, Genshin Impact ou Pokémon.`);
+  throw new Error(`Jogo específico "${query}" não possui rota dedicada. Buscando na base universal...`);
 }
 
-// 4. Carros & Hipercarros (Wikimedia HD API)
+// 5. Carros & Hipercarros (Wikimedia HD API)
 const HYPERCAR_CATALOG = [
   { title: 'Bugatti_Chiron', name: 'Bugatti Chiron' },
   { title: 'Bugatti_Veyron', name: 'Bugatti Veyron' },
@@ -505,7 +565,7 @@ export async function importCars(queryOrUrl) {
   }
 
   const responses = await Promise.all(chunks.map(async chunk => {
-    const url = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + chunk.join('|') + '&prop=pageimages&pithumbsize=600&format=json&origin=*';
+    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${chunk.join('|')}&prop=pageimages&pithumbsize=600&format=json&origin=*`;
     const res = await fetch(url);
     const data = await res.json();
     return data.query?.pages ? Object.values(data.query.pages) : [];
@@ -523,7 +583,7 @@ export async function importCars(queryOrUrl) {
       const cleanTitle = p.title.toLowerCase();
       const displayName = nameMap[cleanTitle] || p.title;
       return {
-        id: 'car-' + p.pageid + '-' + Date.now(),
+        id: `car-${p.pageid || index}-${Date.now()}`,
         src: p.thumbnail.source,
         nome: displayName,
         tierId: null,
@@ -541,74 +601,141 @@ export async function importCars(queryOrUrl) {
     cover: items[0]?.src || null,
     items,
     category: 'geral',
-    sourceLabel: `Wikipedia Motors (${items.length} Veículos)`
+    sourceLabel: `Wikimedia Motors (${items.length} Veículos)`
   };
 }
 
+// 6. Motor Universal de Busca (Wikipedia Multilíngue - Para QUALQUER assunto)
+export async function importUniversalWikipedia(query) {
+  const cleanQ = query
+    .replace(/^(filmes?\s+(da|de|do|dos|das|sobre)?\s*)/i, '')
+    .replace(/^(séries?\s+(da|de|do|dos|das|sobre)?\s*)/i, '')
+    .replace(/^(jogadores?\s+(da|de|do|dos|das|sobre)?\s*)/i, '')
+    .replace(/^(personagens?\s+(da|de|do|dos|das|sobre)?\s*)/i, '')
+    .replace(/^(raças?\s+(da|de|do|dos|das|sobre)?\s*)/i, '')
+    .replace(/^(consoles?\s+(da|de|do|dos|das|sobre)?\s*)/i, '')
+    .replace(/^(países?\s+(da|de|do|dos|das|sobre)?\s*)/i, '')
+    .replace(/^(marcas?\s+(da|de|do|dos|das|sobre)?\s*)/i, '')
+    .trim();
+
+  const queries = [query, cleanQ].filter((v, i, a) => a.indexOf(v) === i);
+  const isPt = /[áàâãéèêíïóôõöúçñ]/i.test(query) || 
+    ['filme', 'jogo', 'personagen', 'carro', 'raca', 'raça', 'pais', 'país', 'cantor', 'ator', 'anime', 'desenho', 'serie', 'série', 'heroi', 'herói', 'vila', 'vilão', 'dinossauro', 'futebol', 'marca'].some(w => query.toLowerCase().includes(w));
+  const langs = isPt ? ['pt', 'en'] : ['en', 'pt'];
+
+  for (const q of queries) {
+    for (const lang of langs) {
+      try {
+        const url = `https://${lang}.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=50&prop=pageimages&pithumbsize=600&format=json&origin=*`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const pages = Object.values(data.query?.pages || {})
+          .filter(p => p.thumbnail?.source && !p.title.startsWith('Ficheiro:') && !p.title.startsWith('File:'));
+
+        if (pages.length >= 3) {
+          const items = pages.map((p, index) => ({
+            id: `wiki-${p.pageid || index}-${Date.now()}`,
+            src: p.thumbnail.source,
+            nome: p.title,
+            tierId: null,
+            colIndex: null,
+            uploadIndex: Date.now() + index
+          }));
+
+          return {
+            title: query.charAt(0).toUpperCase() + query.slice(1),
+            cover: items[0]?.src || null,
+            items,
+            category: 'geral',
+            sourceLabel: `Wikipedia Universal (${items.length} Itens)`
+          };
+        }
+      } catch (e) {
+        // continua tentando outros idiomas
+      }
+    }
+  }
+
+  throw new Error(`Não encontramos resultados para "${query}". Tente buscar com outras palavras-chave.`);
+}
+
+// Despachante Principal de Busca Automática (Universal)
 export async function autoImport(input, categoryMode = 'auto') {
   const trimmed = input.trim();
   if (!trimmed) throw new Error('Por favor, informe o termo ou link para buscar.');
 
-  // Modo específico de Jogos
-  if (categoryMode === 'games') {
-    return await importGameCharacters(trimmed);
-  }
-
-  // Modo específico de Músicas
-  if (categoryMode === 'music') {
-    return await importMusic(trimmed, 'album');
-  }
-
-  // Modo específico de Animes
   if (categoryMode === 'anime') {
     return await importAnimeCharacters(trimmed);
   }
-
-  // MODO INTELIGENTE (Auto Detectar)
-  const lower = trimmed.toLowerCase();
-
-  // 1. Detecção de Carros & Hipercarros
-  if (lower.includes('carro') || lower.includes('car') || lower.includes('hypercar') || lower.includes('supercar') || lower.includes('hipercarro') || lower.includes('supercarro') || lower.includes('ferrari') || lower.includes('porsche') || lower.includes('lamborghini') || lower.includes('bugatti') || lower.includes('mclaren') || lower.includes('koenigsegg') || lower.includes('pagani') || lower.includes('aston martin') || lower.includes('veiculo') || lower.includes('veículo')) {
-    try {
-      return await importCars(trimmed);
-    } catch {
-      // continua para outros
-    }
-  }
-
-  // 2. Detecção direta de Jogos populares ou URLs de API
-  if (lower.includes('lol') || lower.includes('league') || lower.includes('brawl') || lower.includes('genshin') || lower.includes('lunaris') || lower.includes('charlist') || lower.includes('pokemon') || lower.includes('pokémon') || lower.includes('honkai') || lower.includes('star rail') || lower.includes('hsr') || lower.includes('nanoka')) {
+  if (categoryMode === 'games') {
     try {
       return await importGameCharacters(trimmed);
     } catch {
-      // continua para outros
+      return await importUniversalWikipedia(trimmed);
+    }
+  }
+  if (categoryMode === 'music') {
+    return await importMusic(trimmed);
+  }
+  if (categoryMode === 'movies') {
+    try {
+      return await importTVSeries(trimmed);
+    } catch {
+      return await importUniversalWikipedia(trimmed);
     }
   }
 
-  // 3. Detecção de Anime / AniList URL
+  // MODO UNIVERSAL (AUTO-DETECTAR E CASCATA INTELIGENTE)
+  const lower = trimmed.toLowerCase();
+
+  // 1. Carros & Hipercarros
+  if (lower.includes('carro') || lower.includes('car') || lower.includes('hypercar') || lower.includes('supercar') || lower.includes('hipercarro') || lower.includes('supercarro') || lower.includes('ferrari') || lower.includes('porsche') || lower.includes('lamborghini') || lower.includes('bugatti') || lower.includes('mclaren') || lower.includes('koenigsegg') || lower.includes('pagani') || lower.includes('aston martin')) {
+    try {
+      return await importCars(trimmed);
+    } catch {}
+  }
+
+  // 2. Jogos Específicos
+  if (lower.includes('lol') || lower.includes('league') || lower.includes('brawl') || lower.includes('genshin') || lower.includes('lunaris') || lower.includes('charlist') || lower.includes('pokemon') || lower.includes('pokémon') || lower.includes('honkai') || lower.includes('star rail') || lower.includes('hsr') || lower.includes('nanoka')) {
+    try {
+      return await importGameCharacters(trimmed);
+    } catch {}
+  }
+
+  // 3. Links do AniList
   if (/anilist\.co/i.test(trimmed)) {
     return await importAnimeCharacters(trimmed);
   }
 
-  // 4. Tenta Anime primeiro
-  try {
-    return await importAnimeCharacters(trimmed);
-  } catch (errAnime) {
-    // 5. Se falhar, tenta Música
-    try {
-      return await importMusic(trimmed, 'album');
-    } catch (errMusic) {
-      // 6. Se falhar, tenta Jogos
-      try {
-        return await importGameCharacters(trimmed);
-      } catch {
-        // 7. Se falhar, tenta Carros
-        try {
-          return await importCars(trimmed);
-        } catch {
-          throw new Error(`Não encontramos resultados para "${trimmed}". Tente o nome de um Anime (ex: Naruto), Jogo (ex: LoL, Genshin), Carros (ex: Hipercarros, Ferrari, Porsche) ou Artista (ex: The Weeknd).`);
-        }
-      }
-    }
+  // 4. Links de Música
+  if (/spotify\.com|music\.apple\.com|last\.fm/i.test(trimmed)) {
+    return await importMusic(trimmed);
   }
+
+  // 5. Tentativa com Anime (AniList)
+  try {
+    const animeRes = await importAnimeCharacters(trimmed);
+    if (animeRes && animeRes.items?.length > 0) return animeRes;
+  } catch {}
+
+  // 6. Tentativa com Séries & Elencos (TVMaze)
+  try {
+    const tvRes = await importTVSeries(trimmed);
+    if (tvRes && tvRes.items?.length >= 3) return tvRes;
+  } catch {}
+
+  // 7. Tentativa com Música & Álbuns (Last.fm HD)
+  try {
+    const musicRes = await importMusic(trimmed);
+    if (musicRes && musicRes.items?.length >= 3) return musicRes;
+  } catch {}
+
+  // 8. Tentativa com Carros
+  try {
+    const carRes = await importCars(trimmed);
+    if (carRes && carRes.items?.length > 0) return carRes;
+  } catch {}
+
+  // 9. CASCATA FINAL: MOTOR UNIVERSAL DA WIKIPEDIA (Para qualquer outro tema)
+  return await importUniversalWikipedia(trimmed);
 }
