@@ -534,10 +534,10 @@ export default function TemplateMaker() {
         </div>
       </div>
 
-      <div className="control-card" style={{ padding: '20px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-          <h3>Estrutura dos Tiers</h3>
-          <div style={{ display: 'flex', gap: '10px' }}>
+      <div className="control-card" style={{ padding: '16px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
+          <h3 style={{ margin: 0 }}>Estrutura dos Tiers</h3>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button 
               className={layoutMode === 'classico' ? 'btn-active' : 'btn-secondary'}
               onClick={() => handleLayoutChange('classico')}
@@ -548,7 +548,7 @@ export default function TemplateMaker() {
             >Modo Avançado</button>
           </div>
         </div>
-        <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '20px' }}>Configure as cores, textos, adicione ou remova linhas. Este esqueleto será salvo no modelo!</p>
+        <p style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '16px', lineHeight: '1.4' }}>Configure as cores, textos, adicione ou remova linhas. Este esqueleto será salvo no modelo!</p>
         
         {/* TierBoard disabled DND mode by not wrapping in DndContext, just for visual config */}
         <div style={{ opacity: 0.9 }}>
@@ -959,16 +959,19 @@ export default function TemplateMaker() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '25px', marginBottom: '20px', padding: '0 10px' }}>
         <button 
           onClick={handleSaveTemplate}
           className="btn-primary" 
           style={{ 
-            padding: '14px 42px', 
-            fontSize: '1.1rem', 
+            width: '100%',
+            maxWidth: '380px',
+            padding: '13px 20px', 
+            fontSize: '1rem', 
             fontWeight: '700',
             display: 'inline-flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: '8px',
             boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.4)'}`
           }}

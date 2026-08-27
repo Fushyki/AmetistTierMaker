@@ -52,19 +52,21 @@
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
-/* Overlay para Mobile: Obrigar a girar a tela */
+/* Overlay para Mobile: Dica para girar a tela */
 .rotate-screen-overlay {
   display: none;
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: #000;
+  background: rgba(7, 9, 19, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: #fff;
   z-index: 99999;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 30px;
+  padding: 24px;
 }
 
 @media screen and (max-width: 900px) and (orientation: portrait) {

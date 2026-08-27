@@ -134,7 +134,7 @@ export default function Home() {
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '14px' }}>
+          <div className="template-grid-responsive">
             {featuredTemplates.map(template => (
               <div 
                 key={`feat-${template.id}`} 
@@ -205,7 +205,7 @@ export default function Home() {
         />
 
         {/* Barra de Filtros de Categoria */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '22px', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className="categories-scroll-bar">
           {TEMPLATE_CATEGORIES.map(cat => {
             const isSelected = selectedCategory === cat.id;
             return (
@@ -213,22 +213,23 @@ export default function Home() {
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
                 style={{
-                  padding: '7px 15px',
+                  padding: '7px 14px',
                   borderRadius: '20px',
                   border: isSelected ? `1px solid ${cat.color}` : '1px solid #2f2f38',
                   backgroundColor: isSelected ? `${cat.color}22` : '#18181b',
                   color: isSelected ? '#ffffff' : '#9999a5',
-                  fontSize: '0.85rem',
+                  fontSize: '0.82rem',
                   fontWeight: isSelected ? '600' : '400',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.2s ease',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '7px'
+                  gap: '6px',
+                  flexShrink: 0
                 }}
               >
-                <CategoryIcon name={cat.iconName} size={15} color={isSelected ? cat.color : '#888899'} />
+                <CategoryIcon name={cat.iconName} size={14} color={isSelected ? cat.color : '#888899'} />
                 <span>{cat.label}</span>
               </button>
             );
@@ -238,7 +239,7 @@ export default function Home() {
         {isLoading ? (
           <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Carregando templates...</p>
         ) : filteredTemplates.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px' }}>
+          <div className="template-grid-responsive">
             {filteredTemplates.map(template => (
               <div key={template.id} style={{ position: 'relative' }}>
                 {template.data?.is_featured && (

@@ -477,7 +477,7 @@ export default function Profile() {
       </div>
 
       {/* ABAS DE NAVEGAÇÃO */}
-      <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #282834', paddingBottom: '10px', marginBottom: '22px', flexWrap: 'wrap' }}>
+      <div className="profile-tabs-bar">
         <button
           onClick={() => setActiveTab('tierlists')}
           style={{

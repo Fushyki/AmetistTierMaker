@@ -8,7 +8,7 @@ import { exportBoardAsImage } from '../utils/imageExporter';
 import { promptInput } from '../utils/alerts';
 import { toast } from '../utils/notifications';
 import { supabase } from '../services/supabaseClient';
-import { Pencil } from 'lucide-react';
+import { Pencil, Smartphone, X, CornerDownLeft } from 'lucide-react';
 
 import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
@@ -261,8 +261,9 @@ export default function Tierlist() {
           onExport={(format, quality) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: siteTheme || theme || 'ametist', quality })}
         />
 
-        <div className="dica-texto" style={{ marginBottom: '14px', textAlign: 'center' }}>
-          Dica: No celular, clique na imagem e depois clique na área de tier desejada para mover.
+        <div className="mobile-touch-hint">
+          <Smartphone size={15} />
+          <span>Toque no personagem e depois toque no tier desejado para posicionar rapidamente.</span>
         </div>
 
         <TierBoard 
@@ -298,6 +299,39 @@ export default function Tierlist() {
             onUpdateApi={loadFromApiAgain}
             onDeleteSelected={handleDeleteSelected}
           />
+        )}
+
+        {/* Barra Flutuante de Seleção Mobile / Touch */}
+        {selectedItem && (
+          <div className="mobile-selection-bar">
+            <div className="mobile-selection-info">
+              <img src={selectedItem.src} alt={selectedItem.nome || 'Item'} className="mobile-selection-thumb" />
+              <div className="mobile-selection-text">
+                <span className="mobile-selection-title">{selectedItem.nome || 'Item Selecionado'}</span>
+                <span className="mobile-selection-hint">Toque em um Tier para posicionar</span>
+              </div>
+            </div>
+            <div className="mobile-selection-actions">
+              {selectedItem.tierId !== null && (
+                <button 
+                  type="button" 
+                  onClick={() => handleAreaClick(null, null)} 
+                  className="btn-mobile-return"
+                  title="Devolver ao Banco de Imagens"
+                >
+                  <CornerDownLeft size={14} /> Devolver
+                </button>
+              )}
+              <button 
+                type="button" 
+                onClick={() => setSelectedItem(null)} 
+                className="btn-mobile-cancel"
+                title="Desmarcar Seleção"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </DndContext>

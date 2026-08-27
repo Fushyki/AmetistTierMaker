@@ -154,6 +154,8 @@ export default function Copa() {
     return localStorage.getItem('copa-name') || 'Copa do Mundo 2026';
   });
 
+  const [dismissRotateWarning, setDismissRotateWarning] = useState(false);
+
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [activeTeam, setActiveTeam] = useState(null);
@@ -546,13 +548,31 @@ export default function Copa() {
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel} autoScroll={false}>
       <div className={`copa-container ${isPresentationMode ? 'presentation-mode' : ''}`}>
         
-        <div className="rotate-screen-overlay">
-          <h2 style={{ color: '#fbbf24', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            <AlertTriangle size={24} /> Aviso
-          </h2>
-          <p>O Modo Copa do Mundo requer muito espaço na tela.</p>
-          <p>Por favor, <strong>gire o seu celular</strong> (Modo Paisagem) ou acesse pelo computador para montar o seu chaveamento.</p>
-        </div>
+        {!dismissRotateWarning && (
+          <div className="rotate-screen-overlay">
+            <h2 style={{ color: '#fbbf24', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <AlertTriangle size={24} /> Dica de Visualização
+            </h2>
+            <p style={{ margin: '0 0 10px 0', fontSize: '0.95rem' }}>O Chaveamento da Copa do Mundo fica muito melhor na horizontal.</p>
+            <p style={{ margin: '0 0 20px 0', color: '#cbd5e1', fontSize: '0.85rem' }}><strong>Gire o seu celular</strong> (Modo Paisagem) ou continue navegando com rolagem lateral.</p>
+            <button 
+              type="button" 
+              onClick={() => setDismissRotateWarning(true)}
+              style={{
+                background: '#fbbf24',
+                color: '#000',
+                border: 'none',
+                padding: '10px 22px',
+                borderRadius: '8px',
+                fontWeight: 'bold',
+                fontSize: '0.85rem',
+                cursor: 'pointer'
+              }}
+            >
+              Entendi, continuar
+            </button>
+          </div>
+        )}
 
         {!isPresentationMode && (
           <div className="copa-banner">
