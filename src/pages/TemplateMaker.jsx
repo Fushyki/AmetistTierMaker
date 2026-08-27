@@ -1,16 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import { confirmAction } from '../utils/alerts';
 import TierBoard from '../components/TierBoard';
 import { fetchAndParseAPI } from '../utils/apiParser';
 import { processImage } from '../utils/imageProcessor';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
-import { importAnimeCharacters, importMusic, autoImport } from '../utils/autoImporter';
-import { Sparkles, Zap, Flame, Music, Lock, X, Loader2 } from 'lucide-react';
+import { autoImport } from '../utils/autoImporter';
+import { Sparkles, Zap, Flame, Music, Lock, X, Loader2, Search, Check, AlertCircle, Gamepad2 } from 'lucide-react';
 
 const initialRanksAvancado = [
   { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
@@ -30,6 +30,7 @@ const initialRanksClassico = [
 
 export default function TemplateMaker() {
   const { user, loading: authLoading } = useAuth();
+  const { activeTheme, showCustomToast } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -45,7 +46,7 @@ export default function TemplateMaker() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const [dataSourceType, setDataSourceType] = useState('manual'); // 'manual' ou 'api'
+  const [dataSourceType, setDataSourceType] = useState('manual'); // 'manual', 'auto' ou 'api'
   const [apiConfig, setApiConfig] = useState({
     url: '',
     arrayPath: '',
@@ -58,34 +59,41 @@ export default function TemplateMaker() {
     pagesToFetch: 1
   });
   const [autoQuery, setAutoQuery] = useState('');
+  const [autoCategory, setAutoCategory] = useState('auto'); // 'auto', 'anime', 'games', 'music'
+  const [autoFeedback, setAutoFeedback] = useState(null); // { type: 'success' | 'error', message: string }
   const [isAutoLoading, setIsAutoLoading] = useState(false);
   const [isTestingApi, setIsTestingApi] = useState(false);
 
-  const handleRunAutoImport = async (type = 'auto') => {
-    if (!autoQuery.trim()) {
-      return toast.error('Digite o nome ou link do Anime/Artista primeiro!');
+  const handleRunAutoImport = async (overrideQuery = null, overrideCat = null) => {
+    const q = (overrideQuery !== null ? overrideQuery : autoQuery).trim();
+    const cat = overrideCat !== null ? overrideCat : autoCategory;
+
+    if (!q) {
+      setAutoFeedback({ type: 'error', message: 'Digite o nome de um Anime, Jogo ou Artista para buscar.' });
+      return;
     }
 
-    setIsAutoLoading(true);
-    try {
-      let result;
-      if (type === 'anime') {
-        result = await importAnimeCharacters(autoQuery);
-      } else if (type === 'music') {
-        result = await importMusic(autoQuery, 'album');
-      } else {
-        result = await autoImport(autoQuery);
-      }
+    if (overrideQuery) setAutoQuery(overrideQuery);
+    if (overrideCat) setAutoCategory(overrideCat);
 
+    setIsAutoLoading(true);
+    setAutoFeedback(null);
+
+    try {
+      const result = await autoImport(q, cat);
       setItems(result.items);
       if (!name) setName(result.title);
       if (!coverImage && result.cover) setCoverImage(result.cover);
       if (result.category) setCategory(result.category);
 
-      toast.success(`${result.items.length} itens importados com sucesso!`);
+      const successMsg = `${result.items.length} itens importados com sucesso (${result.sourceLabel || 'Banco de Dados'})!`;
+      setAutoFeedback({ type: 'success', message: successMsg });
+      if (showCustomToast) {
+        showCustomToast('Importação Concluída', `${result.items.length} itens carregados para o template.`, 'palette');
+      }
     } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Erro ao importar automaticamente.');
+      setAutoFeedback({ type: 'error', message: err.message || 'Erro ao importar automaticamente.' });
     } finally {
       setIsAutoLoading(false);
     }
@@ -565,88 +573,175 @@ export default function TemplateMaker() {
         </div>
 
         {dataSourceType === 'auto' ? (
-          <div style={{ background: '#161618', padding: '18px', borderRadius: '12px', border: '1px solid rgba(176,98,235,0.35)', marginBottom: '15px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#b062eb' }}>
+          <div style={{ 
+            background: '#141418', 
+            padding: '20px', 
+            borderRadius: '12px', 
+            border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.35)'}`, 
+            marginBottom: '15px',
+            boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.1)'}`
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: activeTheme?.accentColor || '#b062eb' }}>
               <Sparkles size={20} />
-              <h4 style={{ margin: 0, fontSize: '1rem', color: '#fff' }}>Importação Automática em 1 Clique</h4>
+              <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff' }}>Importação Automática em 1 Clique</h4>
             </div>
             <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 16px 0', lineHeight: '1.4' }}>
-              Digite o nome de um <strong>Anime</strong> (ex: <em>Jujutsu Kaisen, Naruto, Bleach</em>) ou <strong>Artista/Música</strong> (ex: <em>The Weeknd, Taylor Swift, Travis Scott</em>) ou cole um link do AniList. Buscaremos todos os personagens e capas em alta definição!
+              Pesquise qualquer <strong>Anime</strong> (AniList), <strong>Jogo</strong> (LoL, Brawl Stars, Genshin, Pokémon) ou <strong>Artista Musical</strong> (Apple Music). O Ametist buscará todos os personagens, imagens HD, título e capa automaticamente!
             </p>
 
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
-              <input 
-                type="text" 
-                placeholder="Ex: Jujutsu Kaisen OU The Weeknd..." 
-                value={autoQuery}
-                onChange={(e) => setAutoQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleRunAutoImport('auto'); }}
-                style={{
-                  flex: 1,
-                  minWidth: '240px',
-                  padding: '11px 16px',
-                  borderRadius: '8px',
-                  border: '1px solid #3a3a40',
-                  backgroundColor: '#212124',
-                  color: '#fff',
-                  fontSize: '0.95rem',
-                  outline: 'none'
-                }}
-              />
+            {/* Categorias de busca */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
+              {[
+                { id: 'auto', label: 'Tudo (Auto Detectar)', icon: Zap },
+                { id: 'anime', label: 'Animes & Mangás', icon: Flame },
+                { id: 'games', label: 'Jogos & Personagens', icon: Gamepad2 },
+                { id: 'music', label: 'Músicas & Artistas', icon: Music },
+              ].map(cat => {
+                const isSelected = autoCategory === cat.id;
+                const IconComp = cat.icon;
+                return (
+                  <button
+                    type="button"
+                    key={cat.id}
+                    onClick={() => {
+                      setAutoCategory(cat.id);
+                      setAutoFeedback(null);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      border: isSelected ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #2f2f38',
+                      backgroundColor: isSelected ? `${activeTheme?.accentColor || '#b062eb'}25` : '#18181c',
+                      color: isSelected ? '#ffffff' : '#8e8e99',
+                      fontSize: '0.8rem',
+                      fontWeight: isSelected ? '700' : '400',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <IconComp size={14} color={isSelected ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {/* Barra de Busca Unificada com Botão Integrado */}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+              <div style={{ flex: 1, minWidth: '260px', position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Search size={18} color="#777" style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
+                <input 
+                  type="text" 
+                  placeholder={
+                    autoCategory === 'anime' ? "Ex: Jujutsu Kaisen, Naruto, Bleach, Attack on Titan..." :
+                    autoCategory === 'games' ? "Ex: League of Legends, Brawl Stars, Genshin Impact, Pokemon..." :
+                    autoCategory === 'music' ? "Ex: The Weeknd, Taylor Swift, Travis Scott, Drake..." :
+                    "Digite o nome de um Anime, Jogo ou Artista musical..."
+                  }
+                  value={autoQuery}
+                  onChange={(e) => {
+                    setAutoQuery(e.target.value);
+                    if (autoFeedback) setAutoFeedback(null);
+                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleRunAutoImport(); }}
+                  style={{
+                    width: '100%',
+                    padding: '11px 14px 11px 38px',
+                    borderRadius: '8px',
+                    border: '1px solid #383842',
+                    backgroundColor: '#1b1b20',
+                    color: '#fff',
+                    fontSize: '0.92rem',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
               <button
-                onClick={() => handleRunAutoImport('anime')}
+                type="button"
+                onClick={() => handleRunAutoImport()}
                 disabled={isAutoLoading}
                 className="btn-primary"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '7px',
-                  padding: '9px 18px',
-                  cursor: isAutoLoading ? 'not-allowed' : 'pointer',
-                  opacity: isAutoLoading ? 0.6 : 1
+                  gap: '8px',
+                  padding: '11px 22px',
+                  cursor: isAutoLoading ? 'wait' : 'pointer',
+                  fontWeight: '700',
+                  fontSize: '0.9rem',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                <Flame size={15} color="#ffd1d9" /> Importar Anime (AniList)
-              </button>
-              <button
-                onClick={() => handleRunAutoImport('music')}
-                disabled={isAutoLoading}
-                className="btn-secondary"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '7px',
-                  padding: '9px 18px',
-                  cursor: isAutoLoading ? 'not-allowed' : 'pointer',
-                  opacity: isAutoLoading ? 0.6 : 1
-                }}
-              >
-                <Music size={15} color="#e9d5ff" /> Importar Discografia (Música)
-              </button>
-              <button
-                onClick={() => handleRunAutoImport('auto')}
-                disabled={isAutoLoading}
-                className="btn-secondary"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '7px',
-                  padding: '9px 18px',
-                  cursor: isAutoLoading ? 'not-allowed' : 'pointer',
-                  opacity: isAutoLoading ? 0.6 : 1
-                }}
-              >
-                <Zap size={15} color="#fef08a" /> Auto Detectar
+                {isAutoLoading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Importando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={16} />
+                    <span>Buscar e Importar</span>
+                  </>
+                )}
               </button>
             </div>
 
-            {isAutoLoading && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '16px', color: '#b062eb', fontWeight: '600', fontSize: '0.9rem' }}>
-                <Loader2 size={18} className="animate-spin" />
-                <span>Consultando base de dados e baixando imagens em alta definição...</span>
+            {/* Sugestões Rápidas em 1 Clique */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '8px', fontSize: '0.78rem', color: '#777' }}>
+              <span>Sugestões rápidas:</span>
+              {[
+                { label: 'League of Legends', cat: 'games' },
+                { label: 'Brawl Stars', cat: 'games' },
+                { label: 'Genshin Impact', cat: 'games' },
+                { label: 'Pokémon (151)', q: 'Pokemon', cat: 'games' },
+                { label: 'Jujutsu Kaisen', cat: 'anime' },
+                { label: 'The Weeknd', cat: 'music' }
+              ].map(sug => (
+                <button
+                  type="button"
+                  key={sug.label}
+                  onClick={() => handleRunAutoImport(sug.q || sug.label, sug.cat)}
+                  disabled={isAutoLoading}
+                  style={{
+                    background: '#222228',
+                    border: '1px solid #33333d',
+                    borderRadius: '6px',
+                    color: '#bbb',
+                    padding: '3px 8px',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#33333d'; e.currentTarget.style.color = '#bbb'; }}
+                >
+                  {sug.label}
+                </button>
+              ))}
+            </div>
+
+            {/* FEEDBACK INLINE (SEM BLOQUEAR A TELA) */}
+            {autoFeedback && (
+              <div 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginTop: '14px',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  backgroundColor: autoFeedback.type === 'success' ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                  border: autoFeedback.type === 'success' ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
+                  color: autoFeedback.type === 'success' ? '#4ade80' : '#f87171',
+                  fontSize: '0.85rem'
+                }}
+              >
+                {autoFeedback.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
+                <span>{autoFeedback.message}</span>
               </div>
             )}
           </div>

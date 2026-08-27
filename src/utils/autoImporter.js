@@ -1,15 +1,15 @@
 ﻿/**
- * Utilitário de Importação Automática Inteligente
+ * Utilitário de Importação Automática Inteligente do Ametist
  * Suporta:
- * 1. AniList (Animes, Mangás, Personagens) via GraphQL oficial gratuito
- * 2. Discografia e Músicas (Álbuns e Faixas) via Apple/iTunes Open Search API
+ * 1. Animes & Mangás (AniList GraphQL Oficial)
+ * 2. Jogos (League of Legends, Brawl Stars, Genshin Impact, Pokémon)
+ * 3. Músicas & Discografia (Apple Music / iTunes HD API)
  */
 
 export async function importAnimeCharacters(queryOrUrl) {
   let search = queryOrUrl.trim();
   let animeId = null;
 
-  // Se for uma URL do AniList (ex: https://anilist.co/anime/113415/...)
   const urlMatch = search.match(/anilist\.co\/anime\/(\d+)/i);
   if (urlMatch) {
     animeId = parseInt(urlMatch[1], 10);
@@ -29,7 +29,7 @@ export async function importAnimeCharacters(queryOrUrl) {
           extraLarge
           large
         }
-        characters (page: 1, perPage: 50, sort: [ROLE, RELEVANCE]) {
+        characters (page: 1, perPage: 60, sort: [ROLE, RELEVANCE]) {
           nodes {
             id
             name {
@@ -59,15 +59,15 @@ export async function importAnimeCharacters(queryOrUrl) {
 
   const json = await response.json();
   if (json.errors && json.errors.length > 0) {
-    throw new Error(json.errors[0].message || 'Anime não encontrado no AniList.');
+    throw new Error(json.errors[0].message || 'Anime não encontrado no banco de dados.');
   }
 
   const media = json.data?.Media;
-  if (!media) throw new Error('Nenhum resultado encontrado para este anime.');
+  if (!media) throw new Error('Nenhum resultado de anime encontrado para esta busca.');
 
   const characters = media.characters?.nodes || [];
   if (characters.length === 0) {
-    throw new Error('Nenhum personagem encontrado para este anime.');
+    throw new Error('Nenhum personagem catalogado para este anime.');
   }
 
   const title = media.title?.english || media.title?.romaji || search;
@@ -86,26 +86,23 @@ export async function importAnimeCharacters(queryOrUrl) {
     title,
     cover,
     items,
-    category: 'animes'
+    category: 'animes',
+    sourceLabel: 'AniList (Anime)'
   };
 }
 
 export async function importMusic(queryOrUrl, entity = 'album') {
   let cleanQuery = queryOrUrl.trim();
-
-  // Limpeza caso o usuário cole link do Spotify ou Apple Music
   cleanQuery = cleanQuery.replace(/https?:\/\/(open\.spotify\.com|music\.apple\.com)\/[^\s]+/i, '').trim() || cleanQuery;
 
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanQuery)}&entity=${entity}&limit=50`;
-
   const response = await fetch(url);
   const data = await response.json();
 
   if (!data.results || data.results.length === 0) {
-    throw new Error(`Nenhum(a) ${entity === 'album' ? 'álbum' : 'música'} encontrado(a).`);
+    throw new Error(`Nenhum(a) ${entity === 'album' ? 'álbum' : 'música'} encontrado(a) para "${cleanQuery}".`);
   }
 
-  // Filtrar e padronizar
   const seen = new Set();
   const items = [];
 
@@ -113,8 +110,6 @@ export async function importMusic(queryOrUrl, entity = 'album') {
     const item = data.results[i];
     const name = entity === 'album' ? item.collectionName : item.trackName;
     const rawArtwork = item.artworkUrl100 || item.artworkUrl60;
-    
-    // Obter arte em alta definição (600x600)
     const src = rawArtwork ? rawArtwork.replace('100x100bb', '600x600bb') : null;
 
     if (name && src && !seen.has(name.toLowerCase())) {
@@ -140,28 +135,169 @@ export async function importMusic(queryOrUrl, entity = 'album') {
     title,
     cover,
     items,
-    category: 'musica'
+    category: 'musica',
+    sourceLabel: 'Apple Music (Discografia)'
   };
 }
 
-/**
- * Detector automático que identifica o melhor importador
- */
-export async function autoImport(input) {
+export async function importGameCharacters(query) {
+  const q = query.toLowerCase().trim();
+
+  // 1. League of Legends / LoL
+  if (q.includes('lol') || q.includes('league of legends') || q.includes('league') || q.includes('champions')) {
+    const versionsRes = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+    const versions = await versionsRes.json();
+    const latestVersion = versions[0];
+
+    const champsRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${latestVersion}/data/pt_BR/champion.json`);
+    const champsData = await champsRes.json();
+
+    const items = Object.values(champsData.data).map((c, i) => ({
+      id: `lol-${c.id}-${Date.now()}`,
+      src: `https://ddragon.leagueoflegends.com/cdn/${latestVersion}/img/champion/${c.image.full}`,
+      nome: c.name,
+      tierId: null,
+      colIndex: null,
+      uploadIndex: Date.now() + i
+    }));
+
+    return {
+      title: 'League of Legends - Campeões',
+      cover: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg',
+      items,
+      category: 'games',
+      sourceLabel: 'Riot Games (Data Dragon)'
+    };
+  }
+
+  // 2. Brawl Stars
+  if (q.includes('brawl') || q.includes('brawl stars') || q.includes('brawler')) {
+    const bsRes = await fetch('https://api.brawlapi.com/v1/brawlers');
+    const bsData = await bsRes.json();
+    const list = bsData.list || [];
+
+    const items = list.map((b, i) => ({
+      id: `brawl-${b.id}-${Date.now()}`,
+      src: b.imageUrl2 || b.imageUrl,
+      nome: b.name,
+      tierId: null,
+      colIndex: null,
+      uploadIndex: Date.now() + i
+    })).filter(it => Boolean(it.src));
+
+    return {
+      title: 'Brawl Stars - Brawlers',
+      cover: items[0]?.src || null,
+      items,
+      category: 'games',
+      sourceLabel: 'Brawl Stars API'
+    };
+  }
+
+  // 3. Genshin Impact
+  if (q.includes('genshin') || q.includes('genshin impact')) {
+    const genshinRes = await fetch('https://genshin.jmp.blue/characters');
+    const characters = await genshinRes.json();
+
+    const items = characters.map((slug, i) => ({
+      id: `genshin-${slug}-${Date.now()}`,
+      src: `https://genshin.jmp.blue/characters/${slug}/icon-big`,
+      nome: slug.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' '),
+      tierId: null,
+      colIndex: null,
+      uploadIndex: Date.now() + i
+    }));
+
+    return {
+      title: 'Genshin Impact - Personagens',
+      cover: items[0]?.src || null,
+      items,
+      category: 'games',
+      sourceLabel: 'Genshin API'
+    };
+  }
+
+  // 4. Pokémon (Kanto Gen 1 padrão ou todas)
+  if (q.includes('pokemon') || q.includes('pokémon')) {
+    let limit = 151;
+    let title = 'Pokémon - 1ª Geração (Kanto)';
+    if (q.includes('gen 2') || q.includes('johto')) { limit = 251; title = 'Pokémon - 1ª e 2ª Geração'; }
+    else if (q.includes('all') || q.includes('todos')) { limit = 386; title = 'Pokémon - Clássicos'; }
+
+    const pokeRes = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}`);
+    const pokeData = await pokeRes.json();
+
+    const items = (pokeData.results || []).map((p, i) => ({
+      id: `poke-${i + 1}-${Date.now()}`,
+      src: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i + 1}.png`,
+      nome: p.name.charAt(0).toUpperCase() + p.name.slice(1),
+      tierId: null,
+      colIndex: null,
+      uploadIndex: Date.now() + i
+    }));
+
+    return {
+      title,
+      cover: items[0]?.src || null,
+      items,
+      category: 'games',
+      sourceLabel: 'PokeAPI'
+    };
+  }
+
+  throw new Error(`Jogo "${query}" não possui base de dados direta. Tente: LoL, Brawl Stars, Genshin Impact ou Pokémon.`);
+}
+
+export async function autoImport(input, categoryMode = 'auto') {
   const trimmed = input.trim();
-  if (/anilist\.co|anime|manga/i.test(trimmed)) {
+  if (!trimmed) throw new Error('Por favor, informe o termo ou link para buscar.');
+
+  // Modo específico de Jogos
+  if (categoryMode === 'games') {
+    return await importGameCharacters(trimmed);
+  }
+
+  // Modo específico de Músicas
+  if (categoryMode === 'music') {
+    return await importMusic(trimmed, 'album');
+  }
+
+  // Modo específico de Animes
+  if (categoryMode === 'anime') {
     return await importAnimeCharacters(trimmed);
   }
-  
-  // Tentar primeiro por Anime
+
+  // MODO INTELIGENTE (Auto Detectar)
+  const lower = trimmed.toLowerCase();
+
+  // 1. Detecção direta de Jogos populares
+  if (lower.includes('lol') || lower.includes('league') || lower.includes('brawl') || lower.includes('genshin') || lower.includes('pokemon') || lower.includes('pokémon')) {
+    try {
+      return await importGameCharacters(trimmed);
+    } catch {
+      // continua para outros
+    }
+  }
+
+  // 2. Detecção de Anime / AniList URL
+  if (/anilist\.co/i.test(trimmed)) {
+    return await importAnimeCharacters(trimmed);
+  }
+
+  // 3. Tenta Anime primeiro
   try {
     return await importAnimeCharacters(trimmed);
   } catch (errAnime) {
-    // Se falhar, tentar música
+    // 4. Se falhar, tenta Música
     try {
       return await importMusic(trimmed, 'album');
-    } catch {
-      throw new Error(`Não conseguimos identificar nada com "${trimmed}". Tente o nome exato de um Anime ou Artista Musical.`);
+    } catch (errMusic) {
+      // 5. Se falhar, tenta Jogos
+      try {
+        return await importGameCharacters(trimmed);
+      } catch {
+        throw new Error(`Não encontramos resultados para "${trimmed}". Tente o nome de um Anime (ex: Naruto), Jogo (ex: LoL, Genshin, Brawl Stars) ou Artista (ex: The Weeknd).`);
+      }
     }
   }
 }
