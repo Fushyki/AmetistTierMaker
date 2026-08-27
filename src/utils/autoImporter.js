@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Utilitário de Importação Automática Inteligente do Ametist
  * Suporta:
  * 1. Animes & Mangás (AniList GraphQL Oficial)
@@ -194,8 +194,8 @@ export async function importGameCharacters(query) {
     };
   }
 
-  // 3. Genshin Impact
-  if (q.includes('genshin') || q.includes('genshin impact')) {
+  // 3. Genshin Impact (ou Lunaris)
+  if (q.includes('genshin') || q.includes('genshin impact') || q.includes('lunaris')) {
     const genshinRes = await fetch('https://genshin.jmp.blue/characters');
     const characters = await genshinRes.json();
 
@@ -213,7 +213,30 @@ export async function importGameCharacters(query) {
       cover: items[0]?.src || null,
       items,
       category: 'games',
-      sourceLabel: 'Genshin API'
+      sourceLabel: 'Genshin Impact Data'
+    };
+  }
+
+  // 4. Honkai: Star Rail
+  if (q.includes('honkai') || q.includes('star rail') || q.includes('hsr')) {
+    const hsrRes = await fetch('https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/index_new/en/characters.json');
+    const hsrData = await hsrRes.json();
+
+    const items = Object.values(hsrData).map((c, i) => ({
+      id: `hsr-${c.id}-${Date.now()}`,
+      src: `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${c.icon}`,
+      nome: c.name,
+      tierId: null,
+      colIndex: null,
+      uploadIndex: Date.now() + i
+    }));
+
+    return {
+      title: 'Honkai: Star Rail - Personagens',
+      cover: items[0]?.src || null,
+      items,
+      category: 'games',
+      sourceLabel: 'StarRailRes'
     };
   }
 

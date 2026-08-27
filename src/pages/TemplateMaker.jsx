@@ -697,6 +697,7 @@ export default function TemplateMaker() {
                 { label: 'League of Legends', cat: 'games' },
                 { label: 'Brawl Stars', cat: 'games' },
                 { label: 'Genshin Impact', cat: 'games' },
+                { label: 'Honkai: Star Rail', q: 'Honkai', cat: 'games' },
                 { label: 'Pokémon (151)', q: 'Pokemon', cat: 'games' },
                 { label: 'Jujutsu Kaisen', cat: 'anime' },
                 { label: 'The Weeknd', cat: 'music' }
