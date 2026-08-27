@@ -479,124 +479,60 @@ export default function Profile() {
       {/* ABAS DE NAVEGAÇÃO */}
       <div className="profile-tabs-bar">
         <button
+          type="button"
           onClick={() => setActiveTab('tierlists')}
-          style={{
-            padding: '9px 18px',
-            borderRadius: '10px',
-            border: activeTab === 'tierlists' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid transparent',
-            backgroundColor: activeTab === 'tierlists' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
-            color: activeTab === 'tierlists' ? '#ffffff' : '#9999a5',
-            fontWeight: activeTab === 'tierlists' ? '700' : '500',
-            fontSize: '0.88rem',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'tierlists' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
-          }}
+          className={`profile-tab-btn ${activeTab === 'tierlists' ? 'active' : ''}`}
         >
-          <Layers size={16} color={activeTab === 'tierlists' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
-          Minhas Tier Lists ({tierlists.length})
+          <Layers size={16} />
+          <span>Minhas Tier Lists ({tierlists.length})</span>
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('templates')}
-          style={{
-            padding: '9px 18px',
-            borderRadius: '10px',
-            border: activeTab === 'templates' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid transparent',
-            backgroundColor: activeTab === 'templates' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
-            color: activeTab === 'templates' ? '#ffffff' : '#9999a5',
-            fontWeight: activeTab === 'templates' ? '700' : '500',
-            fontSize: '0.88rem',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'templates' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
-          }}
+          className={`profile-tab-btn ${activeTab === 'templates' ? 'active' : ''}`}
         >
-          <Sparkles size={16} color={activeTab === 'templates' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
-          Meus Modelos ({userTemplates.length})
+          <Sparkles size={16} />
+          <span>Meus Modelos ({userTemplates.length})</span>
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('visual')}
-          style={{
-            padding: '9px 18px',
-            borderRadius: '10px',
-            border: activeTab === 'visual' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid transparent',
-            backgroundColor: activeTab === 'visual' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
-            color: activeTab === 'visual' ? '#ffffff' : '#9999a5',
-            fontWeight: activeTab === 'visual' ? '700' : '500',
-            fontSize: '0.88rem',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'visual' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
-          }}
+          className={`profile-tab-btn ${activeTab === 'visual' ? 'active' : ''}`}
         >
-          <Palette size={16} color={activeTab === 'visual' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
-          Personalização & Visuais
+          <Palette size={16} />
+          <span>Personalização & Visuais</span>
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('account')}
-          style={{
-            padding: '9px 18px',
-            borderRadius: '10px',
-            border: activeTab === 'account' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid transparent',
-            backgroundColor: activeTab === 'account' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
-            color: activeTab === 'account' ? '#ffffff' : '#9999a5',
-            fontWeight: activeTab === 'account' ? '700' : '500',
-            fontSize: '0.88rem',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'account' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
-          }}
+          className={`profile-tab-btn ${activeTab === 'account' ? 'active' : ''}`}
         >
-          <KeyRound size={16} color={activeTab === 'account' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
-          Segurança da Conta
+          <KeyRound size={16} />
+          <span>Segurança da Conta</span>
         </button>
 
         {isAdmin(user) && (
           <button
+            type="button"
             onClick={() => {
               setActiveTab('admin');
               fetchAdminData();
             }}
-            style={{
-              padding: '9px 18px',
-              borderRadius: '10px',
-              border: activeTab === 'admin' ? '1.5px solid #ef4444' : '1px solid rgba(239,68,68,0.3)',
-              backgroundColor: activeTab === 'admin' ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.06)',
-              color: activeTab === 'admin' ? '#ffffff' : '#f87171',
-              fontWeight: activeTab === 'admin' ? '700' : '500',
-              fontSize: '0.88rem',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-              boxShadow: activeTab === 'admin' ? '0 0 14px rgba(239,68,68,0.35)' : 'none'
-            }}
+            className={`profile-tab-btn admin-tab ${activeTab === 'admin' ? 'active' : ''}`}
           >
-            <ShieldAlert size={16} color={activeTab === 'admin' ? '#f87171' : '#ef4444'} />
-            Painel Admin
+            <ShieldAlert size={16} />
+            <span>Painel Admin</span>
           </button>
         )}
       </div>
 
       {/* CONTEÚDO DA ABA: MINHAS TIER LISTS */}
       {activeTab === 'tierlists' && (
-        <div className="control-card" style={{ padding: '22px' }}>
+        <div className="profile-tab-content">
+          <div className="control-card" style={{ padding: '22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
             <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Minhas Listas Salvas na Nuvem</h3>
             <input 
@@ -674,11 +610,13 @@ export default function Profile() {
             </div>
           )}
         </div>
+      </div>
       )}
 
       {/* CONTEÚDO DA ABA: MEUS MODELOS */}
       {activeTab === 'templates' && (
-        <div className="control-card" style={{ padding: '22px' }}>
+        <div className="profile-tab-content">
+          <div className="control-card" style={{ padding: '22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Modelos Publicados por Você</h3>
@@ -763,11 +701,12 @@ export default function Profile() {
             </div>
           )}
         </div>
+      </div>
       )}
 
       {/* CONTEÚDO DA ABA: VISUAL & CORES */}
       {activeTab === 'visual' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="profile-tab-content" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           <div className="control-card" style={{ padding: '22px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
@@ -787,15 +726,16 @@ export default function Profile() {
                     onClick={() => setSiteTheme(t.id)}
                     style={{
                       backgroundColor: '#16161a',
-                      border: isSelected ? '2px solid ' + t.primaryColor : '1px solid #282830',
+                      border: isSelected ? '2px solid ' + t.primaryColor : '2px solid #282830',
                       borderRadius: '12px',
                       padding: '14px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '12px',
-                      transition: 'all 0.2s ease',
-                      boxShadow: isSelected ? '0 0 16px ' + t.glowColor : 'none'
+                      transition: 'border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease',
+                      boxShadow: isSelected ? '0 0 16px ' + t.glowColor : 'none',
+                      boxSizing: 'border-box'
                     }}
                   >
                     <div style={{
@@ -837,12 +777,14 @@ export default function Profile() {
                 style={{
                   padding: '12px 20px',
                   borderRadius: '10px',
-                  border: uiDensity === 'compact' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid #2e2e38',
+                  border: uiDensity === 'compact' ? '2px solid ' + (activeTheme?.accentColor || '#b062eb') : '2px solid #2e2e38',
                   backgroundColor: uiDensity === 'compact' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
                   color: uiDensity === 'compact' ? '#fff' : '#aaa',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  boxShadow: uiDensity === 'compact' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
+                  transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+                  boxShadow: uiDensity === 'compact' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none',
+                  boxSizing: 'border-box'
                 }}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Compacto (Recomendado)</div>
@@ -855,12 +797,14 @@ export default function Profile() {
                 style={{
                   padding: '12px 20px',
                   borderRadius: '10px',
-                  border: uiDensity === 'spacious' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid #2e2e38',
+                  border: uiDensity === 'spacious' ? '2px solid ' + (activeTheme?.accentColor || '#b062eb') : '2px solid #2e2e38',
                   backgroundColor: uiDensity === 'spacious' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
                   color: uiDensity === 'spacious' ? '#fff' : '#aaa',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  boxShadow: uiDensity === 'spacious' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
+                  transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+                  boxShadow: uiDensity === 'spacious' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none',
+                  boxSizing: 'border-box'
                 }}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Confortável</div>
@@ -873,74 +817,78 @@ export default function Profile() {
 
       {/* CONTEÚDO DA ABA: SEGURANÇA DA CONTA */}
       {activeTab === 'account' && (
-        <div className="control-card" style={{ padding: '22px', maxWidth: '520px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <KeyRound size={20} color={activeTheme?.accentColor || '#b062eb'} />
-            <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Alterar Senha de Acesso</h3>
+        <div className="profile-tab-content">
+          <div className="control-card" style={{ padding: '22px' }}>
+            <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                <KeyRound size={20} color={activeTheme?.accentColor || '#b062eb'} />
+                <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Alterar Senha de Acesso</h3>
+              </div>
+
+              <form onSubmit={handleUpdatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#aaa', marginBottom: '6px' }}>Nova Senha</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input 
+                      type={showNewPassword ? 'text' : 'password'}
+                      placeholder="Mínimo de 6 caracteres"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#777', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      tabIndex="-1"
+                    >
+                      {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#aaa', marginBottom: '6px' }}>Confirmar Nova Senha</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input 
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="Repita a nova senha"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#777', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      tabIndex="-1"
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#777', lineHeight: '1.4' }}>
+                  A nova senha é criptografada e salva instantaneamente no banco de autenticação do Supabase. Nos próximos acessos, utilize esta nova senha.
+                </p>
+
+                <button 
+                  type="submit" 
+                  disabled={isUpdatingPassword}
+                  className="btn-primary" 
+                  style={{ marginTop: '8px', padding: '11px', width: '100%' }}
+                >
+                  {isUpdatingPassword ? 'Atualizando...' : 'Salvar Nova Senha'}
+                </button>
+              </form>
+            </div>
           </div>
-
-          <form onSubmit={handleUpdatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#aaa', marginBottom: '6px' }}>Nova Senha</label>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <input 
-                  type={showNewPassword ? 'text' : 'password'}
-                  placeholder="Mínimo de 6 caracteres"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.9rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#777', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                  tabIndex="-1"
-                >
-                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#aaa', marginBottom: '6px' }}>Confirmar Nova Senha</label>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <input 
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Repita a nova senha"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.9rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#777', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                  tabIndex="-1"
-                >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#777', lineHeight: '1.4' }}>
-              A nova senha é criptografada e salva instantaneamente no banco de autenticação do Supabase. Nos próximos acessos, utilize esta nova senha.
-            </p>
-
-            <button 
-              type="submit" 
-              disabled={isUpdatingPassword}
-              className="btn-primary" 
-              style={{ marginTop: '8px', padding: '11px' }}
-            >
-              {isUpdatingPassword ? 'Atualizando...' : 'Salvar Nova Senha'}
-            </button>
-          </form>
         </div>
       )}
 
       {/* CONTEÚDO DA ABA: PAINEL ADMIN (EXCLUSIVO) */}
       {activeTab === 'admin' && isAdmin(user) && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+        <div className="profile-tab-content" style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
           
           {/* TOPO DO PAINEL ADMIN */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
