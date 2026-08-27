@@ -608,7 +608,7 @@ export default function TemplateMaker() {
               <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff' }}>Importação Automática em 1 Clique</h4>
             </div>
             <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 16px 0', lineHeight: '1.4' }}>
-              Pesquise qualquer <strong>Anime</strong> (AniList), <strong>Jogo</strong> (LoL, Brawl Stars, Genshin, Pokémon) ou <strong>Artista Musical</strong> (Apple Music). O Ametist buscará todos os personagens, imagens HD, título e capa automaticamente!
+              Pesquise qualquer <strong>Anime</strong> (AniList), <strong>Jogo</strong> (LoL, Genshin, Pokémon), <strong>Hipercarros</strong> ou <strong>Artista Musical</strong> (Apple Music). O Ametist buscará todos os itens, imagens HD, título e capa automaticamente!
             </p>
 
             {/* Categorias de busca */}
@@ -657,12 +657,7 @@ export default function TemplateMaker() {
                 <Search size={18} color="#777" style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
                 <input 
                   type="text" 
-                  placeholder={
-                    autoCategory === 'anime' ? "Ex: Jujutsu Kaisen, Naruto, Bleach, Attack on Titan..." :
-                    autoCategory === 'games' ? "Ex: League of Legends, Brawl Stars, Genshin Impact, Pokemon..." :
-                    autoCategory === 'music' ? "Ex: The Weeknd, Taylor Swift, Travis Scott, Drake..." :
-                    "Digite o nome de um Anime, Jogo ou Artista musical..."
-                  }
+                  placeholder="Digite um Anime, Jogo, Carros (ex: Hipercarros, Ferrari) ou Artista..."
                   value={autoQuery}
                   onChange={(e) => {
                     setAutoQuery(e.target.value);
@@ -714,9 +709,11 @@ export default function TemplateMaker() {
 
             {/* Sugestões Rápidas em 1 Clique */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '8px', fontSize: '0.78rem', color: '#777' }}>
-              <span>Sugestões rápidas:</span>
+              <span style={{ fontWeight: '500' }}>Sugestões:</span>
               {[
-                { label: 'League of Legends', cat: 'games' },
+                { label: 'Hipercarros', q: 'hipercarros', cat: 'auto' },
+                { label: 'Ferrari', q: 'ferrari', cat: 'auto' },
+                { label: 'League of Legends', q: 'LoL', cat: 'games' },
                 { label: 'Brawl Stars', cat: 'games' },
                 { label: 'Genshin Impact', cat: 'games' },
                 { label: 'Honkai: Star Rail', q: 'Honkai', cat: 'games' },

@@ -411,6 +411,140 @@ export async function importGameCharacters(query) {
   throw new Error(`Jogo "${query}" não possui base de dados direta. Tente: LoL, Brawl Stars, Genshin Impact ou Pokémon.`);
 }
 
+// 4. Carros & Hipercarros (Wikimedia HD API)
+const HYPERCAR_CATALOG = [
+  { title: 'Bugatti_Chiron', name: 'Bugatti Chiron' },
+  { title: 'Bugatti_Veyron', name: 'Bugatti Veyron' },
+  { title: 'Bugatti_Divo', name: 'Bugatti Divo' },
+  { title: 'Bugatti_Bolide', name: 'Bugatti Bolide' },
+  { title: 'Bugatti_Tourbillon', name: 'Bugatti Tourbillon' },
+  { title: 'Bugatti_Centodieci', name: 'Bugatti Centodieci' },
+  { title: 'Koenigsegg_Jesko', name: 'Koenigsegg Jesko' },
+  { title: 'Koenigsegg_Agera', name: 'Koenigsegg Agera RS' },
+  { title: 'Koenigsegg_Regera', name: 'Koenigsegg Regera' },
+  { title: 'Koenigsegg_Gemera', name: 'Koenigsegg Gemera' },
+  { title: 'Koenigsegg_CC850', name: 'Koenigsegg CC850' },
+  { title: 'Pagani_Zonda', name: 'Pagani Zonda' },
+  { title: 'Pagani_Huayra', name: 'Pagani Huayra' },
+  { title: 'Pagani_Utopia', name: 'Pagani Utopia' },
+  { title: 'LaFerrari', name: 'Ferrari LaFerrari' },
+  { title: 'Ferrari_SF90_Stradale', name: 'Ferrari SF90 Stradale' },
+  { title: 'Ferrari_Daytona_SP3', name: 'Ferrari Daytona SP3' },
+  { title: 'Ferrari_Enzo', name: 'Ferrari Enzo' },
+  { title: 'Ferrari_F40', name: 'Ferrari F40' },
+  { title: 'Ferrari_F50', name: 'Ferrari F50' },
+  { title: 'Ferrari_296', name: 'Ferrari 296 GTB' },
+  { title: 'McLaren_P1', name: 'McLaren P1' },
+  { title: 'McLaren_Senna', name: 'McLaren Senna' },
+  { title: 'McLaren_Speedtail', name: 'McLaren Speedtail' },
+  { title: 'McLaren_720S', name: 'McLaren 720S' },
+  { title: 'McLaren_W1', name: 'McLaren W1' },
+  { title: 'McLaren_Elva', name: 'McLaren Elva' },
+  { title: 'Porsche_918_Spyder', name: 'Porsche 918 Spyder' },
+  { title: 'Porsche_Carrera_GT', name: 'Porsche Carrera GT' },
+  { title: 'Porsche_911_GT3', name: 'Porsche 911 GT3 RS' },
+  { title: 'Porsche_959', name: 'Porsche 959' },
+  { title: 'Lamborghini_Veneno', name: 'Lamborghini Veneno' },
+  { title: 'Lamborghini_Centenario', name: 'Lamborghini Centenario' },
+  { title: 'Lamborghini_Revuelto', name: 'Lamborghini Revuelto' },
+  { title: 'Lamborghini_Si%C3%A1n_FKP_37', name: 'Lamborghini Sián FKP 37' },
+  { title: 'Lamborghini_Aventador', name: 'Lamborghini Aventador SVJ' },
+  { title: 'Lamborghini_Hurac%C3%A1n', name: 'Lamborghini Huracán STO' },
+  { title: 'Aston_Martin_Valkyrie', name: 'Aston Martin Valkyrie' },
+  { title: 'Aston_Martin_Valhalla', name: 'Aston Martin Valhalla' },
+  { title: 'Aston_Martin_Vulcan', name: 'Aston Martin Vulcan' },
+  { title: 'Aston_Martin_One-77', name: 'Aston Martin One-77' },
+  { title: 'Mercedes-AMG_One', name: 'Mercedes-AMG ONE' },
+  { title: 'Rimac_Nevera', name: 'Rimac Nevera' },
+  { title: 'Hennessey_Venom_F5', name: 'Hennessey Venom F5' },
+  { title: 'SSC_Tuatara', name: 'SSC Tuatara' },
+  { title: 'De_Tomaso_P72', name: 'De Tomaso P72' },
+  { title: 'Gordon_Murray_Automotive_T.50', name: 'GMA T.50' },
+  { title: 'Pininfarina_Battista', name: 'Pininfarina Battista' },
+  { title: 'Apollo_Intensa_Emozione', name: 'Apollo Intensa Emozione' },
+  { title: 'Maserati_MC20', name: 'Maserati MC20' },
+  { title: 'Ford_GT', name: 'Ford GT' },
+  { title: 'Lexus_LFA', name: 'Lexus LFA' }
+];
+
+export async function importCars(queryOrUrl) {
+  const q = queryOrUrl.toLowerCase().trim();
+  let selectedCatalog = HYPERCAR_CATALOG;
+  let title = 'Hipercarros & Supercarros Definitivos';
+
+  if (q.includes('ferrari')) {
+    selectedCatalog = HYPERCAR_CATALOG.filter(c => c.name.toLowerCase().includes('ferrari') || c.title.toLowerCase().includes('laferrari'));
+    title = 'Supercarros Ferrari';
+  } else if (q.includes('porsche')) {
+    selectedCatalog = HYPERCAR_CATALOG.filter(c => c.name.toLowerCase().includes('porsche'));
+    title = 'Supercarros Porsche';
+  } else if (q.includes('lamborghini')) {
+    selectedCatalog = HYPERCAR_CATALOG.filter(c => c.name.toLowerCase().includes('lamborghini'));
+    title = 'Supercarros Lamborghini';
+  } else if (q.includes('bugatti')) {
+    selectedCatalog = HYPERCAR_CATALOG.filter(c => c.name.toLowerCase().includes('bugatti'));
+    title = 'Hipercarros Bugatti';
+  } else if (q.includes('mclaren')) {
+    selectedCatalog = HYPERCAR_CATALOG.filter(c => c.name.toLowerCase().includes('mclaren'));
+    title = 'Supercarros McLaren';
+  } else if (q.includes('koenigsegg')) {
+    selectedCatalog = HYPERCAR_CATALOG.filter(c => c.name.toLowerCase().includes('koenigsegg'));
+    title = 'Hipercarros Koenigsegg';
+  } else if (q.includes('aston')) {
+    selectedCatalog = HYPERCAR_CATALOG.filter(c => c.name.toLowerCase().includes('aston'));
+    title = 'Supercarros Aston Martin';
+  } else if (q.includes('pagani')) {
+    selectedCatalog = HYPERCAR_CATALOG.filter(c => c.name.toLowerCase().includes('pagani'));
+    title = 'Hipercarros Pagani';
+  }
+
+  const titles = selectedCatalog.map(c => c.title);
+  const chunks = [];
+  for (let i = 0; i < titles.length; i += 40) {
+    chunks.push(titles.slice(i, i + 40));
+  }
+
+  const responses = await Promise.all(chunks.map(async chunk => {
+    const url = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + chunk.join('|') + '&prop=pageimages&pithumbsize=600&format=json&origin=*';
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.query?.pages ? Object.values(data.query.pages) : [];
+  }));
+
+  const pages = responses.flat();
+  const nameMap = {};
+  selectedCatalog.forEach(c => {
+    nameMap[decodeURIComponent(c.title).replace(/_/g, ' ').toLowerCase()] = c.name;
+  });
+
+  const items = pages
+    .filter(p => p.thumbnail && p.thumbnail.source)
+    .map((p, index) => {
+      const cleanTitle = p.title.toLowerCase();
+      const displayName = nameMap[cleanTitle] || p.title;
+      return {
+        id: 'car-' + p.pageid + '-' + Date.now(),
+        src: p.thumbnail.source,
+        nome: displayName,
+        tierId: null,
+        colIndex: null,
+        uploadIndex: Date.now() + index
+      };
+    });
+
+  if (items.length === 0) {
+    throw new Error('Nenhum veículo encontrado para esta pesquisa.');
+  }
+
+  return {
+    title,
+    cover: items[0]?.src || null,
+    items,
+    category: 'geral',
+    sourceLabel: `Wikipedia Motors (${items.length} Veículos)`
+  };
+}
+
 export async function autoImport(input, categoryMode = 'auto') {
   const trimmed = input.trim();
   if (!trimmed) throw new Error('Por favor, informe o termo ou link para buscar.');
@@ -433,7 +567,16 @@ export async function autoImport(input, categoryMode = 'auto') {
   // MODO INTELIGENTE (Auto Detectar)
   const lower = trimmed.toLowerCase();
 
-  // 1. Detecção direta de Jogos populares ou URLs de API
+  // 1. Detecção de Carros & Hipercarros
+  if (lower.includes('carro') || lower.includes('car') || lower.includes('hypercar') || lower.includes('supercar') || lower.includes('hipercarro') || lower.includes('supercarro') || lower.includes('ferrari') || lower.includes('porsche') || lower.includes('lamborghini') || lower.includes('bugatti') || lower.includes('mclaren') || lower.includes('koenigsegg') || lower.includes('pagani') || lower.includes('aston martin') || lower.includes('veiculo') || lower.includes('veículo')) {
+    try {
+      return await importCars(trimmed);
+    } catch {
+      // continua para outros
+    }
+  }
+
+  // 2. Detecção direta de Jogos populares ou URLs de API
   if (lower.includes('lol') || lower.includes('league') || lower.includes('brawl') || lower.includes('genshin') || lower.includes('lunaris') || lower.includes('charlist') || lower.includes('pokemon') || lower.includes('pokémon') || lower.includes('honkai') || lower.includes('star rail') || lower.includes('hsr') || lower.includes('nanoka')) {
     try {
       return await importGameCharacters(trimmed);
@@ -442,24 +585,29 @@ export async function autoImport(input, categoryMode = 'auto') {
     }
   }
 
-  // 2. Detecção de Anime / AniList URL
+  // 3. Detecção de Anime / AniList URL
   if (/anilist\.co/i.test(trimmed)) {
     return await importAnimeCharacters(trimmed);
   }
 
-  // 3. Tenta Anime primeiro
+  // 4. Tenta Anime primeiro
   try {
     return await importAnimeCharacters(trimmed);
   } catch (errAnime) {
-    // 4. Se falhar, tenta Música
+    // 5. Se falhar, tenta Música
     try {
       return await importMusic(trimmed, 'album');
     } catch (errMusic) {
-      // 5. Se falhar, tenta Jogos
+      // 6. Se falhar, tenta Jogos
       try {
         return await importGameCharacters(trimmed);
       } catch {
-        throw new Error(`Não encontramos resultados para "${trimmed}". Tente o nome de um Anime (ex: Naruto), Jogo (ex: LoL, Genshin, Brawl Stars) ou Artista (ex: The Weeknd).`);
+        // 7. Se falhar, tenta Carros
+        try {
+          return await importCars(trimmed);
+        } catch {
+          throw new Error(`Não encontramos resultados para "${trimmed}". Tente o nome de um Anime (ex: Naruto), Jogo (ex: LoL, Genshin), Carros (ex: Hipercarros, Ferrari, Porsche) ou Artista (ex: The Weeknd).`);
+        }
       }
     }
   }
