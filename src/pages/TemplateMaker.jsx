@@ -813,9 +813,72 @@ export default function TemplateMaker() {
           </div>
         ) : (
           <div style={{ background: '#161618', padding: '15px', borderRadius: '8px' }}>
-            <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '15px' }}>
+            <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '12px' }}>
               Conecte a uma API JSON externa. As imagens não serão salvas no seu banco, e sim carregadas diretamente da API toda vez que a Tier List for aberta.
             </p>
+
+            {/* Presets Rápidos de API */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '14px', padding: '10px 12px', background: '#1e1e24', borderRadius: '8px', border: '1px solid #2d2d38' }}>
+              <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: '600' }}>Presets Rápidos:</span>
+              <button
+                type="button"
+                onClick={() => setApiConfig({
+                  url: 'https://static.nanoka.cc/hsr/4.4.55/character.json',
+                  pagesToFetch: 1,
+                  arrayPath: '',
+                  namePath: 'en',
+                  imagePath: '_api_key_id',
+                  imageBaseUrl: 'https://static.nanoka.cc/assets/hsr/avatarshopicon/',
+                  replaceFrom: '',
+                  replaceTo: '',
+                  imageSuffix: '.webp'
+                })}
+                style={{ background: '#292934', border: '1px solid #3d3d4e', borderRadius: '6px', color: '#fff', padding: '5px 10px', fontSize: '0.78rem', cursor: 'pointer', transition: 'border-color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#3d3d4e'}
+              >
+                Honkai: Star Rail (Nanoka)
+              </button>
+              <button
+                type="button"
+                onClick={() => setApiConfig({
+                  url: 'https://api.lunaris.moe/data/7.0.52.2/charlist.json',
+                  pagesToFetch: 1,
+                  arrayPath: '',
+                  namePath: 'ptName',
+                  imagePath: 'CardImg',
+                  imageBaseUrl: 'https://lunaris.moe/assets/UI/',
+                  replaceFrom: '',
+                  replaceTo: '',
+                  imageSuffix: '.png'
+                })}
+                style={{ background: '#292934', border: '1px solid #3d3d4e', borderRadius: '6px', color: '#fff', padding: '5px 10px', fontSize: '0.78rem', cursor: 'pointer', transition: 'border-color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#3d3d4e'}
+              >
+                Genshin Impact (Lunaris)
+              </button>
+              <button
+                type="button"
+                onClick={() => setApiConfig({
+                  url: 'https://gi.yatta.moe/api/v2/pt/avatar',
+                  pagesToFetch: 1,
+                  arrayPath: 'data.items',
+                  namePath: 'name',
+                  imagePath: 'icon',
+                  imageBaseUrl: 'https://gi.yatta.moe/assets/UI/',
+                  replaceFrom: '',
+                  replaceTo: '',
+                  imageSuffix: '.png'
+                })}
+                style={{ background: '#292934', border: '1px solid #3d3d4e', borderRadius: '6px', color: '#fff', padding: '5px 10px', fontSize: '0.78rem', cursor: 'pointer', transition: 'border-color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#3d3d4e'}
+              >
+                Genshin Impact (Project Amber)
+              </button>
+            </div>
+
             <div style={{ display: 'grid', gap: '10px' }}>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <input type="text" placeholder="URL da API (ex: ...anime?page=[PAGE])" value={apiConfig.url} onChange={e => setApiConfig({...apiConfig, url: e.target.value})} style={{ flex: 1, minWidth: '300px', padding: '10px', borderRadius: '5px', border: '1px solid #3a3a40', backgroundColor: '#212124', color: '#fff' }} />
