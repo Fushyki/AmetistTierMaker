@@ -533,8 +533,15 @@ export default function Profile() {
       {activeTab === 'tierlists' && (
         <div className="profile-tab-content">
           <div className="control-card" style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-            <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Minhas Listas Salvas na Nuvem</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700', borderBottom: 'none', paddingBottom: 0, textAlign: 'left', textTransform: 'none' }}>
+                Minhas Listas Salvas na Nuvem
+              </h3>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#8e8e99' }}>
+                Acesse, renomeie ou continue editando suas tier lists salvas na nuvem.
+              </p>
+            </div>
             <input 
               type="search"
               placeholder="Buscar nas minhas listas..."
@@ -617,10 +624,12 @@ export default function Profile() {
       {activeTab === 'templates' && (
         <div className="profile-tab-content">
           <div className="control-card" style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Modelos Publicados por Você</h3>
-              <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#aaa' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700', borderBottom: 'none', paddingBottom: 0, textAlign: 'left', textTransform: 'none' }}>
+                Modelos Publicados por Você
+              </h3>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#8e8e99' }}>
                 Gerencie as configurações internas, capas, bancos de imagens e regras dos seus templates.
               </p>
             </div>

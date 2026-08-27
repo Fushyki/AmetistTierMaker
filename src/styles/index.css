@@ -754,7 +754,17 @@ h1 {
 }
 
 .control-card { flex: 1 1 200px; display: flex; flex-direction: column; gap: 8px; }
-.control-card h3 { margin: 0; color: var(--accent-color); text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; border-bottom: 1px solid var(--accent-border); padding-bottom: 4px; text-align: center; }
+.controls-wrapper .control-card h3,
+.controls-container-wrapper .control-card h3 { 
+    margin: 0; 
+    color: var(--accent-color); 
+    text-transform: uppercase; 
+    font-size: 0.82rem; 
+    letter-spacing: 0.5px; 
+    border-bottom: 1px solid var(--accent-border); 
+    padding-bottom: 4px; 
+    text-align: center; 
+}
 .btn-grid { display: flex; flex-direction: column; gap: 6px; }
 .btn-primary { background: var(--accent-gradient); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 10px var(--accent-glow); }
 .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
