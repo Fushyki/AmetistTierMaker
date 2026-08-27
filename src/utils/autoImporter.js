@@ -296,8 +296,69 @@ export async function importGameCharacters(query) {
     };
   }
 
-  // 4. Honkai: Star Rail
-  if (q.includes('honkai') || q.includes('star rail') || q.includes('hsr')) {
+  // 4. Honkai: Star Rail (API Nanoka Oficial - hsr.nanoka.cc)
+  if (q.includes('honkai') || q.includes('star rail') || q.includes('hsr') || q.includes('nanoka')) {
+    try {
+      let version = '4.4.55';
+      try {
+        const pageRes = await fetch('https://hsr.nanoka.cc/character', { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        if (pageRes.ok) {
+          const html = await pageRes.text();
+          const match = html.match(/https:\/\/static\.nanoka\.cc\/hsr\/([\d.]+)\/character\.json/);
+          if (match && match[1]) version = match[1];
+        }
+      } catch (errVer) {
+        console.warn('Erro ao consultar versão do Nanoka:', errVer);
+      }
+
+      const hsrRes = await fetch(`https://static.nanoka.cc/hsr/${version}/character.json`);
+      if (hsrRes.ok) {
+        const hsrData = await hsrRes.json();
+        const elementMap = {
+          Physical: 'Físico',
+          Fire: 'Fogo',
+          Ice: 'Gelo',
+          Thunder: 'Raio',
+          Wind: 'Vento',
+          Quantum: 'Quântico',
+          Imaginary: 'Imaginário'
+        };
+
+        const items = Object.entries(hsrData)
+          .filter(([id, c]) => Boolean(c && (c.en || c.name)))
+          .map(([id, c], i) => {
+            let name = c.en || c.name || `Personagem ${id}`;
+            if (name === '{NICKNAME}' || id.startsWith('800')) {
+              const elem = elementMap[c.damageType] || c.damageType || 'Físico';
+              const gender = id.endsWith('1') || id.endsWith('3') || id.endsWith('5') || id.endsWith('7') || id.endsWith('9') ? 'M' : 'F';
+              name = `Desbravador (${elem}) [${gender}]`;
+            }
+
+            return {
+              id: `hsr-${id}-${Date.now()}`,
+              src: `https://static.nanoka.cc/assets/hsr/avatarshopicon/${id}.webp`,
+              nome: name,
+              tierId: null,
+              colIndex: null,
+              uploadIndex: Date.now() + i
+            };
+          });
+
+        if (items.length > 0) {
+          return {
+            title: 'Honkai: Star Rail - Todos os Personagens',
+            cover: 'https://static.nanoka.cc/assets/hsr/avatardrawcard/1308.webp', // Acheron
+            items,
+            category: 'games',
+            sourceLabel: `Nanoka HSR (${items.length} Personagens)`
+          };
+        }
+      }
+    } catch (errNanoka) {
+      console.warn('Fallback para StarRailRes:', errNanoka);
+    }
+
+    // Fallback: StarRailRes
     const hsrRes = await fetch('https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/index_new/en/characters.json');
     const hsrData = await hsrRes.json();
 
@@ -373,7 +434,7 @@ export async function autoImport(input, categoryMode = 'auto') {
   const lower = trimmed.toLowerCase();
 
   // 1. Detecção direta de Jogos populares ou URLs de API
-  if (lower.includes('lol') || lower.includes('league') || lower.includes('brawl') || lower.includes('genshin') || lower.includes('lunaris') || lower.includes('charlist') || lower.includes('pokemon') || lower.includes('pokémon') || lower.includes('star rail') || lower.includes('hsr')) {
+  if (lower.includes('lol') || lower.includes('league') || lower.includes('brawl') || lower.includes('genshin') || lower.includes('lunaris') || lower.includes('charlist') || lower.includes('pokemon') || lower.includes('pokémon') || lower.includes('honkai') || lower.includes('star rail') || lower.includes('hsr') || lower.includes('nanoka')) {
     try {
       return await importGameCharacters(trimmed);
     } catch {
