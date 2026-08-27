@@ -258,7 +258,7 @@ export default function Tierlist() {
           isOpen={isExportModalOpen}
           onClose={() => setIsExportModalOpen(false)}
           tierlistName={tierlistName}
-          onExport={(format) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: siteTheme || theme || 'ametist' })}
+          onExport={(format, quality) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: siteTheme || theme || 'ametist', quality })}
         />
 
         <div className="dica-texto" style={{ marginBottom: '14px', textAlign: 'center' }}>

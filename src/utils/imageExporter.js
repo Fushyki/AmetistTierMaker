@@ -16,7 +16,14 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
   let stagingContainer = null;
 
   try {
-    toast.loading(format === 'story' ? 'Renderizando Story 9:16...' : 'Renderizando Imagem 16:9...', { id: 'img-export' });
+    const isStory = format === 'story';
+    const quality = options.quality || 'discord'; // 'discord' (leve ~1-2MB) vs 'ultra' (4K ~8-12MB)
+    const pixelRatio = quality === 'ultra' ? 2 : 1;
+
+    const labelMode = isStory ? 'Story 9:16' : 'Horizontal 16:9';
+    const labelQuality = quality === 'ultra' ? '4K' : 'Otimizado';
+
+    toast.loading(`Renderizando ${labelMode} (${labelQuality})...`, { id: 'img-export' });
     const htmlToImage = await import('html-to-image');
     boardElement.classList.add('clean-mode');
 
@@ -24,7 +31,6 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
     const themeObj = getThemeById(themeName);
     const accent = themeObj.accentColor || '#b062eb';
 
-    const isStory = format === 'story';
     const canvasWidth = isStory ? 1080 : 1920;
     const minCanvasHeight = isStory ? 1920 : 1080;
 
@@ -181,13 +187,13 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
     const finalHeight = Math.max(minCanvasHeight, exportWrapper.scrollHeight || minCanvasHeight);
 
     const dataUrl = await htmlToImage.toPng(exportWrapper, {
-      pixelRatio: 2,
+      pixelRatio: pixelRatio,
       cacheBust: true,
       backgroundColor: '#0b0b0f',
       width: canvasWidth,
       height: finalHeight,
-      canvasWidth: canvasWidth * 2,
-      canvasHeight: finalHeight * 2,
+      canvasWidth: Math.round(canvasWidth * pixelRatio),
+      canvasHeight: Math.round(finalHeight * pixelRatio),
       style: {
         margin: '0',
         top: '0',
@@ -199,10 +205,12 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
     });
 
     const link = document.createElement('a');
-    link.download = filename;
+    const suffix = quality === 'ultra' ? '-4k' : '';
+    const cleanFilename = filename.replace(/\.png$/i, '') + suffix + '.png';
+    link.download = cleanFilename;
     link.href = dataUrl;
     link.click();
-    toast.success(isStory ? 'Story 9:16 gerado com sucesso!' : 'Imagem 16:9 gerada com sucesso!', { id: 'img-export' });
+    toast.success(`${labelMode} (${labelQuality}) baixado com sucesso!`, { id: 'img-export' });
   } catch (error) {
     console.error('Erro ao salvar imagem:', error);
     toast.error('Houve um erro ao gerar a imagem: ' + (error.message || error), { id: 'img-export' });
