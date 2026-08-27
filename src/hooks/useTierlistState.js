@@ -3,8 +3,13 @@ import { useSearchParams } from 'react-router-dom';
 import { toast } from '../utils/notifications';
 import { supabase } from '../services/supabaseClient';
 import { fetchAndParseAPI } from '../utils/apiParser';
-import { confirmAction } from '../utils/alerts';
+import { confirmAction, promptInput } from '../utils/alerts';
+import { autoImport } from '../utils/autoImporter';
 import { useHistory } from './useHistory';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export const initialRanksAvancado = [
   { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },
@@ -153,14 +158,19 @@ export function useTierlistState(user) {
                   const apiItems = await fetchAndParseAPI(data.data.apiConfig);
                   if (apiItems.length === 0) toast.error('A API não retornou nenhuma imagem.');
                   setItems(apiItems);
+                  localStorage.setItem('tierlist-original-bank', JSON.stringify(apiItems || []));
                 } catch {
                   toast.error("Erro ao puxar imagens da API do Template.");
                 }
               } else {
-                setItems(data.data.items);
+                const templateItems = data.data.items || [];
+                setItems(templateItems);
+                localStorage.setItem('tierlist-original-bank', JSON.stringify(templateItems));
               }
             } else {
-              setItems(data.data);
+              const rawItems = Array.isArray(data.data) ? data.data : (data.data.items || []);
+              setItems(rawItems);
+              localStorage.setItem('tierlist-original-bank', JSON.stringify(rawItems));
             }
             
             localStorage.setItem('tierlist-api-loaded', 'true');
@@ -407,8 +417,15 @@ export function useTierlistState(user) {
       if (currentId) {
         await supabase.from('tierlists').update({ data: dataToSave, updated_at: new Date() }).eq('id', currentId);
       } else {
-        const name = prompt('Dê um nome para a sua Tierlist:');
+        const name = await promptInput({
+          title: 'Salvar Tier List',
+          text: 'Dê um nome para a sua Tier List:',
+          defaultValue: tierlistName || 'Minha Tier List',
+          placeholder: 'Ex: Melhores Personagens 2026'
+        });
         if (!name) return;
+        setTierlistName(name);
+        localStorage.setItem('tierlist-name', name);
         const { data, error } = await supabase.from('tierlists').insert([{ user_id: user.id, name, data: dataToSave }]).select();
         if (error) throw error;
         localStorage.setItem('tierlist-current-id', data[0].id);
@@ -424,7 +441,7 @@ export function useTierlistState(user) {
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', 'minha-tierlist.json');
+    linkElement.setAttribute('download', `${tierlistName || 'minha-tierlist'}.json`);
     linkElement.click();
   };
 
@@ -477,55 +494,128 @@ export function useTierlistState(user) {
 
   const loadFromApiAgain = async () => {
     const activeTemplateId = localStorage.getItem('tierlist-active-template-id');
-    const existingIds = new Set(items.map(i => i.id));
+    const placedItems = items.filter(i => i.tierId !== null);
 
     try {
+      let templateItems = [];
+
+      // 1. Tenta carregar o template do Supabase
       if (activeTemplateId) {
         const { data } = await supabase.from('templates').select('data').eq('id', activeTemplateId).single();
         if (data && data.data) {
-          let templateItems = [];
           if (data.data.apiConfig) {
             templateItems = await fetchAndParseAPI(data.data.apiConfig);
           } else {
-            templateItems = data.data.items || data.data;
+            templateItems = data.data.items || (Array.isArray(data.data) ? data.data : []);
           }
+        }
+      }
 
-          if (templateItems.length === 0) {
-            toast.error('A API não retornou nenhuma imagem.');
+      // 2. Se não achou, tenta o banco original em cache local
+      if (!templateItems || templateItems.length === 0) {
+        const cachedBank = localStorage.getItem('tierlist-original-bank');
+        if (cachedBank) {
+          try {
+            templateItems = JSON.parse(cachedBank);
+          } catch (e) {
+            console.warn('Erro ao ler banco local:', e);
+          }
+        }
+      }
+
+      // 3. Fallback inteligente: se detectou personagens de jogos conhecidos
+      if (!templateItems || templateItems.length === 0) {
+        const hasHsr = items.some(i => (i.src || '').includes('nanoka') || (i.id || '').startsWith('hsr-'));
+        const hasGenshin = items.some(i => (i.src || '').includes('lunaris') || (i.src || '').includes('yatta') || (i.id || '').startsWith('genshin-'));
+        
+        if (hasHsr) {
+          const res = await autoImport('hsr');
+          templateItems = res?.items || [];
+        } else if (hasGenshin) {
+          const res = await autoImport('genshin');
+          templateItems = res?.items || [];
+        }
+      }
+
+      if (templateItems && templateItems.length > 0) {
+        localStorage.setItem('tierlist-original-bank', JSON.stringify(templateItems));
+      }
+
+      // Se o usuário possui personagens já colocados nas tiers (já usados)
+      if (placedItems.length > 0) {
+        const result = await MySwal.fire({
+          title: 'Restaurar Banco de Imagens',
+          text: `Você possui ${placedItems.length} personagens colocados nas tiers. O que deseja fazer?`,
+          icon: 'question',
+          showCancelButton: true,
+          showDenyButton: true,
+          confirmButtonColor: '#b062eb',
+          denyButtonColor: '#3b82f6',
+          cancelButtonColor: '#383842',
+          confirmButtonText: 'Devolver Todos ao Banco',
+          denyButtonText: 'Recuperar Apenas Faltantes',
+          cancelButtonText: 'Cancelar',
+          background: '#16161a',
+          color: '#ffffff',
+          customClass: { popup: 'swal-custom-popup' }
+        });
+
+        if (result.isDismissed) return;
+
+        saveHistoryState(items, ranksData);
+
+        if (result.isConfirmed) {
+          // Devolver todos ao banco (reseta posições das tiers)
+          if (templateItems && templateItems.length > 0) {
+            setItems(templateItems.map(it => ({ ...it, tierId: null, colIndex: null })));
+          } else {
+            setItems(prev => prev.map(it => ({ ...it, tierId: null, colIndex: null })));
+          }
+          toast.success('Todos os personagens voltaram para o banco de imagens!');
+          return;
+        }
+
+        if (result.isDenied) {
+          // Recuperar faltantes mantendo intactos os personagens já usados nas tiers
+          if (!templateItems || templateItems.length === 0) {
+            toast.info('Nenhum item adicional encontrado no modelo original.');
             return;
           }
 
-          const missingItems = templateItems.filter(item => !existingIds.has(item.id));
-          if (missingItems.length > 0) {
-            const restoredItems = missingItems.map(item => ({ ...item, tierId: null, colIndex: null }));
+          const currentSrcSet = new Set(items.map(i => i.src || i.nome));
+          const missing = templateItems.filter(t => !currentSrcSet.has(t.src || t.nome));
+
+          if (missing.length > 0) {
+            const restoredItems = missing.map(item => ({ ...item, tierId: null, colIndex: null }));
             setItems(prev => [...prev, ...restoredItems]);
+            toast.success(`${missing.length} personagens adicionados ao banco sem alterar suas tiers!`);
           } else {
-            toast.success('Todas as imagens originais do template já estão presentes.');
+            toast.success('Todos os personagens do modelo já estão no tabuleiro ou banco.');
           }
+          return;
+        }
+      }
+
+      // Se não há itens colocados nas tiers (apenas no banco ou banco foi limpo):
+      if (templateItems && templateItems.length > 0) {
+        saveHistoryState(items, ranksData);
+        const currentSrcSet = new Set(items.map(i => i.src || i.nome));
+        const missing = templateItems.filter(t => !currentSrcSet.has(t.src || t.nome));
+
+        if (missing.length > 0) {
+          const restoredItems = missing.map(item => ({ ...item, tierId: null, colIndex: null }));
+          setItems(prev => [...prev, ...restoredItems]);
+          toast.success(`${missing.length} personagens restaurados para o banco!`);
+        } else {
+          setItems(templateItems.map(it => ({ ...it, tierId: null, colIndex: null })));
+          toast.success('Banco de personagens restaurado com sucesso!');
         }
       } else {
-        const defaultUrl = localStorage.getItem('tierlist-api-url') || 'https://api.lunaris.moe/data/6.6.54.3/charlist.json';
-        const res = await fetch(defaultUrl);
-        const data = await res.json();
-        
-        const newItems = Object.entries(data)
-          .filter(([id]) => !existingIds.has('genshin-' + id))
-          .map(([id, char], index) => {
-            const iconName = char.CardImg ? char.CardImg.replace('UI_Gacha_', 'UI_') : '';
-            return {
-              id: 'genshin-' + id,
-              src: `https://api.lunaris.moe/data/assets/avataricon/${iconName}.webp`,
-              nome: char.ptName || char.enName || id,
-              tierId: null,
-              colIndex: null,
-              uploadIndex: Date.now() + index
-            };
-          });
-
-        setItems(prev => [...prev, ...newItems]);
+        toast.error('Não foi possível carregar os dados originais do modelo.');
       }
     } catch (err) {
       console.error("Erro ao restaurar imagens:", err);
+      toast.error('Erro ao restaurar imagens: ' + err.message);
     }
   };
 

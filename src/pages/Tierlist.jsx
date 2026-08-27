@@ -5,6 +5,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTierlistState } from '../hooks/useTierlistState';
 import { exportBoardAsImage } from '../utils/imageExporter';
+import { promptInput } from '../utils/alerts';
+import { toast } from '../utils/notifications';
+import { supabase } from '../services/supabaseClient';
+import { Pencil } from 'lucide-react';
 
 import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
@@ -173,6 +177,24 @@ export default function Tierlist() {
     }
   };
 
+  const handleRenameTierlist = async () => {
+    const newName = await promptInput({
+      title: 'Renomear Tier List',
+      text: 'Digite um novo nome para esta Tier List:',
+      defaultValue: tierlistName || 'Minha Tier List',
+      placeholder: 'Nome da Tier List'
+    });
+    if (newName && newName !== tierlistName) {
+      setTierlistName(newName);
+      localStorage.setItem('tierlist-name', newName);
+      const currentId = localStorage.getItem('tierlist-current-id');
+      if (currentId && user) {
+        await supabase.from('tierlists').update({ name: newName }).eq('id', currentId);
+      }
+      toast.success('Nome da Tier List atualizado!');
+    }
+  };
+
   return (
     <DndContext sensors={sensors} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <div className={`tierlist-container ${isPresentationMode ? 'presentation-mode' : ''}`}>
@@ -181,7 +203,38 @@ export default function Tierlist() {
           <PresentationOverlay onExit={() => setIsPresentationMode(false)} />
         )}
 
-        {!isPresentationMode && <h1>{tierlistName}</h1>}
+        {!isPresentationMode && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '14px', flexWrap: 'wrap' }}>
+            <h1 
+              style={{ margin: 0, cursor: 'pointer', transition: 'color 0.2s' }} 
+              onClick={handleRenameTierlist} 
+              title="Clique para renomear"
+            >
+              {tierlistName}
+            </h1>
+            <button
+              type="button"
+              onClick={handleRenameTierlist}
+              style={{
+                background: 'rgba(176, 98, 235, 0.12)',
+                border: '1px solid rgba(176, 98, 235, 0.35)',
+                color: '#b062eb',
+                cursor: 'pointer',
+                padding: '6px 8px',
+                borderRadius: '8px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(176, 98, 235, 0.3)'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(176, 98, 235, 0.12)'; e.currentTarget.style.color = '#b062eb'; }}
+              title="Renomear Tier List"
+            >
+              <Pencil size={16} />
+            </button>
+          </div>
+        )}
 
         {!isPresentationMode && (
           <TierlistControls 
