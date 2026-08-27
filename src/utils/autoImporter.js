@@ -194,8 +194,37 @@ export async function importGameCharacters(query) {
     };
   }
 
-  // 3. Genshin Impact (ou Lunaris)
-  if (q.includes('genshin') || q.includes('genshin impact') || q.includes('lunaris')) {
+  // 3. Genshin Impact (API Lunaris / Project Amber Oficial - Atualizada)
+  if (q.includes('genshin') || q.includes('genshin impact') || q.includes('lunaris') || q.includes('amber')) {
+    try {
+      // Nova API Oficial do Lunaris / Project Amber (gi.yatta.moe) com 134+ personagens incluindo Natlan
+      const yattaRes = await fetch('https://gi.yatta.moe/api/v2/pt/avatar');
+      const yattaData = await yattaRes.json();
+      const rawList = Object.values(yattaData?.data?.items || {});
+
+      if (rawList.length > 0) {
+        const items = rawList.map((c, i) => ({
+          id: `genshin-${c.id || i}-${Date.now()}`,
+          src: `https://gi.yatta.moe/assets/UI/${c.icon}.png`,
+          nome: c.name,
+          tierId: null,
+          colIndex: null,
+          uploadIndex: Date.now() + i
+        })).filter(it => Boolean(it.src && it.nome));
+
+        return {
+          title: 'Genshin Impact - Todos os Personagens',
+          cover: 'https://gi.yatta.moe/assets/UI/UI_Gacha_AvatarImg_Furina.png',
+          items,
+          category: 'games',
+          sourceLabel: 'Lunaris / Project Amber (134+ Personagens)'
+        };
+      }
+    } catch (e) {
+      console.warn('Fallback para API secundária de Genshin:', e);
+    }
+
+    // Fallback secundário
     const genshinRes = await fetch('https://genshin.jmp.blue/characters');
     const characters = await genshinRes.json();
 
