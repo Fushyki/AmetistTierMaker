@@ -3,7 +3,7 @@ import { DndContext, useDraggable, useDroppable, DragOverlay } from '@dnd-kit/co
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Swal from 'sweetalert2';
-import toast from 'react-hot-toast';
+import { toast } from '../utils/notifications';
 import { supabase } from '../services/supabaseClient';
 import { defaultTeams } from '../data/copaTeams';
 import { createEmptyMatches } from '../utils/copaBracket';

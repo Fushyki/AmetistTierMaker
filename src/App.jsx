@@ -1,8 +1,8 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import GlobalAnnouncement from './components/GlobalAnnouncement';
+import CustomToastContainer from './components/CustomToastContainer';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -32,21 +32,8 @@ function App() {
             <Navbar />
             <GlobalAnnouncement />
           </header>
-          <Toaster 
-            position="bottom-center"
-            toastOptions={{
-              style: {
-                background: '#333',
-                color: '#fff',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#4CAF50',
-                  secondary: '#fff',
-                },
-              },
-            }}
-          />
+          
+          <CustomToastContainer />
           
           <main style={{ flex: 1, paddingBottom: '30px' }}>
             <ErrorBoundary>

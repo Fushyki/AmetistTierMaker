@@ -8,12 +8,12 @@ import { confirmAction } from '../utils/alerts';
 import { Trash2, Pencil, Star, Sparkles } from 'lucide-react';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
 import CategoryBadge, { CategoryIcon } from '../components/CategoryBadge';
-import toast from 'react-hot-toast';
+import { notify } from '../utils/notifications';
 import '../styles/index.css';
 
 export default function Home() {
   const { user } = useAuth();
-  const { showCustomToast, activeTheme } = useTheme();
+  const { activeTheme } = useTheme();
   const [templates, setTemplates] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
@@ -56,13 +56,9 @@ export default function Home() {
       const { error } = await supabase.from('templates').delete().eq('id', templateId);
       if (!error) {
         setTemplates(prev => prev.filter(t => t.id !== templateId));
-        if (showCustomToast) {
-          showCustomToast('Template Removido', 'O template foi excluído com sucesso.', 'palette');
-        } else {
-          toast.success("Template removido com sucesso!");
-        }
+        notify.success('Template Removido', 'O template foi excluído com sucesso.');
       } else {
-        toast.error("Erro ao deletar: " + error.message);
+        notify.error('Erro ao Deletar', error.message);
       }
     }
   };
@@ -83,16 +79,14 @@ export default function Home() {
       if (error) throw error;
 
       setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, data: updatedData } : t));
-      if (showCustomToast) {
-        showCustomToast(
-          newFeatured ? 'Template em Destaque' : 'Destaque Removido',
-          `"${template.name}" ${newFeatured ? 'foi fixado nos destaques da Home!' : 'foi removido dos destaques.'}`,
-          'palette'
-        );
-      }
+      notify.custom(
+        newFeatured ? 'Template em Destaque' : 'Destaque Removido',
+        `"${template.name}" ${newFeatured ? 'foi fixado nos destaques da Home!' : 'foi removido dos destaques.'}`,
+        'palette'
+      );
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao atualizar destaque: ' + err.message);
+      notify.error('Erro ao Atualizar', err.message);
     }
   };
 

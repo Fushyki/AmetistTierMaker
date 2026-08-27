@@ -1,4 +1,4 @@
-import toast from 'react-hot-toast';
+import { toast } from './notifications';
 import { getThemeById } from '../data/themes';
 
 /**

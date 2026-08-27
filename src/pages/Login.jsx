@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { notify } from '../utils/notifications';
 import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, Sparkles, AlertCircle, Check } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { isValidEmail, checkPasswordStrength } from '../utils/authValidators';
@@ -104,7 +104,7 @@ export default function Login() {
           return;
         }
         
-        toast.success('Bem-vindo de volta!');
+        notify.success('Bem-vindo de volta!', 'Login realizado com sucesso.');
         navigate('/admin');
       } else {
         const { data, error } = await supabase.auth.signUp({ 
@@ -122,7 +122,7 @@ export default function Login() {
         }
         
         if (data?.user) {
-          toast.success('Conta criada com sucesso! Bem-vindo!');
+          notify.success('Conta Criada', 'Sua conta foi criada com sucesso! Bem-vindo!');
           navigate('/admin');
         }
       }

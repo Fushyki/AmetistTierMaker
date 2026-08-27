@@ -33,7 +33,7 @@ import {
   Globe
 } from 'lucide-react';
 import Swal from 'sweetalert2';
-import toast from 'react-hot-toast';
+import { toast, notify } from '../utils/notifications';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
 import CategoryBadge, { CategoryIcon } from '../components/CategoryBadge';
 import '../styles/index.css';

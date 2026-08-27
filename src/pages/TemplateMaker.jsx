@@ -11,6 +11,7 @@ import { processImage } from '../utils/imageProcessor';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
 import { autoImport } from '../utils/autoImporter';
 import { Sparkles, Zap, Flame, Music, Lock, X, Loader2, Search, Check, AlertCircle, Gamepad2 } from 'lucide-react';
+import { toast, notify } from '../utils/notifications';
 
 const initialRanksAvancado = [
   { id: 'group-1', titulo: "APEX CHARACTERS", ranks: [{ id: 'tier-1', l: "T0", c: "s-rank" }, { id: 'tier-2', l: "T0,5", c: "a-rank" }] },

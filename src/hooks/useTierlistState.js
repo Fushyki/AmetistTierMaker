@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from '../utils/notifications';
 import { supabase } from '../services/supabaseClient';
 import { fetchAndParseAPI } from '../utils/apiParser';
 import { confirmAction } from '../utils/alerts';
