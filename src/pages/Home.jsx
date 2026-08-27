@@ -108,7 +108,7 @@ export default function Home() {
   });
 
   return (
-    <div className="tierlist-container" style={{ textAlign: 'center', marginTop: '55px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div className="tierlist-container" style={{ textAlign: 'center', margin: '15px auto 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <img src="/ametist-logo.png" alt="Ametist Logo" className="hero-logo-icon" />
         <img src="/ametist-text.png" alt="Bem-vindo ao Ametist" className="hero-logo-text" />

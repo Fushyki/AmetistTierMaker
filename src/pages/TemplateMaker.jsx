@@ -422,7 +422,7 @@ export default function TemplateMaker() {
 
   if (!user) {
     return (
-      <div className="container" style={{ padding: '20px 15px', maxWidth: '520px', margin: '55px auto 20px', color: '#fff', textAlign: 'center' }}>
+      <div className="container" style={{ padding: '20px 15px', maxWidth: '520px', margin: '20px auto 20px', color: '#fff', textAlign: 'center' }}>
         <h1 style={{ color: '#b062eb', marginBottom: '14px', fontSize: '1.4rem' }}>Acesso Restrito</h1>
         <div style={{ background: '#18181b', padding: '24px 20px', borderRadius: '12px', border: '1px solid #28282e' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
@@ -446,7 +446,7 @@ export default function TemplateMaker() {
   }
 
   return (
-    <div className="container" style={{ padding: '10px 15px', maxWidth: '880px', margin: '55px auto 20px', color: '#fff' }}>
+    <div className="container" style={{ padding: '10px 15px', maxWidth: '880px', margin: '15px auto 20px', color: '#fff' }}>
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <h1 style={{ margin: '0 0 6px 0', color: activeTheme?.accentColor || '#b062eb', fontSize: '1.45rem' }}>
           {editTemplateId ? `Editar Configurações do Modelo: ${name || ''}` : 'Criador de Modelos'}

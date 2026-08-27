@@ -28,7 +28,10 @@ function App() {
     <ThemeProvider>
       <Router>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <GlobalAnnouncement />
+          <header className="ametist-header-sticky">
+            <Navbar />
+            <GlobalAnnouncement />
+          </header>
           <Toaster 
             position="bottom-center"
             toastOptions={{
@@ -44,8 +47,6 @@ function App() {
               },
             }}
           />
-          
-          <Navbar />
           
           <main style={{ flex: 1, paddingBottom: '30px' }}>
             <ErrorBoundary>

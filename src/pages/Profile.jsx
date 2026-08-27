@@ -381,7 +381,7 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="container" style={{ padding: '20px 15px', maxWidth: '520px', margin: '60px auto 20px', color: '#fff', textAlign: 'center' }}>
+      <div className="container" style={{ padding: '20px 15px', maxWidth: '520px', margin: '20px auto 20px', color: '#fff', textAlign: 'center' }}>
         <h1 style={{ color: '#b062eb', marginBottom: '14px', fontSize: '1.4rem' }}>Acesso ao Perfil</h1>
         <div className="control-card" style={{ padding: '24px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
@@ -415,7 +415,7 @@ export default function Profile() {
   });
 
   return (
-    <div className="container" style={{ padding: '10px 15px', maxWidth: '1000px', margin: '55px auto 30px', color: '#fff' }}>
+    <div className="container" style={{ padding: '10px 15px', maxWidth: '1000px', margin: '15px auto 30px', color: '#fff' }}>
       
       {/* CABEÇALHO DO PERFIL */}
       <div 

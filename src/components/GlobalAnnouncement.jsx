@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabaseClient';
 import { Sparkles, Star, Info, AlertTriangle, X } from 'lucide-react';
@@ -91,19 +91,22 @@ export default function GlobalAnnouncement() {
 
   return (
     <div 
+      className="ametist-global-announcement"
       style={{
         background: styleConfig.bg,
         color: styleConfig.textColor,
-        padding: '8px 16px',
-        fontSize: '0.86rem',
+        padding: '7px 16px',
+        fontSize: '0.84rem',
         fontWeight: '500',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        zIndex: 1000,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.35)',
-        textAlign: 'center'
+        zIndex: 999,
+        borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.25)',
+        textAlign: 'center',
+        width: '100%'
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '1000px', paddingRight: '28px' }}>
