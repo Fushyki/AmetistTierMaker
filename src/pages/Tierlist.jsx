@@ -189,7 +189,6 @@ export default function Tierlist() {
             layoutMode={layoutMode}
             colunas={colunas}
             canUndo={canUndo}
-            activeTemplateId={activeTemplateId}
             onExportImage={() => setIsExportModalOpen(true)}
             onExportJSON={handleExportJSON}
             onImportJSON={handleImportJSON}

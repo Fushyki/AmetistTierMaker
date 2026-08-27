@@ -21,8 +21,7 @@ import {
   FolderHeart,
   Eye,
   EyeOff,
-  Lock,
-  Settings
+  Lock
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
@@ -407,16 +406,6 @@ export default function Profile() {
                     >
                       Abrir Tier List
                     </button>
-                    {item.data?.templateId && (
-                      <Link
-                        to={`/template-maker?editTemplateId=${item.data.templateId}`}
-                        className="btn-secondary"
-                        style={{ padding: '6px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
-                        title="Editar Configurações do Modelo Base"
-                      >
-                        <Settings size={14} />
-                      </Link>
-                    )}
                     <button 
                       onClick={() => handleRenameTierlist(item.id, item.name)}
                       className="btn-secondary"

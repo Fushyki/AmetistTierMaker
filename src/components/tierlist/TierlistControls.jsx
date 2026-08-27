@@ -1,13 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Pencil } from 'lucide-react';
 
 export default function TierlistControls({
   user,
   layoutMode,
   colunas,
   canUndo,
-  activeTemplateId,
   onExportImage,
   onExportJSON,
   onImportJSON,
@@ -53,26 +50,6 @@ export default function TierlistControls({
       <div className="control-card">
         <h3>Configuração</h3>
         <div className="btn-grid">
-          {activeTemplateId && (
-            <Link 
-              to={`/template-maker?editTemplateId=${activeTemplateId}`} 
-              className="btn-secondary"
-              style={{
-                textDecoration: 'none',
-                textAlign: 'center',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                border: '1.5px solid var(--accent-border)',
-                color: 'var(--accent-color)',
-                fontWeight: '600'
-              }}
-              title="Editar título, capa, imagens e configurações do modelo base"
-            >
-              <Pencil size={13} /> Editar Configurações do Modelo
-            </Link>
-          )}
           <button onClick={onEnterPresentation} className="btn-secondary">
             Modo Apresentação
           </button>
