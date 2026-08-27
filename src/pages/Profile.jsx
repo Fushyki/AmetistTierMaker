@@ -21,7 +21,8 @@ import {
   FolderHeart,
   Eye,
   EyeOff,
-  Lock
+  Lock,
+  Settings
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
@@ -404,8 +405,18 @@ export default function Profile() {
                       className="btn-primary"
                       style={{ flex: 1, padding: '6px 10px', fontSize: '0.8rem' }}
                     >
-                      Abrir / Editar
+                      Abrir Tier List
                     </button>
+                    {item.data?.templateId && (
+                      <Link
+                        to={`/template-maker?editTemplateId=${item.data.templateId}`}
+                        className="btn-secondary"
+                        style={{ padding: '6px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                        title="Editar Configurações do Modelo Base"
+                      >
+                        <Settings size={14} />
+                      </Link>
+                    )}
                     <button 
                       onClick={() => handleRenameTierlist(item.id, item.name)}
                       className="btn-secondary"
@@ -434,7 +445,12 @@ export default function Profile() {
       {activeTab === 'templates' && (
         <div className="control-card" style={{ padding: '22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-            <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Modelos Publicados por Você</h3>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Modelos Publicados por Você</h3>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#aaa' }}>
+                Gerencie as configurações internas, capas, bancos de imagens e regras dos seus templates.
+              </p>
+            </div>
             <Link to="/template-maker" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
               + Criar Novo Modelo
             </Link>
@@ -450,7 +466,7 @@ export default function Profile() {
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '14px' }}>
               {filteredTemplates.map(template => (
                 <div 
                   key={template.id}
@@ -466,7 +482,7 @@ export default function Profile() {
                   <img 
                     src={template.cover_image} 
                     alt={template.name} 
-                    style={{ width: '100%', height: '110px', objectFit: 'cover' }}
+                    style={{ width: '100%', height: '115px', objectFit: 'cover' }}
                     onError={(e) => { e.target.src = 'https://via.placeholder.com/300x150?text=Sem+Capa'; }}
                   />
                   <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -479,30 +495,32 @@ export default function Profile() {
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '6px', marginTop: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' }}>
                       <Link 
                         to={`/tierlist?templateId=${template.id}`} 
                         className="btn-primary"
-                        style={{ flex: 1, textDecoration: 'none', textAlign: 'center', padding: '5px 8px', fontSize: '0.78rem' }}
+                        style={{ textDecoration: 'none', textAlign: 'center', padding: '7px 10px', fontSize: '0.8rem', fontWeight: '600' }}
                       >
-                        Usar
+                        Montar Tier List
                       </Link>
-                      <Link 
-                        to={`/template-maker?editTemplateId=${template.id}`} 
-                        className="btn-secondary"
-                        style={{ padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
-                        title="Editar Modelo"
-                      >
-                        <Pencil size={13} />
-                      </Link>
-                      <button 
-                        onClick={() => handleDeleteTemplate(template.id)}
-                        className="btn-danger outline"
-                        style={{ padding: '5px 10px' }}
-                        title="Excluir Modelo"
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <Link 
+                          to={`/template-maker?editTemplateId=${template.id}`} 
+                          className="btn-secondary"
+                          style={{ flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '6px 8px', fontSize: '0.75rem', fontWeight: '600' }}
+                          title="Editar título, capa, banco de imagens e regras deste modelo"
+                        >
+                          <Pencil size={12} /> Editar Modelo
+                        </Link>
+                        <button 
+                          onClick={() => handleDeleteTemplate(template.id)}
+                          className="btn-danger outline"
+                          style={{ padding: '6px 10px' }}
+                          title="Excluir Modelo"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

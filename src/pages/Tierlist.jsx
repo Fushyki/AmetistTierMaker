@@ -31,6 +31,7 @@ export default function Tierlist() {
     setTierlistName,
     theme,
     setTheme,
+    activeTemplateId,
     selectedItem,
     setSelectedItem,
     canUndo,
@@ -188,6 +189,7 @@ export default function Tierlist() {
             layoutMode={layoutMode}
             colunas={colunas}
             canUndo={canUndo}
+            activeTemplateId={activeTemplateId}
             onExportImage={() => setIsExportModalOpen(true)}
             onExportJSON={handleExportJSON}
             onImportJSON={handleImportJSON}

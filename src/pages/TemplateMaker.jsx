@@ -447,7 +447,28 @@ export default function TemplateMaker() {
 
   return (
     <div className="container" style={{ padding: '10px 15px', maxWidth: '880px', margin: '55px auto 20px', color: '#fff' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '16px', color: '#b062eb', fontSize: '1.4rem' }}>Criador de Modelos</h1>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 style={{ margin: '0 0 6px 0', color: activeTheme?.accentColor || '#b062eb', fontSize: '1.45rem' }}>
+          {editTemplateId ? `Editar Configurações do Modelo: ${name || ''}` : 'Criador de Modelos'}
+        </h1>
+        {editTemplateId && (
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'rgba(176,98,235,0.12)',
+            border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.35)'}`,
+            padding: '8px 16px',
+            borderRadius: '20px',
+            fontSize: '0.82rem',
+            color: '#ddd',
+            marginTop: '8px'
+          }}>
+            <Sparkles size={15} color={activeTheme?.accentColor || '#b062eb'} />
+            <span>Configurações internas do modelo (título, categoria, capa, banco de imagens e estrutura de tiers)</span>
+          </div>
+        )}
+      </div>
       
       <div className="control-card" style={{ padding: '14px', marginBottom: '14px' }}>
         <h3>Informações do Template</h3>
@@ -874,13 +895,22 @@ export default function TemplateMaker() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px', marginBottom: '20px' }}>
         <button 
           onClick={handleSaveTemplate}
           className="btn-primary" 
-          style={{ padding: '15px 40px', fontSize: '1.2rem', background: 'linear-gradient(135deg, #b062eb, #7d3ba3)', boxShadow: '0 4px 15px rgba(176,98,235,0.4)' }}
+          style={{ 
+            padding: '14px 42px', 
+            fontSize: '1.1rem', 
+            fontWeight: '700',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.4)'}`
+          }}
         >
-          {editTemplateId ? 'Atualizar Template' : 'Publicar Template'}
+          <Check size={18} />
+          {editTemplateId ? 'Salvar Alterações no Modelo' : 'Publicar Modelo na Galeria'}
         </button>
       </div>
     </div>

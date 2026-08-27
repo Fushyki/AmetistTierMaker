@@ -49,6 +49,9 @@ export function useTierlistState(user) {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('tierlist-theme') || 'ametist';
   });
+  const [activeTemplateId, setActiveTemplateId] = useState(() => {
+    return localStorage.getItem('tierlist-active-template-id') || null;
+  });
   const [selectedItem, setSelectedItem] = useState(null);
 
   // Hook de Histórico / Undo
@@ -162,6 +165,7 @@ export function useTierlistState(user) {
             
             localStorage.setItem('tierlist-api-loaded', 'true');
             localStorage.setItem('tierlist-active-template-id', templateId);
+            setActiveTemplateId(templateId);
             localStorage.removeItem('tierlist-current-id');
             
             searchParams.delete('templateId');
@@ -194,6 +198,10 @@ export function useTierlistState(user) {
             if (data.data.colunas) setColunas(data.data.colunas);
             if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
             if (data.data.theme) setTheme(data.data.theme);
+            if (data.data.templateId) {
+              setActiveTemplateId(data.data.templateId);
+              localStorage.setItem('tierlist-active-template-id', data.data.templateId);
+            }
             
             localStorage.removeItem('tierlist-force-cloud-load');
           }
@@ -385,7 +393,15 @@ export function useTierlistState(user) {
   const handleSaveToCloud = async () => {
     if (!user) return toast.error("Faça login para salvar na nuvem.");
     const currentId = localStorage.getItem('tierlist-current-id');
-    const dataToSave = { items, ranksData, layoutMode, colunas, columnTitles, theme };
+    const dataToSave = { 
+      items, 
+      ranksData, 
+      layoutMode, 
+      colunas, 
+      columnTitles, 
+      theme,
+      templateId: activeTemplateId 
+    };
     
     try {
       if (currentId) {
@@ -528,6 +544,7 @@ export function useTierlistState(user) {
     setTierlistName,
     theme,
     setTheme,
+    activeTemplateId,
     selectedItem,
     setSelectedItem,
     canUndo,
