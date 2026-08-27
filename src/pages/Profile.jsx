@@ -17,22 +17,33 @@ import {
   KeyRound, 
   ExternalLink,
   ShieldAlert,
+  Shield,
   Sliders,
   FolderHeart,
   Eye,
   EyeOff,
-  Lock
+  Lock,
+  Star,
+  Megaphone,
+  BarChart3,
+  Trophy,
+  Search,
+  RefreshCw,
+  Bell,
+  Globe
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
+import { TEMPLATE_CATEGORIES } from '../data/categories';
+import CategoryBadge, { CategoryIcon } from '../components/CategoryBadge';
 import '../styles/index.css';
 
 export default function Profile() {
   const { user, loading: authLoading } = useAuth();
-  const { siteTheme, setSiteTheme, uiDensity, setUiDensity, availableThemes, activeTheme } = useTheme();
+  const { siteTheme, setSiteTheme, uiDensity, setUiDensity, availableThemes, activeTheme, showCustomToast } = useTheme();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('tierlists'); // 'tierlists', 'templates', 'visual', 'account'
+  const [activeTab, setActiveTab] = useState('tierlists'); // 'tierlists', 'templates', 'visual', 'account', 'admin'
   const [tierlists, setTierlists] = useState([]);
   const [userTemplates, setUserTemplates] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -45,9 +56,35 @@ export default function Profile() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
+  // Estados do Painel de Admin
+  const [adminMetrics, setAdminMetrics] = useState({
+    totalTemplates: 0,
+    publicTemplates: 0,
+    privateTemplates: 0,
+    featuredTemplates: 0,
+    totalTierlists: 0,
+    totalCopas: 0,
+    catCounts: { games: 0, animes: 0, musica: 0, filmes: 0, geral: 0 },
+    allTemplates: []
+  });
+  const [adminAnnouncement, setAdminAnnouncement] = useState({
+    active: false,
+    message: '',
+    type: 'purple',
+    link: '',
+    linkText: ''
+  });
+  const [isSavingAnnouncement, setIsSavingAnnouncement] = useState(false);
+  const [adminSearch, setAdminSearch] = useState('');
+  const [adminCatFilter, setAdminCatFilter] = useState('todos');
+  const [isAdminLoading, setIsAdminLoading] = useState(false);
+
   useEffect(() => {
     if (user) {
       fetchUserData();
+      if (isAdmin(user)) {
+        fetchAdminData();
+      }
     }
   }, [user]);
 
@@ -68,6 +105,182 @@ export default function Profile() {
       console.error('Erro ao buscar dados do usuário:', err);
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const fetchAdminData = async () => {
+    if (!isAdmin(user)) return;
+    setIsAdminLoading(true);
+    try {
+      const [allTemplatesRes, allTierlistsRes, announcementRes] = await Promise.all([
+        supabase.from('templates').select('*').order('created_at', { ascending: false }),
+        supabase.from('tierlists').select('id, data, created_at'),
+        supabase.from('templates').select('data').eq('name', '__SYSTEM_ANNOUNCEMENT__').maybeSingle()
+      ]);
+
+      const templatesList = (allTemplatesRes.data || []).filter(t => t.name !== '__SYSTEM_ANNOUNCEMENT__');
+      const tierlistsList = allTierlistsRes.data || [];
+
+      // Métricas
+      const totalTemplates = templatesList.length;
+      const publicTemplates = templatesList.filter(t => t.is_public).length;
+      const privateTemplates = templatesList.filter(t => !t.is_public).length;
+      const featuredTemplates = templatesList.filter(t => t.data?.is_featured).length;
+
+      const totalTierlists = tierlistsList.length;
+      const totalCopas = tierlistsList.filter(t => t.data?.type === 'copa').length;
+
+      const catCounts = { games: 0, animes: 0, musica: 0, filmes: 0, geral: 0 };
+      templatesList.forEach(t => {
+        const cat = t.data?.category || 'games';
+        if (catCounts[cat] !== undefined) catCounts[cat]++;
+        else catCounts.geral++;
+      });
+
+      setAdminMetrics({
+        totalTemplates,
+        publicTemplates,
+        privateTemplates,
+        featuredTemplates,
+        totalTierlists,
+        totalCopas,
+        catCounts,
+        allTemplates: templatesList
+      });
+
+      if (announcementRes.data?.data) {
+        setAdminAnnouncement(announcementRes.data.data);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar dados de admin:', err);
+    } finally {
+      setIsAdminLoading(false);
+    }
+  };
+
+  const handleSaveAnnouncement = async (e) => {
+    if (e) e.preventDefault();
+    if (!adminAnnouncement.message.trim() && adminAnnouncement.active) {
+      return toast.error('Digite a mensagem do aviso antes de ativar.');
+    }
+
+    setIsSavingAnnouncement(true);
+    try {
+      const payload = {
+        active: adminAnnouncement.active,
+        message: adminAnnouncement.message.trim(),
+        type: adminAnnouncement.type || 'purple',
+        link: adminAnnouncement.link?.trim() || '',
+        linkText: adminAnnouncement.linkText?.trim() || '',
+        updatedAt: new Date().toISOString()
+      };
+
+      const { data: existing } = await supabase
+        .from('templates')
+        .select('id')
+        .eq('name', '__SYSTEM_ANNOUNCEMENT__')
+        .maybeSingle();
+
+      if (existing) {
+        await supabase.from('templates').update({ data: payload, is_public: false }).eq('id', existing.id);
+      } else {
+        await supabase.from('templates').insert([{
+          user_id: user.id,
+          name: '__SYSTEM_ANNOUNCEMENT__',
+          is_public: false,
+          cover_image: '',
+          data: payload
+        }]);
+      }
+
+      localStorage.setItem('ametist_global_announcement', JSON.stringify(payload));
+      localStorage.removeItem('ametist_announcement_dismissed_id');
+      
+      if (showCustomToast) {
+        showCustomToast(
+          'Aviso Global Atualizado',
+          payload.active ? 'Aviso transmitido para todos os visitantes do site.' : 'Aviso desativado com sucesso.',
+          'palette'
+        );
+      } else {
+        toast.success('Aviso global atualizado com sucesso!');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao salvar aviso global: ' + err.message);
+    } finally {
+      setIsSavingAnnouncement(false);
+    }
+  };
+
+  const handleAdminToggleFeature = async (templateId, currentFeatured) => {
+    try {
+      const template = adminMetrics.allTemplates.find(t => t.id === templateId);
+      if (!template) return;
+      const updatedData = { ...(template.data || {}), is_featured: !currentFeatured };
+      
+      const { error } = await supabase.from('templates').update({ data: updatedData }).eq('id', templateId);
+      if (error) throw error;
+
+      setAdminMetrics(prev => ({
+        ...prev,
+        featuredTemplates: prev.featuredTemplates + (currentFeatured ? -1 : 1),
+        allTemplates: prev.allTemplates.map(t => t.id === templateId ? { ...t, data: updatedData } : t)
+      }));
+
+      if (showCustomToast) {
+        showCustomToast('Destaque Atualizado', !currentFeatured ? 'Template fixado nos destaques da Home!' : 'Destaque removido.', 'palette');
+      }
+    } catch (err) {
+      toast.error('Erro ao alternar destaque: ' + err.message);
+    }
+  };
+
+  const handleAdminTogglePublic = async (templateId, currentPublic) => {
+    try {
+      const newPublic = !currentPublic;
+      const { error } = await supabase.from('templates').update({ is_public: newPublic }).eq('id', templateId);
+      if (error) throw error;
+
+      setAdminMetrics(prev => ({
+        ...prev,
+        publicTemplates: prev.publicTemplates + (newPublic ? 1 : -1),
+        privateTemplates: prev.privateTemplates + (newPublic ? -1 : 1),
+        allTemplates: prev.allTemplates.map(t => t.id === templateId ? { ...t, is_public: newPublic } : t)
+      }));
+
+      if (showCustomToast) {
+        showCustomToast('Visibilidade Alterada', newPublic ? 'Template publicado na Galeria.' : 'Template tornado privado.', 'palette');
+      }
+    } catch (err) {
+      toast.error('Erro ao alternar visibilidade: ' + err.message);
+    }
+  };
+
+  const handleAdminDeleteTemplate = async (templateId, templateName) => {
+    const isConfirmed = await confirmAction(
+      'Excluir Template (Admin)',
+      'Tem certeza que deseja apagar permanentemente o template "' + templateName + '"?',
+      'Sim, excluir'
+    );
+    if (isConfirmed) {
+      try {
+        const { error } = await supabase.from('templates').delete().eq('id', templateId);
+        if (error) throw error;
+
+        setAdminMetrics(prev => ({
+          ...prev,
+          totalTemplates: prev.totalTemplates - 1,
+          allTemplates: prev.allTemplates.filter(t => t.id !== templateId)
+        }));
+        setUserTemplates(prev => prev.filter(t => t.id !== templateId));
+
+        if (showCustomToast) {
+          showCustomToast('Template Excluído', 'O modelo foi removido do banco de dados.', 'palette');
+        }
+      } catch (err) {
+        toast.error('Erro ao excluir: ' + err.message);
+      }
     }
   };
 
@@ -141,22 +354,18 @@ export default function Profile() {
     setIsUpdatingPassword(true);
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) {
-        let msg = error.message;
-        if (msg.includes('New password should be different')) {
-          msg = 'A nova senha deve ser diferente da sua senha atual.';
-        } else if (msg.includes('Password should be at least')) {
-          msg = 'A senha deve ter pelo menos 6 caracteres.';
-        } else if (msg.includes('Auth session missing')) {
-          msg = 'Sua sessão expirou. Por favor, saia e entre novamente.';
-        }
-        throw new Error(msg);
-      }
-      toast.success('Senha atualizada com sucesso no banco de dados!');
+      if (error) throw error;
+      
       setNewPassword('');
       setConfirmPassword('');
+      if (showCustomToast) {
+        showCustomToast('Senha Atualizada', 'Sua senha foi alterada com sucesso no Supabase.', 'palette');
+      } else {
+        toast.success('Senha atualizada com sucesso!');
+      }
     } catch (err) {
-      toast.error(err.message || 'Erro ao atualizar senha.');
+      console.error(err);
+      toast.error(err.message || 'Erro ao atualizar a senha.');
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -164,29 +373,32 @@ export default function Profile() {
 
   if (authLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <p style={{ color: '#b062eb', fontWeight: 'bold' }}>Carregando perfil...</p>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', color: '#b062eb', fontSize: '1rem', fontWeight: '600' }}>
+        Carregando dados do perfil...
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="container" style={{ padding: '20px', maxWidth: '480px', margin: '70px auto 30px', textAlign: 'center', color: '#fff' }}>
-        <div style={{ background: '#16161a', padding: '30px 20px', borderRadius: '14px', border: '1px solid #282834' }}>
-          <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(176,98,235,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#b062eb' }}>
-            <User size={30} />
+      <div className="container" style={{ padding: '20px 15px', maxWidth: '520px', margin: '60px auto 20px', color: '#fff', textAlign: 'center' }}>
+        <h1 style={{ color: '#b062eb', marginBottom: '14px', fontSize: '1.4rem' }}>Acesso ao Perfil</h1>
+        <div className="control-card" style={{ padding: '24px 20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'rgba(176,98,235,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b062eb' }}>
+              <Lock size={28} />
+            </div>
           </div>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>Perfil do Usuário</h2>
-          <p style={{ color: '#aaa', fontSize: '0.88rem', marginBottom: '22px', lineHeight: '1.5' }}>
-            Você precisa estar conectado para acessar suas configurações de visual, gerenciar suas Tier Lists e editar seus templates.
+          <h2 style={{ marginBottom: '10px', fontSize: '1.15rem' }}>Você precisa estar conectado</h2>
+          <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '20px' }}>
+            Faça login para gerenciar suas Tier Lists salvas na nuvem, editar seus modelos e personalizar o visual do Ametist.
           </p>
           <button 
-            onClick={() => navigate('/login')} 
+            onClick={() => navigate('/login')}
             className="btn-primary"
-            style={{ width: '100%', padding: '12px' }}
+            style={{ padding: '10px 22px', fontSize: '0.95rem' }}
           >
-            Fazer Login / Cadastre-se
+            Fazer Login / Criar Conta
           </button>
         </div>
       </div>
@@ -196,23 +408,30 @@ export default function Profile() {
   const filteredTierlists = tierlists.filter(t => (t.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
   const filteredTemplates = userTemplates.filter(t => (t.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
 
+  const filteredAdminTemplates = adminMetrics.allTemplates.filter(t => {
+    const matchesSearch = (t.name || '').toLowerCase().includes(adminSearch.toLowerCase());
+    const matchesCat = adminCatFilter === 'todos' || (t.data?.category || 'games') === adminCatFilter;
+    return matchesSearch && matchesCat;
+  });
+
   return (
-    <div className="tierlist-container" style={{ maxWidth: '1080px', margin: '55px auto 30px', padding: '10px 16px' }}>
+    <div className="container" style={{ padding: '10px 15px', maxWidth: '1000px', margin: '55px auto 30px', color: '#fff' }}>
       
-      {/* HEADER DO PERFIL */}
-      <div style={{
-        backgroundColor: '#141418',
-        border: '1px solid #282832',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.4)'
-      }}>
+      {/* CABEÇALHO DO PERFIL */}
+      <div 
+        className="control-card" 
+        style={{ 
+          padding: '24px', 
+          marginBottom: '20px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          flexWrap: 'wrap', 
+          gap: '16px',
+          background: 'linear-gradient(135deg, rgba(26,26,30,0.9) 0%, rgba(20,20,24,0.95) 100%)',
+          border: '1px solid ' + (activeTheme?.accentBorder || 'rgba(176,98,235,0.3)')
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{
             width: '64px',
@@ -225,7 +444,7 @@ export default function Profile() {
             fontSize: '1.6rem',
             fontWeight: '800',
             color: '#fff',
-            boxShadow: `0 0 20px ${activeTheme?.accentColor || '#b062eb'}55`
+            boxShadow: '0 0 20px ' + (activeTheme?.accentColor || '#b062eb') + '55'
           }}>
             {((user?.email || user?.user_metadata?.display_name || 'U')[0]).toUpperCase()}
           </div>
@@ -239,7 +458,7 @@ export default function Profile() {
                   ADMIN
                 </span>
               ) : (
-                <span style={{ fontSize: '0.72rem', padding: '2px 8px', background: `${activeTheme?.accentColor || '#b062eb'}22`, border: `1px solid ${activeTheme?.accentColor || '#b062eb'}66`, color: activeTheme?.accentColor || '#d8b4fe', borderRadius: '4px', fontWeight: '600' }}>
+                <span style={{ fontSize: '0.72rem', padding: '2px 8px', background: (activeTheme?.accentColor || '#b062eb') + '22', border: '1px solid ' + (activeTheme?.accentColor || '#b062eb') + '66', color: activeTheme?.accentColor || '#d8b4fe', borderRadius: '4px', fontWeight: '600' }}>
                   MEMBRO VIP
                 </span>
               )}
@@ -264,8 +483,8 @@ export default function Profile() {
           style={{
             padding: '9px 18px',
             borderRadius: '10px',
-            border: activeTab === 'tierlists' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid transparent',
-            backgroundColor: activeTab === 'tierlists' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
+            border: activeTab === 'tierlists' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid transparent',
+            backgroundColor: activeTab === 'tierlists' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
             color: activeTab === 'tierlists' ? '#ffffff' : '#9999a5',
             fontWeight: activeTab === 'tierlists' ? '700' : '500',
             fontSize: '0.88rem',
@@ -274,7 +493,7 @@ export default function Profile() {
             alignItems: 'center',
             gap: '8px',
             transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'tierlists' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
+            boxShadow: activeTab === 'tierlists' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
           }}
         >
           <Layers size={16} color={activeTab === 'tierlists' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
@@ -286,8 +505,8 @@ export default function Profile() {
           style={{
             padding: '9px 18px',
             borderRadius: '10px',
-            border: activeTab === 'templates' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid transparent',
-            backgroundColor: activeTab === 'templates' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
+            border: activeTab === 'templates' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid transparent',
+            backgroundColor: activeTab === 'templates' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
             color: activeTab === 'templates' ? '#ffffff' : '#9999a5',
             fontWeight: activeTab === 'templates' ? '700' : '500',
             fontSize: '0.88rem',
@@ -296,7 +515,7 @@ export default function Profile() {
             alignItems: 'center',
             gap: '8px',
             transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'templates' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
+            boxShadow: activeTab === 'templates' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
           }}
         >
           <Sparkles size={16} color={activeTab === 'templates' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
@@ -308,8 +527,8 @@ export default function Profile() {
           style={{
             padding: '9px 18px',
             borderRadius: '10px',
-            border: activeTab === 'visual' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid transparent',
-            backgroundColor: activeTab === 'visual' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
+            border: activeTab === 'visual' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid transparent',
+            backgroundColor: activeTab === 'visual' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
             color: activeTab === 'visual' ? '#ffffff' : '#9999a5',
             fontWeight: activeTab === 'visual' ? '700' : '500',
             fontSize: '0.88rem',
@@ -318,7 +537,7 @@ export default function Profile() {
             alignItems: 'center',
             gap: '8px',
             transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'visual' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
+            boxShadow: activeTab === 'visual' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
           }}
         >
           <Palette size={16} color={activeTab === 'visual' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
@@ -330,8 +549,8 @@ export default function Profile() {
           style={{
             padding: '9px 18px',
             borderRadius: '10px',
-            border: activeTab === 'account' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid transparent',
-            backgroundColor: activeTab === 'account' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
+            border: activeTab === 'account' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid transparent',
+            backgroundColor: activeTab === 'account' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
             color: activeTab === 'account' ? '#ffffff' : '#9999a5',
             fontWeight: activeTab === 'account' ? '700' : '500',
             fontSize: '0.88rem',
@@ -340,12 +559,39 @@ export default function Profile() {
             alignItems: 'center',
             gap: '8px',
             transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'account' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
+            boxShadow: activeTab === 'account' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
           }}
         >
           <KeyRound size={16} color={activeTab === 'account' ? (activeTheme?.accentColor || '#b062eb') : '#888'} />
           Segurança da Conta
         </button>
+
+        {isAdmin(user) && (
+          <button
+            onClick={() => {
+              setActiveTab('admin');
+              fetchAdminData();
+            }}
+            style={{
+              padding: '9px 18px',
+              borderRadius: '10px',
+              border: activeTab === 'admin' ? '1.5px solid #ef4444' : '1px solid rgba(239,68,68,0.3)',
+              backgroundColor: activeTab === 'admin' ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.06)',
+              color: activeTab === 'admin' ? '#ffffff' : '#f87171',
+              fontWeight: activeTab === 'admin' ? '700' : '500',
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              boxShadow: activeTab === 'admin' ? '0 0 14px rgba(239,68,68,0.35)' : 'none'
+            }}
+          >
+            <ShieldAlert size={16} color={activeTab === 'admin' ? '#f87171' : '#ef4444'} />
+            Painel Admin
+          </button>
+        )}
       </div>
 
       {/* CONTEÚDO DA ABA: MINHAS TIER LISTS */}
@@ -358,15 +604,15 @@ export default function Profile() {
               placeholder="Buscar nas minhas listas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.85rem' }}
+              style={{ padding: '7px 14px', borderRadius: '20px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.85rem' }}
             />
           </div>
 
           {loadingData ? (
-            <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Carregando suas listas...</p>
+            <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Carregando suas tier lists...</p>
           ) : filteredTierlists.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '30px 15px', color: '#888' }}>
-              <p style={{ marginBottom: '15px' }}>Você ainda não tem nenhuma Tier List salva na nuvem.</p>
+              <p style={{ marginBottom: '15px' }}>Você ainda não salvou nenhuma tier list na nuvem.</p>
               <Link to="/tierlist" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
                 Montar Minha Primeira Tier List
               </Link>
@@ -486,7 +732,7 @@ export default function Profile() {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' }}>
                       <Link 
-                        to={`/tierlist?templateId=${template.id}`} 
+                        to={'/tierlist?templateId=' + template.id} 
                         className="btn-primary"
                         style={{ textDecoration: 'none', textAlign: 'center', padding: '7px 10px', fontSize: '0.8rem', fontWeight: '600' }}
                       >
@@ -494,7 +740,7 @@ export default function Profile() {
                       </Link>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <Link 
-                          to={`/template-maker?editTemplateId=${template.id}`} 
+                          to={'/template-maker?editTemplateId=' + template.id} 
                           className="btn-secondary"
                           style={{ flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '6px 8px', fontSize: '0.75rem', fontWeight: '600' }}
                           title="Editar título, capa, banco de imagens e regras deste modelo"
@@ -525,55 +771,50 @@ export default function Profile() {
           
           <div className="control-card" style={{ padding: '22px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <Palette size={22} color="#b062eb" />
-              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Tema de Cores do Ametist</h3>
+              <Palette size={20} color={activeTheme?.accentColor || '#b062eb'} />
+              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Tema Global de Cores</h3>
             </div>
-            <p style={{ color: '#aaa', fontSize: '0.88rem', margin: '0 0 20px 0', lineHeight: '1.4' }}>
-              Escolha a skin visual que define a estética do site e dos seus tabuleiros. Essa configuração fica gravada no seu perfil.
+            <p style={{ color: '#aaa', fontSize: '0.85rem', margin: '0 0 18px 0', lineHeight: '1.4' }}>
+              Escolha o esquema de cores que reflete sua personalidade. Todo o site e botões ativos mudarão instantaneamente.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
-              {availableThemes.map((themeItem) => {
-                const isSelected = siteTheme === themeItem.id;
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+              {availableThemes.map(t => {
+                const isSelected = siteTheme === t.id;
                 return (
-                  <div
-                    key={themeItem.id}
-                    onClick={() => setSiteTheme(themeItem.id)}
+                  <div 
+                    key={t.id}
+                    onClick={() => setSiteTheme(t.id)}
                     style={{
-                      padding: '16px',
+                      backgroundColor: '#16161a',
+                      border: isSelected ? '2px solid ' + t.primaryColor : '1px solid #282830',
                       borderRadius: '12px',
-                      backgroundColor: isSelected ? `${themeItem.accentColor}15` : '#17171c',
-                      border: isSelected ? `2px solid ${themeItem.accentColor}` : '1px solid #282832',
+                      padding: '14px',
                       cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
                       transition: 'all 0.2s ease',
-                      boxShadow: isSelected ? `0 0 20px ${themeItem.accentColor}25` : 'none',
-                      position: 'relative'
+                      boxShadow: isSelected ? '0 0 16px ' + t.glowColor : 'none'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{
-                          width: '16px',
-                          height: '16px',
-                          borderRadius: '50%',
-                          backgroundColor: themeItem.accentColor,
-                          boxShadow: `0 0 8px ${themeItem.accentColor}`
-                        }} />
-                        <strong style={{ color: '#fff', fontSize: '0.95rem' }}>{themeItem.name}</strong>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '8px',
+                      background: t.gradient,
+                      boxShadow: '0 2px 8px ' + t.glowColor,
+                      flexShrink: 0
+                    }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: isSelected ? 'bold' : 'normal' }}>
+                        {t.name}
                       </div>
-                      {isSelected && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: themeItem.accentColor, fontSize: '0.75rem', fontWeight: 'bold' }}>
-                          <Check size={14} /> Ativo
-                        </span>
-                      )}
+                      <div style={{ color: isSelected ? t.primaryColor : '#666', fontSize: '0.75rem', fontWeight: '500' }}>
+                        {isSelected ? '● Ativo no site' : 'Clique para usar'}
+                      </div>
                     </div>
-
-                    <p style={{ margin: '0 0 12px 0', color: '#8e8e99', fontSize: '0.8rem', lineHeight: '1.3' }}>
-                      {themeItem.description}
-                    </p>
-
-                    {/* Mini Preview Bar */}
-                    <div style={{ height: '6px', borderRadius: '4px', background: themeItem.gradient, width: '100%' }} />
+                    {isSelected && <Check size={16} color={t.primaryColor} />}
                   </div>
                 );
               })}
@@ -582,26 +823,26 @@ export default function Profile() {
 
           <div className="control-card" style={{ padding: '22px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <Sliders size={20} color={activeTheme?.accentColor || "#b062eb"} />
+              <Sliders size={20} color={activeTheme?.accentColor || '#b062eb'} />
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Densidade e Escala Visual</h3>
             </div>
-            <p style={{ color: '#aaa', fontSize: '0.88rem', margin: '0 0 16px 0' }}>
-              Ajuste o tamanho base dos elementos para a sua tela.
+            <p style={{ color: '#aaa', fontSize: '0.85rem', margin: '0 0 18px 0', lineHeight: '1.4' }}>
+              Ajuste o tamanho dos elementos e espaçamento dos tabuleiros para melhor visualização na sua tela.
             </p>
 
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
               <button
                 type="button"
                 onClick={() => setUiDensity('compact')}
                 style={{
                   padding: '12px 20px',
                   borderRadius: '10px',
-                  border: uiDensity === 'compact' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #2e2e38',
-                  backgroundColor: uiDensity === 'compact' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
+                  border: uiDensity === 'compact' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid #2e2e38',
+                  backgroundColor: uiDensity === 'compact' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
                   color: uiDensity === 'compact' ? '#fff' : '#aaa',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  boxShadow: uiDensity === 'compact' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
+                  boxShadow: uiDensity === 'compact' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
                 }}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Compacto (Recomendado)</div>
@@ -614,12 +855,12 @@ export default function Profile() {
                 style={{
                   padding: '12px 20px',
                   borderRadius: '10px',
-                  border: uiDensity === 'spacious' ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #2e2e38',
-                  backgroundColor: uiDensity === 'spacious' ? `${activeTheme?.accentColor || '#b062eb'}25` : '#17171c',
+                  border: uiDensity === 'spacious' ? '1.5px solid ' + (activeTheme?.accentColor || '#b062eb') : '1px solid #2e2e38',
+                  backgroundColor: uiDensity === 'spacious' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
                   color: uiDensity === 'spacious' ? '#fff' : '#aaa',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  boxShadow: uiDensity === 'spacious' ? `0 0 14px ${activeTheme?.accentColor || '#b062eb'}30` : 'none'
+                  boxShadow: uiDensity === 'spacious' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none'
                 }}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Confortável</div>
@@ -634,7 +875,7 @@ export default function Profile() {
       {activeTab === 'account' && (
         <div className="control-card" style={{ padding: '22px', maxWidth: '520px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <KeyRound size={20} color="#b062eb" />
+            <KeyRound size={20} color={activeTheme?.accentColor || '#b062eb'} />
             <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Alterar Senha de Acesso</h3>
           </div>
 
@@ -694,6 +935,402 @@ export default function Profile() {
               {isUpdatingPassword ? 'Atualizando...' : 'Salvar Nova Senha'}
             </button>
           </form>
+        </div>
+      )}
+
+      {/* CONTEÚDO DA ABA: PAINEL ADMIN (EXCLUSIVO) */}
+      {activeTab === 'admin' && isAdmin(user) && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+          
+          {/* TOPO DO PAINEL ADMIN */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <ShieldAlert size={24} color="#ef4444" />
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#fff' }}>Central de Controle de Administrador</h3>
+                <p style={{ margin: '2px 0 0 0', fontSize: '0.82rem', color: '#888' }}>
+                  Acesso total de moderação, métricas globais e transmissão de avisos para todo o site.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={fetchAdminData}
+              disabled={isAdminLoading}
+              className="btn-secondary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem' }}
+            >
+              <RefreshCw size={14} className={isAdminLoading ? 'animate-spin' : ''} />
+              Atualizar Dados
+            </button>
+          </div>
+
+          {/* 1. CARDS DE MÉTRICAS */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '14px' }}>
+            <div className="control-card" style={{ padding: '18px', borderLeft: '4px solid #b062eb' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: '600', textTransform: 'uppercase' }}>Modelos Publicados</span>
+                <Sparkles size={18} color="#b062eb" />
+              </div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff' }}>{adminMetrics.totalTemplates}</div>
+              <div style={{ fontSize: '0.75rem', color: '#777', marginTop: '4px' }}>
+                {adminMetrics.publicTemplates} públicos · {adminMetrics.privateTemplates} privados
+              </div>
+            </div>
+
+            <div className="control-card" style={{ padding: '18px', borderLeft: '4px solid #3b82f6' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: '600', textTransform: 'uppercase' }}>Tier Lists Salvas</span>
+                <Layers size={18} color="#3b82f6" />
+              </div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff' }}>{adminMetrics.totalTierlists}</div>
+              <div style={{ fontSize: '0.75rem', color: '#777', marginTop: '4px' }}>
+                Total de montagens na nuvem
+              </div>
+            </div>
+
+            <div className="control-card" style={{ padding: '18px', borderLeft: '4px solid #facc15' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: '600', textTransform: 'uppercase' }}>Em Destaque (Home)</span>
+                <Star size={18} color="#facc15" fill="#facc15" />
+              </div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#facc15' }}>{adminMetrics.featuredTemplates}</div>
+              <div style={{ fontSize: '0.75rem', color: '#777', marginTop: '4px' }}>
+                Pinados no topo da galeria
+              </div>
+            </div>
+
+            <div className="control-card" style={{ padding: '18px', borderLeft: '4px solid #10b981' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: '600', textTransform: 'uppercase' }}>Torneios / Copas</span>
+                <Trophy size={18} color="#10b981" />
+              </div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff' }}>{adminMetrics.totalCopas}</div>
+              <div style={{ fontSize: '0.75rem', color: '#777', marginTop: '4px' }}>
+                Modo chaveamento competitivo
+              </div>
+            </div>
+          </div>
+
+          {/* 2. DISTRIBUIÇÃO POR CATEGORIA */}
+          <div className="control-card" style={{ padding: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <BarChart3 size={18} color="#b062eb" />
+              <h4 style={{ margin: 0, fontSize: '1rem', color: '#fff' }}>Distribuição de Conteúdo por Categoria</h4>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
+              {[
+                { id: 'games', label: 'Jogos', count: adminMetrics.catCounts.games, color: '#ef4444' },
+                { id: 'animes', label: 'Animes', count: adminMetrics.catCounts.animes, color: '#ec4899' },
+                { id: 'musica', label: 'Música', count: adminMetrics.catCounts.musica, color: '#a855f7' },
+                { id: 'filmes', label: 'Filmes', count: adminMetrics.catCounts.filmes, color: '#3b82f6' },
+                { id: 'geral', label: 'Geral', count: adminMetrics.catCounts.geral, color: '#10b981' }
+              ].map(cat => {
+                const percent = adminMetrics.totalTemplates > 0 
+                  ? Math.round((cat.count / adminMetrics.totalTemplates) * 100) 
+                  : 0;
+                return (
+                  <div key={cat.id} style={{ backgroundColor: '#17171c', padding: '12px', borderRadius: '8px', border: '1px solid #282830' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#ccc', marginBottom: '6px' }}>
+                      <span style={{ fontWeight: '600' }}>{cat.label}</span>
+                      <span style={{ color: cat.color, fontWeight: '700' }}>{cat.count} ({percent}%)</span>
+                    </div>
+                    <div style={{ width: '100%', height: '6px', backgroundColor: '#25252b', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{ width: percent + '%', height: '100%', backgroundColor: cat.color, borderRadius: '3px' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 3. GERENCIADOR DE AVISOS GLOBAIS (SITE ANNOUNCEMENT) */}
+          <div className="control-card" style={{ padding: '22px', border: '1px solid rgba(176,98,235,0.4)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Megaphone size={20} color="#facc15" />
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff' }}>Banner de Avisos Globais</h4>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: '#aaa' }}>
+                    Exiba uma mensagem no topo de todas as páginas para todos os visitantes do site.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.85rem', color: adminAnnouncement.active ? '#4ade80' : '#888', fontWeight: 'bold' }}>
+                  {adminAnnouncement.active ? '● AVISO ATIVADO' : '○ DESATIVADO'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setAdminAnnouncement(prev => ({ ...prev, active: !prev.active }))}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    border: 'none',
+                    backgroundColor: adminAnnouncement.active ? '#22c55e' : '#3f3f46',
+                    color: '#fff',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {adminAnnouncement.active ? 'Desativar' : 'Ativar'}
+                </button>
+              </div>
+            </div>
+
+            {/* PREVIEW DO AVISO */}
+            <div style={{ marginBottom: '16px' }}>
+              <span style={{ display: 'block', fontSize: '0.78rem', color: '#888', marginBottom: '6px', fontWeight: '600' }}>PRÉ-VISUALIZAÇÃO AO VIVO:</span>
+              <div style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                background: 
+                  adminAnnouncement.type === 'gold' ? 'linear-gradient(90deg, #b45309, #f59e0b)' :
+                  adminAnnouncement.type === 'info' ? 'linear-gradient(90deg, #1e40af, #3b82f6)' :
+                  adminAnnouncement.type === 'warning' ? 'linear-gradient(90deg, #991b1b, #ef4444)' :
+                  'linear-gradient(90deg, #7928ca, #b062eb)',
+                color: '#fff',
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+              }}>
+                <Bell size={15} />
+                <span>{adminAnnouncement.message || 'Digite sua mensagem de aviso abaixo...'}</span>
+                {adminAnnouncement.link && (
+                  <span style={{ background: 'rgba(255,255,255,0.25)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    {adminAnnouncement.linkText || 'Ver mais'} →
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* FORMULÁRIO DO AVISO */}
+            <form onSubmit={handleSaveAnnouncement} style={{ display: 'grid', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: '#aaa', marginBottom: '6px', fontWeight: '600' }}>
+                  Estilo Visual do Banner:
+                </label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {[
+                    { id: 'purple', label: 'Novidade (Roxo Ametista)', color: '#b062eb' },
+                    { id: 'gold', label: 'Destaque (Dourado)', color: '#facc15' },
+                    { id: 'info', label: 'Informativo (Azul)', color: '#3b82f6' },
+                    { id: 'warning', label: 'Alerta / Manutenção (Vermelho)', color: '#ef4444' }
+                  ].map(st => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setAdminAnnouncement(prev => ({ ...prev, type: st.id }))}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        border: adminAnnouncement.type === st.id ? '1.5px solid ' + st.color : '1px solid #333',
+                        backgroundColor: adminAnnouncement.type === st.id ? st.color + '25' : '#17171c',
+                        color: adminAnnouncement.type === st.id ? '#fff' : '#aaa',
+                        fontSize: '0.8rem',
+                        fontWeight: adminAnnouncement.type === st.id ? '700' : '400',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: '#aaa', marginBottom: '6px', fontWeight: '600' }}>
+                  Mensagem do Banner:
+                </label>
+                <input 
+                  type="text"
+                  placeholder="Ex: Novo modo Torneio Copa adicionado! Monte sua chave de 16 itens agora."
+                  value={adminAnnouncement.message}
+                  onChange={(e) => setAdminAnnouncement(prev => ({ ...prev, message: e.target.value }))}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #383842', backgroundColor: '#18181c', color: '#fff', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', color: '#aaa', marginBottom: '6px', fontWeight: '600' }}>
+                    Link de Destino (Opcional):
+                  </label>
+                  <input 
+                    type="text"
+                    placeholder="Ex: /copa ou https://..."
+                    value={adminAnnouncement.link}
+                    onChange={(e) => setAdminAnnouncement(prev => ({ ...prev, link: e.target.value }))}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #383842', backgroundColor: '#18181c', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', color: '#aaa', marginBottom: '6px', fontWeight: '600' }}>
+                    Texto do Botão (Opcional):
+                  </label>
+                  <input 
+                    type="text"
+                    placeholder="Ex: Experimentar Agora"
+                    value={adminAnnouncement.linkText}
+                    onChange={(e) => setAdminAnnouncement(prev => ({ ...prev, linkText: e.target.value }))}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #383842', backgroundColor: '#18181c', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSavingAnnouncement}
+                className="btn-primary"
+                style={{ padding: '11px', fontWeight: '700', fontSize: '0.92rem', marginTop: '6px' }}
+              >
+                {isSavingAnnouncement ? 'Transmitindo...' : 'Salvar e Publicar Aviso Global'}
+              </button>
+            </form>
+          </div>
+
+          {/* 4. TABELA DE MODERAÇÃO DE TODOS OS TEMPLATES */}
+          <div className="control-card" style={{ padding: '22px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#fff' }}>Moderação Global de Modelos ({adminMetrics.totalTemplates})</h4>
+                <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: '#aaa' }}>
+                  Fixe destaques na Home, altere visibilidade ou edite/exclua qualquer modelo da plataforma.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <input 
+                  type="search"
+                  placeholder="Buscar modelo..."
+                  value={adminSearch}
+                  onChange={(e) => setAdminSearch(e.target.value)}
+                  style={{ padding: '7px 14px', borderRadius: '20px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.85rem' }}
+                />
+                <select
+                  value={adminCatFilter}
+                  onChange={(e) => setAdminCatFilter(e.target.value)}
+                  style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.85rem' }}
+                >
+                  <option value="todos">Todas Categorias</option>
+                  <option value="games">Jogos</option>
+                  <option value="animes">Animes</option>
+                  <option value="musica">Música</option>
+                  <option value="filmes">Filmes</option>
+                  <option value="geral">Geral</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #282834', color: '#888' }}>
+                    <th style={{ padding: '10px 8px' }}>Capa</th>
+                    <th style={{ padding: '10px 8px' }}>Nome do Modelo</th>
+                    <th style={{ padding: '10px 8px' }}>Categoria</th>
+                    <th style={{ padding: '10px 8px' }}>Status</th>
+                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>Ações de Moderação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAdminTemplates.map(t => {
+                    const isFeat = Boolean(t.data?.is_featured);
+                    const isPub = Boolean(t.is_public);
+                    return (
+                      <tr key={t.id} style={{ borderBottom: '1px solid #22222a' }}>
+                        <td style={{ padding: '8px' }}>
+                          <img 
+                            src={t.cover_image} 
+                            alt={t.name} 
+                            style={{ width: '50px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #333' }}
+                            onError={(e) => { e.target.src = 'https://via.placeholder.com/60x40?text=Sem+Capa'; }}
+                          />
+                        </td>
+                        <td style={{ padding: '8px', color: '#fff', fontWeight: '600' }}>
+                          <div>{t.name}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#666', fontWeight: 'normal' }}>ID: {t.id}</div>
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <CategoryBadge categoryId={t.data?.category || 'games'} />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.72rem', padding: '2px 6px', borderRadius: '4px', background: isPub ? 'rgba(74,222,128,0.15)' : 'rgba(250,204,21,0.15)', color: isPub ? '#4ade80' : '#facc15', fontWeight: 'bold' }}>
+                              {isPub ? 'Público' : 'Privado'}
+                            </span>
+                            {isFeat && (
+                              <span style={{ fontSize: '0.72rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(250,204,21,0.25)', color: '#facc15', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                <Star size={10} fill="#facc15" /> Destaque
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td style={{ padding: '8px', textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
+                            <button
+                              onClick={() => handleAdminToggleFeature(t.id, isFeat)}
+                              style={{
+                                padding: '5px 8px',
+                                borderRadius: '6px',
+                                border: '1px solid #facc15',
+                                backgroundColor: isFeat ? '#facc15' : 'transparent',
+                                color: isFeat ? '#000' : '#facc15',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold'
+                              }}
+                              title={isFeat ? "Remover Destaque da Home" : "Fixar como Destaque na Home"}
+                            >
+                              <Star size={12} fill={isFeat ? "#000" : "none"} />
+                              {isFeat ? 'Destaque' : 'Fixar'}
+                            </button>
+
+                            <button
+                              onClick={() => handleAdminTogglePublic(t.id, isPub)}
+                              className="btn-secondary"
+                              style={{ padding: '5px 8px', fontSize: '0.75rem' }}
+                              title={isPub ? "Tornar Privado" : "Tornar Público"}
+                            >
+                              {isPub ? <EyeOff size={13} /> : <Eye size={13} />}
+                            </button>
+
+                            <Link
+                              to={'/template-maker?editTemplateId=' + t.id}
+                              className="btn-secondary"
+                              style={{ padding: '5px 8px', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}
+                              title="Editar Template"
+                            >
+                              <Pencil size={13} />
+                            </Link>
+
+                            <button
+                              onClick={() => handleAdminDeleteTemplate(t.id, t.name)}
+                              className="btn-danger outline"
+                              style={{ padding: '5px 8px' }}
+                              title="Excluir Template Permanentemente"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       )}
 

@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
+import GlobalAnnouncement from './components/GlobalAnnouncement';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -27,6 +28,7 @@ function App() {
     <ThemeProvider>
       <Router>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <GlobalAnnouncement />
           <Toaster 
             position="bottom-center"
             toastOptions={{
