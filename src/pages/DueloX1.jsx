@@ -88,7 +88,8 @@ export default function DueloX1() {
           .order('created_at', { ascending: false });
 
         if (!error && data) {
-          setTemplates(data);
+          const publicTemplates = data.filter(t => t.name && !t.name.startsWith('__'));
+          setTemplates(publicTemplates);
         }
       } catch (err) {
         console.error('Erro ao buscar templates:', err);

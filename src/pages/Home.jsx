@@ -75,14 +75,14 @@ export default function Home() {
           .from('templates')
           .select('id, name, cover_image, created_at, user_id, data')
           .eq('is_public', true)
-          .not('name', 'like', '__%')
           .order('created_at', { ascending: false });
         
         if (error) {
           console.error("Erro ao carregar templates:", error.message);
           setTemplates([]);
         } else {
-          setTemplates(data || []);
+          const publicTemplates = (data || []).filter(t => t.name && !t.name.startsWith('__'));
+          setTemplates(publicTemplates);
         }
       } catch (err) {
         console.error(err);

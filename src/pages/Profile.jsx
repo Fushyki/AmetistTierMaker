@@ -154,7 +154,7 @@ export default function Profile() {
       if (templatesRes.error) throw templatesRes.error;
 
       setTierlists(tierlistsRes.data || []);
-      setUserTemplates(templatesRes.data || []);
+      setUserTemplates((templatesRes.data || []).filter(t => t.name && !t.name.startsWith('__')));
 
       // Busca templates favoritados
       const likedIds = getUserLikedTemplateIds(user.id);
@@ -204,7 +204,7 @@ export default function Profile() {
         supabase.from('templates').select('data').eq('name', '__SYSTEM_ANNOUNCEMENT__').maybeSingle()
       ]);
 
-      const templatesList = (allTemplatesRes.data || []).filter(t => t.name !== '__SYSTEM_ANNOUNCEMENT__');
+      const templatesList = (allTemplatesRes.data || []).filter(t => t.name && !t.name.startsWith('__'));
       const tierlistsList = allTierlistsRes.data || [];
 
       // Métricas
