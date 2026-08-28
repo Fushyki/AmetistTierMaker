@@ -56,14 +56,9 @@ export default function TierlistControls({
       <div className={`controls-wrapper ${isCollapsedMobile ? 'mobile-collapsed' : ''}`}>
         {/* GRUPO 1: AÇÕES PRINCIPAIS E COMPARTILHAMENTO */}
         <div className="control-card">
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px', minHeight: '20px' }}>
-            <h3 style={{ margin: 0, textAlign: 'center' }}>Salvar & Compartilhar</h3>
-            {!user && (
-              <span style={{ position: 'absolute', right: 0, fontSize: '0.68rem', color: '#aaa', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                <Lock size={11} color="var(--accent-color)" /> Membros
-              </span>
-            )}
-          </div>
+          <h3 style={{ margin: '0 0 8px 0', textAlign: 'center', width: '100%' }}>
+            Salvar & Compartilhar
+          </h3>
 
           {user ? (
             <div className="btn-grid">
