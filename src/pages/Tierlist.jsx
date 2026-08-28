@@ -261,7 +261,7 @@ export default function Tierlist() {
           isOpen={isExportModalOpen}
           onClose={() => setIsExportModalOpen(false)}
           tierlistName={tierlistName}
-          onExport={(format, quality) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: siteTheme || theme || 'ametist', quality })}
+          onExport={(format, quality, action) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: siteTheme || theme || 'ametist', quality, action })}
         />
 
         <ShareModal 

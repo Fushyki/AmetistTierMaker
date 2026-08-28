@@ -204,13 +204,49 @@ export async function exportBoardAsImage(filename = 'minha-tierlist.png', elemen
       }
     });
 
-    const link = document.createElement('a');
-    const suffix = quality === 'ultra' ? '-4k' : '';
-    const cleanFilename = filename.replace(/\.png$/i, '') + suffix + '.png';
-    link.download = cleanFilename;
-    link.href = dataUrl;
-    link.click();
-    toast.success(`${labelMode} (${labelQuality}) baixado com sucesso!`, { id: 'img-export' });
+    const action = options.action || 'download'; // 'copy' | 'download'
+    const isCopy = action === 'copy';
+
+    if (isCopy) {
+      try {
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        
+        if (navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/png': blob
+            })
+          ]);
+          toast.success(`${labelMode} (${labelQuality}) copiado para a área de transferência! Cole com Ctrl+V.`, { id: 'img-export', duration: 4000 });
+        } else {
+          const link = document.createElement('a');
+          const suffix = quality === 'ultra' ? '-4k' : '';
+          const cleanFilename = filename.replace(/\.png$/i, '') + suffix + '.png';
+          link.download = cleanFilename;
+          link.href = dataUrl;
+          link.click();
+          toast.info('Área de transferência de imagem não suportada neste navegador. Download iniciado.', { id: 'img-export' });
+        }
+      } catch (clipErr) {
+        console.warn('Falha ao copiar para clipboard, fallback para download:', clipErr);
+        const link = document.createElement('a');
+        const suffix = quality === 'ultra' ? '-4k' : '';
+        const cleanFilename = filename.replace(/\.png$/i, '') + suffix + '.png';
+        link.download = cleanFilename;
+        link.href = dataUrl;
+        link.click();
+        toast.info('Permissão de cópia não concedida. O download da imagem foi iniciado.', { id: 'img-export' });
+      }
+    } else {
+      const link = document.createElement('a');
+      const suffix = quality === 'ultra' ? '-4k' : '';
+      const cleanFilename = filename.replace(/\.png$/i, '') + suffix + '.png';
+      link.download = cleanFilename;
+      link.href = dataUrl;
+      link.click();
+      toast.success(`${labelMode} (${labelQuality}) baixado com sucesso!`, { id: 'img-export' });
+    }
   } catch (error) {
     console.error('Erro ao salvar imagem:', error);
     toast.error('Houve um erro ao gerar a imagem: ' + (error.message || error), { id: 'img-export' });
