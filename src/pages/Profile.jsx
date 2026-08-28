@@ -36,12 +36,16 @@ import {
   UploadCloud,
   Link2,
   Image as ImageIcon,
-  X
+  X,
+  Heart,
+  Crown,
+  Swords
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { toast, notify } from '../utils/notifications';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
 import CategoryBadge, { CategoryIcon } from '../components/CategoryBadge';
+import { getUserLikedTemplateIds, toggleTemplateLike, getUserChampions } from '../utils/likesManager';
 import '../styles/index.css';
 
 const AVATAR_PRESETS = [
@@ -61,9 +65,11 @@ export default function Profile() {
   const { siteTheme, setSiteTheme, uiDensity, setUiDensity, availableThemes, activeTheme, showCustomToast } = useTheme();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('tierlists'); // 'tierlists', 'templates', 'visual', 'account', 'admin'
+  const [activeTab, setActiveTab] = useState('tierlists'); // 'tierlists', 'templates', 'favoritos', 'campeoes', 'visual', 'account', 'admin'
   const [tierlists, setTierlists] = useState([]);
   const [userTemplates, setUserTemplates] = useState([]);
+  const [favoriteTemplates, setFavoriteTemplates] = useState([]);
+  const [duelChampions, setDuelChampions] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -113,6 +119,21 @@ export default function Profile() {
     }
   }, [user]);
 
+  // Listener para sincronizar curtidas e campeões
+  useEffect(() => {
+    const handleSync = () => {
+      if (user) {
+        fetchUserData();
+      }
+    };
+    window.addEventListener('ametist-likes-updated', handleSync);
+    window.addEventListener('ametist-champions-updated', handleSync);
+    return () => {
+      window.removeEventListener('ametist-likes-updated', handleSync);
+      window.removeEventListener('ametist-champions-updated', handleSync);
+    };
+  }, [user]);
+
   const fetchUserData = async () => {
     try {
       setLoadingData(true);
@@ -126,10 +147,42 @@ export default function Profile() {
 
       setTierlists(tierlistsRes.data || []);
       setUserTemplates(templatesRes.data || []);
+
+      // Busca templates favoritados
+      const likedIds = getUserLikedTemplateIds(user.id);
+      let favs = [];
+      if (likedIds && likedIds.length > 0) {
+        const favsRes = await supabase
+          .from('templates')
+          .select('*')
+          .in('id', likedIds);
+        if (!favsRes.error && favsRes.data) {
+          favs = favsRes.data;
+        }
+      }
+      setFavoriteTemplates(favs);
+      setDuelChampions(getUserChampions(user.id));
     } catch (err) {
       console.error('Erro ao buscar dados do usuário:', err);
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const handleRemoveFavorite = async (template) => {
+    const res = await toggleTemplateLike(template, user);
+    if (res.success) {
+      setFavoriteTemplates(prev => prev.filter(t => t.id !== template.id));
+      toast.info(`"${template.name}" removido dos favoritos.`);
+    }
+  };
+
+  const handleClearChampions = async () => {
+    const isConfirmed = await confirmAction('Limpar Campeões', 'Deseja apagar o histórico de campeões salvos do seu perfil?', 'Sim, limpar');
+    if (isConfirmed && user?.id) {
+      localStorage.removeItem(`ametist_user_champions_${user.id}`);
+      setDuelChampions([]);
+      toast.success('Histórico de campeões limpo!');
     }
   };
 
@@ -627,6 +680,24 @@ export default function Profile() {
 
         <button
           type="button"
+          onClick={() => setActiveTab('favoritos')}
+          className={`profile-tab-btn ${activeTab === 'favoritos' ? 'active' : ''}`}
+        >
+          <Heart size={16} />
+          <span>Favoritos ({favoriteTemplates.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('campeoes')}
+          className={`profile-tab-btn ${activeTab === 'campeoes' ? 'active' : ''}`}
+        >
+          <Trophy size={16} />
+          <span>Campeões ({duelChampions.length})</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab('visual')}
           className={`profile-tab-btn ${activeTab === 'visual' ? 'active' : ''}`}
         >
@@ -844,6 +915,193 @@ export default function Profile() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONTEÚDO DA ABA: FAVORITOS */}
+      {activeTab === 'favoritos' && (
+        <div className="profile-tab-content">
+          <div className="control-card" style={{ padding: '22px', background: '#121216', borderRadius: '14px', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.25)'}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Heart size={20} color="#ef4444" fill="#ef4444" />
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700' }}>Modelos Favoritados</h3>
+                </div>
+                <p style={{ color: '#aaa', fontSize: '0.85rem', margin: '4px 0 0 0' }}>
+                  Modelos da comunidade que você curtiu e favoritou para jogar a qualquer momento.
+                </p>
+              </div>
+            </div>
+
+            {loadingData ? (
+              <p style={{ color: '#888', fontSize: '0.9rem', textAlign: 'center', padding: '20px' }}>Carregando favoritos...</p>
+            ) : favoriteTemplates.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '36px 16px', color: '#888' }}>
+                <Heart size={36} color="#444" style={{ margin: '0 auto 10px auto' }} />
+                <p style={{ margin: '0 0 12px 0', fontSize: '0.95rem' }}>Você ainda não favoritou nenhum modelo.</p>
+                <Link to="/" className="btn-primary" style={{ padding: '8px 16px', textDecoration: 'none', fontSize: '0.85rem' }}>
+                  Explorar Modelos na Home
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px' }}>
+                {favoriteTemplates.map(template => (
+                  <div 
+                    key={`fav-${template.id}`}
+                    style={{
+                      background: '#16161a',
+                      border: '1px solid #282832',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}
+                  >
+                    <div style={{ width: '100%', height: '115px', overflow: 'hidden', position: 'relative' }}>
+                      <img 
+                        src={template.cover_image} 
+                        alt={template.name} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/300x150?text=Sem+Capa'; }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFavorite(template)}
+                        style={{
+                          position: 'absolute',
+                          top: '6px',
+                          right: '6px',
+                          background: 'rgba(0,0,0,0.7)',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '26px',
+                          height: '26px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          color: '#ef4444'
+                        }}
+                        title="Remover dos favoritos"
+                      >
+                        <Heart size={14} fill="#ef4444" />
+                      </button>
+                    </div>
+                    <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <h4 style={{ margin: '0 0 10px 0', fontSize: '0.95rem', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {template.name}
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <Link 
+                          to={'/tierlist?templateId=' + template.id} 
+                          className="btn-primary"
+                          style={{ textDecoration: 'none', textAlign: 'center', padding: '7px 10px', fontSize: '0.8rem', fontWeight: '600' }}
+                        >
+                          Montar Tier List
+                        </Link>
+                        <Link 
+                          to={'/duelo?templateId=' + template.id} 
+                          className="btn-secondary"
+                          style={{ textDecoration: 'none', textAlign: 'center', padding: '6px 10px', fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
+                        >
+                          <Swords size={13} color={activeTheme?.accentColor || '#b062eb'} /> Jogar Duelo
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CONTEÚDO DA ABA: CAMPEÕES DE DUELO */}
+      {activeTab === 'campeoes' && (
+        <div className="profile-tab-content">
+          <div className="control-card" style={{ padding: '22px', background: '#121216', borderRadius: '14px', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.25)'}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Trophy size={20} color="#ffd700" />
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700' }}>Galeria de Campeões de Duelo</h3>
+                </div>
+                <p style={{ color: '#aaa', fontSize: '0.85rem', margin: '4px 0 0 0' }}>
+                  Todos os personagens e cartas que conquistaram o 1º lugar nos seus Torneios Mata-Mata.
+                </p>
+              </div>
+
+              {duelChampions.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearChampions}
+                  className="btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.78rem', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
+                >
+                  <Trash2 size={13} /> Limpar Histórico
+                </button>
+              )}
+            </div>
+
+            {duelChampions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '36px 16px', color: '#888' }}>
+                <Crown size={38} color="#555" style={{ margin: '0 auto 10px auto' }} />
+                <p style={{ margin: '0 0 12px 0', fontSize: '0.95rem' }}>Você ainda não coroou nenhum campeão em torneios.</p>
+                <Link to="/duelo" className="btn-primary" style={{ padding: '8px 16px', textDecoration: 'none', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Swords size={14} /> Iniciar um Torneio de Duelo
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '14px' }}>
+                {duelChampions.map((champ, idx) => (
+                  <div 
+                    key={champ.id || idx}
+                    style={{
+                      background: '#16161c',
+                      border: '1.5px solid #ffd700',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 18px rgba(255, 215, 0, 0.15)',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}
+                  >
+                    <div style={{ width: '100%', height: '140px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img 
+                        src={champ.championImage} 
+                        alt="" 
+                        aria-hidden="true"
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(15px)', opacity: 0.3 }}
+                      />
+                      <img 
+                        src={champ.championImage} 
+                        alt={champ.championName} 
+                        style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }}
+                      />
+                      <div style={{ position: 'absolute', top: '6px', left: '6px', background: '#ffd700', color: '#000', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, fontWeight: '900', fontSize: '0.75rem' }}>
+                        1º
+                      </div>
+                    </div>
+                    <div style={{ padding: '10px 12px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.92rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {champ.championName}
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#ffd700', fontWeight: '700', marginTop: '2px' }}>
+                        Campeão do Torneio
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#777', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {champ.templateName}
+                      </div>
+                      <div style={{ fontSize: '0.66rem', color: '#555', marginTop: '2px' }}>
+                        {new Date(champ.date).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

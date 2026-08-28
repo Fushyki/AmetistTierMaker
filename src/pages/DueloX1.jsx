@@ -22,15 +22,18 @@ import {
   Sliders
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
+import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { toast } from '../utils/notifications';
 import { fetchAndParseAPI } from '../utils/apiParser';
 import { autoImport } from '../utils/autoImporter';
+import { saveUserChampion } from '../utils/likesManager';
 import '../styles/index.css';
 
 export default function DueloX1() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { activeTheme } = useTheme();
 
   // Estados principais
@@ -344,11 +347,22 @@ export default function DueloX1() {
 
       if (combinedNextItems.length === 1) {
         // GRANDE FINAL TERMINADA -> TEMOS O CAMPEÃO!
+        const champ = combinedNextItems[0];
         setPodium({
-          champion: combinedNextItems[0],
+          champion: champ,
           runnerUp: loser,
           third: currentRound.length === 2 ? loser : null
         });
+
+        if (user?.id) {
+          saveUserChampion(user.id, {
+            champion: champ,
+            templateName: selectedTemplate?.name,
+            templateId: selectedTemplate?.id,
+            bracketSize: selectedBracketSize
+          });
+        }
+
         setGameState('finished');
       } else {
         // Monta a próxima rodada
