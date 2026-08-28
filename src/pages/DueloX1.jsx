@@ -22,6 +22,8 @@ import {
 import { supabase } from '../services/supabaseClient';
 import { useTheme } from '../contexts/ThemeContext';
 import { toast } from '../utils/notifications';
+import { fetchAndParseAPI } from '../utils/apiParser';
+import { autoImport } from '../utils/autoImporter';
 import '../styles/index.css';
 
 export default function DueloX1() {
@@ -33,6 +35,7 @@ export default function DueloX1() {
   const [mode, setMode] = useState('x1'); // 'x1' (Mata-Mata Torneio) ou 'tierlist_battle' (Ranqueamento Completo)
   const [gameState, setGameState] = useState('select_template'); // 'select_template', 'playing', 'finished'
   const [loading, setLoading] = useState(false);
+  const [loadingTemplate, setLoadingTemplate] = useState(false);
 
   // Modelos disponíveis para jogar
   const [templates, setTemplates] = useState([]);
@@ -112,24 +115,61 @@ export default function DueloX1() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, mode, tournamentRounds, currentRoundIndex, currentMatchIndex, nextRoundItems, insertItem, binaryRange, rankedList, unrankedItems, selectedSide]);
 
-  // Função para inicializar o template selecionado
-  const handleSelectTemplate = (tpl) => {
+  // Função para carregar e inicializar o template selecionado com suporte a APIs e autoImport
+  const handleSelectTemplate = async (tpl) => {
     setSelectedTemplate(tpl);
+    setLoadingTemplate(true);
     let items = [];
-    if (tpl.data) {
-      if (Array.isArray(tpl.data.items)) {
-        items = tpl.data.items;
-      } else if (Array.isArray(tpl.data)) {
-        items = tpl.data;
-      }
-    }
-    if (!items || items.length < 3) {
-      try {
-        const localItems = JSON.parse(localStorage.getItem('tierlist-items') || '[]');
-        if (localItems && localItems.length >= 3) {
-          items = localItems;
+
+    try {
+      if (tpl.data) {
+        if (tpl.data.apiConfig) {
+          try {
+            items = await fetchAndParseAPI(tpl.data.apiConfig);
+          } catch (err) {
+            console.warn('Erro ao puxar da API do template:', err);
+          }
+        } else if (Array.isArray(tpl.data.items) && tpl.data.items.length > 0) {
+          items = tpl.data.items;
+        } else if (Array.isArray(tpl.data) && tpl.data.length > 0) {
+          items = tpl.data;
         }
-      } catch (e) {}
+      }
+
+      // Fallback inteligente caso não tenha retornado da API
+      if (!items || items.length === 0) {
+        const tplName = (tpl.name || '').toLowerCase();
+        if (tplName.includes('genshin')) {
+          const res = await autoImport('genshin');
+          items = res?.items || [];
+        } else if (tplName.includes('star rail') || tplName.includes('hsr')) {
+          const res = await autoImport('hsr');
+          items = res?.items || [];
+        } else if (tplName.includes('brawl')) {
+          const res = await autoImport('brawlstars');
+          items = res?.items || [];
+        } else if (tplName.includes('league') || tplName.includes('lol')) {
+          const res = await autoImport('lol');
+          items = res?.items || [];
+        } else if (tplName.includes('pokémon') || tplName.includes('pokemon')) {
+          const res = await autoImport('pokemon');
+          items = res?.items || [];
+        }
+      }
+
+      // Fallback local do tierlist se houver banco salvo
+      if (!items || items.length < 3) {
+        try {
+          const localItems = JSON.parse(localStorage.getItem('tierlist-items') || '[]');
+          if (localItems && localItems.length >= 3) {
+            items = localItems;
+          }
+        } catch (e) {}
+      }
+    } catch (err) {
+      console.error('Erro ao carregar dados do modelo:', err);
+    } finally {
+      setLoadingTemplate(false);
     }
 
     if (!items || items.length < 3) {
@@ -142,6 +182,11 @@ export default function DueloX1() {
       src: item.src || item.image || item.url,
       nome: item.nome || item.name || item.title || `Item ${idx + 1}`
     })).filter(i => i.src);
+
+    if (normalized.length < 3) {
+      toast.error('Não foi possível carregar as imagens deste modelo.');
+      return;
+    }
 
     setRawItems(normalized);
     startDuelSession(normalized, mode);
@@ -532,50 +577,61 @@ export default function DueloX1() {
           </div>
 
           {/* Grid de Modelos */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px' }}>
-            {templates
-              .filter(t => t.name.toLowerCase().includes(templateSearch.toLowerCase()))
-              .map(t => (
-                <div
-                  key={t.id}
-                  onClick={() => handleSelectTemplate(t)}
-                  style={{
-                    backgroundColor: '#16161a',
-                    border: '1px solid #282832',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.4)'
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb';
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = '#282832';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  <div style={{ width: '100%', height: '110px', backgroundColor: '#222', overflow: 'hidden' }}>
-                    <img 
-                      src={t.cover_image || 'https://via.placeholder.com/300x120?text=Ametist'} 
-                      alt={t.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                    />
-                  </div>
-                  <div style={{ padding: '12px' }}>
-                    <h3 style={{ margin: '0 0 6px 0', fontSize: '0.95rem', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {t.name}
-                    </h3>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: activeTheme?.accentColor || '#b062eb', fontSize: '0.8rem', fontWeight: '700' }}>
-                      <span>Iniciar Duelos</span>
-                      <ChevronRight size={14} />
+          {loadingTemplate ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: activeTheme?.accentColor || '#b062eb', fontWeight: '800', fontSize: '1.05rem', background: '#141419', borderRadius: '16px', border: '1px solid #282834' }}>
+              Carregando personagens e imagens do modelo...
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px' }}>
+              {templates
+                .filter(t => t.name.toLowerCase().includes(templateSearch.toLowerCase()))
+                .map(t => (
+                  <div
+                    key={t.id}
+                    onClick={() => !loadingTemplate && handleSelectTemplate(t)}
+                    style={{
+                      backgroundColor: '#16161a',
+                      border: '1px solid #282832',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      cursor: loadingTemplate ? 'wait' : 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                      opacity: loadingTemplate ? 0.6 : 1
+                    }}
+                    onMouseEnter={e => {
+                      if (!loadingTemplate) {
+                        e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb';
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!loadingTemplate) {
+                        e.currentTarget.style.borderColor = '#282832';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }
+                    }}
+                  >
+                    <div style={{ width: '100%', height: '110px', backgroundColor: '#222', overflow: 'hidden' }}>
+                      <img 
+                        src={t.cover_image || 'https://via.placeholder.com/300x120?text=Ametist'} 
+                        alt={t.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    </div>
+                    <div style={{ padding: '12px' }}>
+                      <h3 style={{ margin: '0 0 6px 0', fontSize: '0.95rem', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {t.name}
+                      </h3>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: activeTheme?.accentColor || '#b062eb', fontSize: '0.8rem', fontWeight: '700' }}>
+                        <span>Iniciar Duelos</span>
+                        <ChevronRight size={14} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-          </div>
+                ))}
+            </div>
+          )}
         </div>
       )}
 
