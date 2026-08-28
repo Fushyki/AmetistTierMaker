@@ -437,11 +437,11 @@ export default function DueloX1() {
     const cCount = Math.max(1, Math.round(total * 0.20));
 
     const tiers = [
-      { id: 'rank-s', nome: 'S', color: '#ff7f7f', items: finalRanked.slice(0, sCount) },
-      { id: 'rank-a', nome: 'A', color: '#ffbf7f', items: finalRanked.slice(sCount, sCount + aCount) },
-      { id: 'rank-b', nome: 'B', color: '#ffff7f', items: finalRanked.slice(sCount + aCount, sCount + aCount + bCount) },
-      { id: 'rank-c', nome: 'C', color: '#7fff7f', items: finalRanked.slice(sCount + aCount + bCount, sCount + aCount + bCount + cCount) },
-      { id: 'rank-d', nome: 'D', color: '#7fbfff', items: finalRanked.slice(sCount + aCount + bCount + cCount) }
+      { id: 'tier-1', l: 'S', c: 's-rank', bgColor: '#ff7f7f', items: finalRanked.slice(0, sCount) },
+      { id: 'tier-2', l: 'A', c: 'a-rank', bgColor: '#ffbf7f', items: finalRanked.slice(sCount, sCount + aCount) },
+      { id: 'tier-3', l: 'B', c: 'b-rank', bgColor: '#ffff7f', items: finalRanked.slice(sCount + aCount, sCount + aCount + bCount) },
+      { id: 'tier-4', l: 'C', c: 'c-rank', bgColor: '#7fff7f', items: finalRanked.slice(sCount + aCount + bCount, sCount + aCount + bCount + cCount) },
+      { id: 'tier-5', l: 'D', c: 'd-rank', bgColor: '#7fbfff', items: finalRanked.slice(sCount + aCount + bCount + cCount) }
     ];
 
     setGeneratedTierList(tiers);
@@ -456,7 +456,9 @@ export default function DueloX1() {
     generatedTierList.forEach(tier => {
       tier.items.forEach(item => {
         placedItems.push({
-          ...item,
+          id: item.id || `duel-item-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          src: item.src || item.image || item.url,
+          nome: item.nome || item.name || 'Item',
           tierId: tier.id,
           colIndex: null
         });
@@ -466,24 +468,29 @@ export default function DueloX1() {
     const ranksData = [
       {
         id: 'group-1',
-        titulo: 'Principal',
+        titulo: 'TIER LIST',
         ranks: generatedTierList.map(t => ({
           id: t.id,
-          label: t.nome,
-          color: t.color
+          l: t.l,
+          c: t.c,
+          bgColor: t.bgColor
         }))
       }
     ];
 
     localStorage.setItem('tierlist-items', JSON.stringify(placedItems));
     localStorage.setItem('tierlist-ranks', JSON.stringify(ranksData));
-    localStorage.setItem('tierlist-name', `${selectedTemplate?.name || 'Tier List'} (Ranqueada no Duelo)`);
+    localStorage.setItem('tierlist-layout', 'classico');
+    localStorage.setItem('tierlist-colunas', '1');
+    localStorage.setItem('tierlist-name', `${selectedTemplate?.name || 'Tier List'} (Ranqueada na Batalha)`);
+    localStorage.setItem('tierlist-api-loaded', 'true');
+    localStorage.setItem('tierlist-force-cloud-load', 'false');
+    localStorage.removeItem('tierlist-current-id');
     if (selectedTemplate?.id) {
       localStorage.setItem('tierlist-active-template-id', selectedTemplate.id);
     }
-    localStorage.setItem('tierlist-force-cloud-load', 'false');
 
-    toast.success('Tier List gerada! Abrindo tabuleiro...');
+    toast.success('Tier List gerada com sucesso! Abrindo tabuleiro...');
     navigate('/tierlist');
   };
 
@@ -1605,7 +1612,7 @@ export default function DueloX1() {
                     {/* Header do Tier */}
                     <div style={{
                       width: '80px',
-                      backgroundColor: tier.color,
+                      backgroundColor: tier.bgColor || tier.color || '#ff7f7f',
                       color: '#000',
                       fontWeight: '900',
                       fontSize: '1.3rem',
@@ -1614,7 +1621,7 @@ export default function DueloX1() {
                       justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      {tier.nome}
+                      {tier.l || tier.nome}
                     </div>
 
                     {/* Itens do Tier */}
