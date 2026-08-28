@@ -1502,47 +1502,81 @@ export default function DueloX1() {
                 Após todas as fases do chaveamento, estes foram os 3 melhores colocados no torneio:
               </p>
 
-              {/* PÓDIO TOP 3 COMPLETO (1º Campeão / Ouro, 2º Vice / Prata, 3º Lugar / Bronze) */}
+              {/* PÓDIO 2 COLUNAS: COLUNA 1 (2º E 3º EMPILHADOS) | COLUNA 2 (1º SOZINHO E DESTACADO) */}
               <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'flex-end',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                 gap: '16px',
-                maxWidth: '860px',
+                maxWidth: '760px',
+                width: '100%',
                 margin: '0 auto 30px auto',
-                flexWrap: 'wrap'
+                alignItems: 'stretch'
               }}>
-                {/* 2º LUGAR (VICE-CAMPEÃO / PRATA) */}
-                {podium.runnerUp && (
-                  <div style={{
-                    flex: '1 1 200px',
-                    maxWidth: '240px',
-                    background: '#15151b',
-                    border: '2px solid #a8a8b2',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    boxShadow: '0 8px 24px rgba(168, 168, 178, 0.2)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    order: 1
-                  }}>
-                    <div style={{ background: '#272730', padding: '7px', color: '#e2e2e8', fontWeight: '800', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                      <Medal size={16} color="#c0c0c0" /> 2º LUGAR (Prata)
-                    </div>
-                    <div style={{ width: '100%', height: '180px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src={podium.runnerUp.src} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(15px)', opacity: 0.3 }} />
-                      <img src={podium.runnerUp.src} alt={podium.runnerUp.nome} style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '8px' }} />
-                    </div>
-                    <div style={{ padding: '10px', fontSize: '0.92rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {podium.runnerUp.nome}
-                    </div>
-                  </div>
-                )}
-
-                {/* 1º LUGAR (GRANDE CAMPEÃO / OURO) */}
+                {/* COLUNA 1: 2º E 3º LUGAR EMPILHADOS */}
                 <div style={{
-                  flex: '1 1 240px',
-                  maxWidth: '290px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px',
+                  justifyContent: 'space-between',
+                  height: '100%'
+                }}>
+                  {/* 2º LUGAR (PRATA) */}
+                  {podium.runnerUp ? (
+                    <div style={{
+                      flex: 1,
+                      background: '#15151c',
+                      border: '2px solid #a8a8b2',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 20px rgba(168, 168, 178, 0.2)',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
+                      <div style={{ background: '#272732', padding: '6px 12px', color: '#e2e2e8', fontWeight: '800', fontSize: '0.82rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                        <Medal size={15} color="#c0c0c0" /> 2º LUGAR (Prata)
+                      </div>
+                      <div style={{ width: '100%', height: '140px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={podium.runnerUp.src} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(15px)', opacity: 0.3 }} />
+                        <img src={podium.runnerUp.src} alt={podium.runnerUp.nome} style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
+                      </div>
+                      <div style={{ padding: '8px 12px', fontSize: '0.88rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {podium.runnerUp.nome}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ flex: 1, background: '#15151c', borderRadius: '16px', border: '1px dashed #333' }} />
+                  )}
+
+                  {/* 3º LUGAR (BRONZE) */}
+                  {podium.third ? (
+                    <div style={{
+                      flex: 1,
+                      background: '#15151c',
+                      border: '2px solid #b45309',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 20px rgba(180, 83, 9, 0.25)',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
+                      <div style={{ background: '#2c1810', padding: '6px 12px', color: '#fdba74', fontWeight: '800', fontSize: '0.82rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                        <Award size={15} color="#cd7f32" /> 3º LUGAR (Bronze)
+                      </div>
+                      <div style={{ width: '100%', height: '140px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={podium.third.src} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(15px)', opacity: 0.3 }} />
+                        <img src={podium.third.src} alt={podium.third.nome} style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
+                      </div>
+                      <div style={{ padding: '8px 12px', fontSize: '0.88rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {podium.third.nome}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ flex: 1, background: '#15151c', borderRadius: '16px', border: '1px dashed #333' }} />
+                  )}
+                </div>
+
+                {/* COLUNA 2: 1º LUGAR (GRANDE CAMPEÃO / OURO) */}
+                <div style={{
                   background: '#171722',
                   border: '3px solid #ffd700',
                   borderRadius: '18px',
@@ -1550,14 +1584,13 @@ export default function DueloX1() {
                   boxShadow: '0 0 35px rgba(255, 215, 0, 0.35)',
                   display: 'flex',
                   flexDirection: 'column',
-                  transform: 'translateY(-10px)',
-                  order: 2,
-                  zIndex: 2
+                  justifyContent: 'space-between',
+                  height: '100%'
                 }}>
-                  <div style={{ background: 'linear-gradient(90deg, #b45309 0%, #ffd700 50%, #b45309 100%)', padding: '8px', color: '#000', fontWeight: '900', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                    <Crown size={18} /> 1º CAMPEÃO (Ouro)
+                  <div style={{ background: 'linear-gradient(90deg, #b45309 0%, #ffd700 50%, #b45309 100%)', padding: '10px 14px', color: '#000', fontWeight: '900', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <Crown size={20} /> 1º CAMPEÃO (Ouro)
                   </div>
-                  <div style={{ width: '100%', height: '230px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ flex: 1, minHeight: '300px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <img 
                       src={podium.champion.src} 
                       alt="" 
@@ -1567,40 +1600,13 @@ export default function DueloX1() {
                     <img 
                       src={podium.champion.src} 
                       alt={podium.champion.nome} 
-                      style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '10px' }} 
+                      style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', maxHeight: '320px', objectFit: 'contain', padding: '12px' }} 
                     />
                   </div>
-                  <div style={{ padding: '12px', fontSize: '1.15rem', fontWeight: '900', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ padding: '14px', fontSize: '1.25rem', fontWeight: '900', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {podium.champion.nome}
                   </div>
                 </div>
-
-                {/* 3º LUGAR (BRONZE / SEMIFINALISTAS) */}
-                {podium.third && (
-                  <div style={{
-                    flex: '1 1 200px',
-                    maxWidth: '240px',
-                    background: '#15151b',
-                    border: '2px solid #b45309',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    boxShadow: '0 8px 24px rgba(180, 83, 9, 0.25)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    order: 3
-                  }}>
-                    <div style={{ background: '#2c1810', padding: '7px', color: '#fdba74', fontWeight: '800', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                      <Award size={16} color="#cd7f32" /> 3º LUGAR (Bronze)
-                    </div>
-                    <div style={{ width: '100%', height: '180px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src={podium.third.src} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(15px)', opacity: 0.3 }} />
-                      <img src={podium.third.src} alt={podium.third.nome} style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '8px' }} />
-                    </div>
-                    <div style={{ padding: '10px', fontSize: '0.92rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {podium.third.nome}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Botões de Ação */}
