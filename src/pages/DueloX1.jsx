@@ -17,7 +17,9 @@ import {
   XCircle,
   Clock,
   CheckCircle2,
-  ListOrdered
+  ListOrdered,
+  Settings2,
+  Sliders
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { useTheme } from '../contexts/ThemeContext';
@@ -33,7 +35,7 @@ export default function DueloX1() {
 
   // Estados principais
   const [mode, setMode] = useState('x1'); // 'x1' (Mata-Mata Torneio) ou 'tierlist_battle' (Ranqueamento Completo)
-  const [gameState, setGameState] = useState('select_template'); // 'select_template', 'playing', 'finished'
+  const [gameState, setGameState] = useState('select_template'); // 'select_template', 'configure_tournament', 'playing', 'finished'
   const [loading, setLoading] = useState(false);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
 
@@ -42,12 +44,14 @@ export default function DueloX1() {
   const [templateSearch, setTemplateSearch] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [rawItems, setRawItems] = useState([]);
+  const [selectedBracketSize, setSelectedBracketSize] = useState('all'); // '8', '16', '32', '64', '128', 'all'
 
-  // ESTADO DO MODO 1: DUELO X1 (MATA-MATA)
+  // ESTADO DO MODO 1: DUELO (MATA-MATA)
   const [tournamentRounds, setTournamentRounds] = useState([]); // Array de rodadas com partidas
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [nextRoundItems, setNextRoundItems] = useState([]);
+  const [pendingByeItems, setPendingByeItems] = useState([]); // Itens que passaram direto da fase preliminar (byes)
   const [eliminatedItems, setEliminatedItems] = useState([]); // Array de itens eliminados com informações da fase
   const [podium, setPodium] = useState({ champion: null, runnerUp: null, third: null });
   const [activeInspectorTab, setActiveInspectorTab] = useState('bracket'); // 'bracket', 'classified', 'eliminated'
@@ -115,7 +119,7 @@ export default function DueloX1() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, mode, tournamentRounds, currentRoundIndex, currentMatchIndex, nextRoundItems, insertItem, binaryRange, rankedList, unrankedItems, selectedSide]);
 
-  // Função para carregar e inicializar o template selecionado com suporte a APIs e autoImport
+  // Função para carregar o template selecionado e abrir tela de configuração de chaveamento
   const handleSelectTemplate = async (tpl) => {
     setSelectedTemplate(tpl);
     setLoadingTemplate(true);
@@ -189,31 +193,59 @@ export default function DueloX1() {
     }
 
     setRawItems(normalized);
-    startDuelSession(normalized, mode);
+    setSelectedBracketSize(normalized.length <= 16 ? 'all' : (normalized.length >= 32 ? '32' : '16'));
+    setGameState('configure_tournament');
   };
 
   // Nomes amigáveis para as fases do chaveamento
-  const getRoundLabel = (matchesCount) => {
+  const getRoundLabel = (matchesCount, isPreliminar = false) => {
+    if (isPreliminar) return 'Fase Preliminar';
     if (matchesCount === 1) return 'Grande Final';
     if (matchesCount === 2) return 'Semifinais';
     if (matchesCount === 4) return 'Quartas de Final';
     if (matchesCount === 8) return 'Oitavas de Final';
     if (matchesCount === 16) return '16-avos de Final';
+    if (matchesCount === 32) return '32-avos de Final';
+    if (matchesCount === 64) return '64-avos de Final';
     return `Fase de ${matchesCount * 2}`;
   };
 
-  // Iniciar sessão de jogo
-  const startDuelSession = (itemsList, selectedMode) => {
+  // Iniciar sessão de jogo com o tamanho de chave escolhido
+  const startDuelSession = (itemsList, selectedMode, bracketSize = selectedBracketSize) => {
     const shuffled = [...itemsList].sort(() => Math.random() - 0.5);
 
     if (selectedMode === 'x1') {
-      // Modo Mata-Mata Torneio (Ajusta para 4, 8, 16 ou 32 participantes)
-      let count = shuffled.length;
-      let power = 2;
-      while (power * 2 <= count && power * 2 <= 32) {
-        power *= 2;
+      let tournamentItems = [];
+      let byes = [];
+      let isPreliminar = false;
+
+      if (bracketSize === 'all' || !bracketSize) {
+        const total = shuffled.length;
+        // Encontra a maior potência de 2 menor ou igual a total
+        let p = 2;
+        while (p * 2 <= total) {
+          p *= 2;
+        }
+
+        if (total === p) {
+          // Total já é potência de 2 exata (8, 16, 32, 64, etc.)
+          tournamentItems = shuffled;
+        } else {
+          // Torneio completo com Fase Preliminar para os itens extras
+          // Exemplo: 50 itens. p = 32. extra = 18.
+          // 18 confrontos preliminares usam 36 itens. Os 14 restantes ganham "Bye" (folga para a rodada 1).
+          const extra = total - p;
+          const preliminarCount = extra * 2;
+          const preliminarItems = shuffled.slice(0, preliminarCount);
+          byes = shuffled.slice(preliminarCount); // Passam direto para a próxima fase
+
+          tournamentItems = preliminarItems;
+          isPreliminar = true;
+        }
+      } else {
+        const targetSize = parseInt(bracketSize, 10) || 16;
+        tournamentItems = shuffled.slice(0, Math.min(targetSize, shuffled.length));
       }
-      const tournamentItems = shuffled.slice(0, power);
 
       const firstRoundMatches = [];
       for (let i = 0; i < tournamentItems.length; i += 2) {
@@ -222,7 +254,8 @@ export default function DueloX1() {
           itemA: tournamentItems[i],
           itemB: tournamentItems[i + 1] || tournamentItems[0],
           winner: null,
-          loser: null
+          loser: null,
+          isPreliminar: isPreliminar
         });
       }
 
@@ -230,12 +263,13 @@ export default function DueloX1() {
       setCurrentRoundIndex(0);
       setCurrentMatchIndex(0);
       setNextRoundItems([]);
+      setPendingByeItems(byes);
       setEliminatedItems([]);
       setPodium({ champion: null, runnerUp: null, third: null });
       setActiveInspectorTab('bracket');
       setGameState('playing');
     } else {
-      // Modo Batalha Tier List (Ranqueamento completo por inserção binária)
+      // Modo Batalha Tier List (Ranqueamento completo de 100% dos itens por inserção binária)
       const first = shuffled[0];
       const rest = shuffled.slice(1);
       const nextInsert = rest[0];
@@ -266,14 +300,14 @@ export default function DueloX1() {
     }, 220);
   };
 
-  // Processamento do Torneio X1
+  // Processamento do Torneio
   const processTournamentPick = (winnerSide) => {
     const currentRound = tournamentRounds[currentRoundIndex];
     const currentMatch = currentRound[currentMatchIndex];
     const winner = winnerSide === 'left' ? currentMatch.itemA : currentMatch.itemB;
     const loser = winnerSide === 'left' ? currentMatch.itemB : currentMatch.itemA;
 
-    const roundName = getRoundLabel(currentRound.length);
+    const roundName = getRoundLabel(currentRound.length, currentMatch.isPreliminar);
 
     // Registra o vencedor na partida atual
     currentMatch.winner = winner;
@@ -298,10 +332,17 @@ export default function DueloX1() {
       setCurrentMatchIndex(prev => prev + 1);
     } else {
       // Rodada terminada!
-      if (newNextItems.length === 1) {
+      // Se havia itens de "Bye" da fase preliminar, adiciona-os agora
+      let combinedNextItems = [...newNextItems];
+      if (pendingByeItems.length > 0) {
+        combinedNextItems = [...combinedNextItems, ...pendingByeItems];
+        setPendingByeItems([]);
+      }
+
+      if (combinedNextItems.length === 1) {
         // GRANDE FINAL TERMINADA -> TEMOS O CAMPEÃO!
         setPodium({
-          champion: newNextItems[0],
+          champion: combinedNextItems[0],
           runnerUp: loser,
           third: currentRound.length === 2 ? loser : null
         });
@@ -309,13 +350,14 @@ export default function DueloX1() {
       } else {
         // Monta a próxima rodada
         const nextRoundMatches = [];
-        for (let i = 0; i < newNextItems.length; i += 2) {
+        for (let i = 0; i < combinedNextItems.length; i += 2) {
           nextRoundMatches.push({
             id: `match-${currentRoundIndex + 1}-${i / 2}`,
-            itemA: newNextItems[i],
-            itemB: newNextItems[i + 1],
+            itemA: combinedNextItems[i],
+            itemB: combinedNextItems[i + 1],
             winner: null,
-            loser: null
+            loser: null,
+            isPreliminar: false
           });
         }
         setTournamentRounds(prev => [...prev, nextRoundMatches]);
@@ -440,9 +482,9 @@ export default function DueloX1() {
       if (round && round[currentMatchIndex]) {
         currentCardLeft = round[currentMatchIndex].itemA;
         currentCardRight = round[currentMatchIndex].itemB;
+        roundTitle = getRoundLabel(round.length, round[currentMatchIndex].isPreliminar);
       }
       roundMatchesTotal = round ? round.length : 1;
-      roundTitle = getRoundLabel(roundMatchesTotal);
     } else {
       currentCardLeft = insertItem;
       currentCardRight = rankedList[binaryRange.mid];
@@ -453,22 +495,13 @@ export default function DueloX1() {
   // Gera a lista de fases estimadas para a barra de etapas do torneio
   const getTournamentStages = () => {
     if (!tournamentRounds || tournamentRounds.length === 0) return [];
-    const firstRoundSize = tournamentRounds[0].length;
-    const stages = [];
-    let size = firstRoundSize;
-    let idx = 0;
-    while (size >= 1) {
-      stages.push({
-        index: idx,
-        size: size,
-        label: getRoundLabel(size),
-        isCompleted: idx < currentRoundIndex,
-        isCurrent: idx === currentRoundIndex
-      });
-      size = Math.floor(size / 2);
-      idx++;
-    }
-    return stages;
+    return tournamentRounds.map((rd, idx) => ({
+      index: idx,
+      size: rd.length,
+      label: getRoundLabel(rd.length, rd[0]?.isPreliminar),
+      isCompleted: idx < currentRoundIndex,
+      isCurrent: idx === currentRoundIndex
+    }));
   };
 
   const tournamentStages = getTournamentStages();
@@ -496,7 +529,9 @@ export default function DueloX1() {
             type="button"
             onClick={() => {
               setMode('x1');
-              if (selectedTemplate) startDuelSession(rawItems, 'x1');
+              if (selectedTemplate && rawItems.length > 0) {
+                setGameState('configure_tournament');
+              }
             }}
             style={{
               padding: '7px 14px',
@@ -519,7 +554,9 @@ export default function DueloX1() {
             type="button"
             onClick={() => {
               setMode('tierlist_battle');
-              if (selectedTemplate) startDuelSession(rawItems, 'tierlist_battle');
+              if (selectedTemplate && rawItems.length > 0) {
+                setGameState('configure_tournament');
+              }
             }}
             style={{
               padding: '7px 14px',
@@ -551,7 +588,7 @@ export default function DueloX1() {
             </h2>
             <p style={{ color: '#aaa', fontSize: '0.88rem', maxWidth: '550px', margin: '0 auto 20px auto', lineHeight: '1.4' }}>
               {mode === 'x1'
-                ? 'Em cada rodada você escolhe o vencedor entre 2 cartas. Veja o chaveamento completo, quem avançou e quem foi eliminado até a Grande Final!'
+                ? 'Em cada rodada você escolhe o vencedor entre 2 cartas. Escolha quantas chaves deseja jogar ou dispute com todas as imagens do modelo!'
                 : 'Compare itens 2 a 2 de forma rápida. O algoritmo inteligente calcula as notas e monta sua Tier List inteira automaticamente!'}
             </p>
 
@@ -624,7 +661,7 @@ export default function DueloX1() {
                         {t.name}
                       </h3>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: activeTheme?.accentColor || '#b062eb', fontSize: '0.8rem', fontWeight: '700' }}>
-                        <span>Iniciar Duelos</span>
+                        <span>Configurar Duelo</span>
                         <ChevronRight size={14} />
                       </div>
                     </div>
@@ -632,6 +669,194 @@ export default function DueloX1() {
                 ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* TELA DE CONFIGURAÇÃO DE CHAVEAMENTO (SELEÇÃO DE QUANTIDADE DE CHAVES) */}
+      {gameState === 'configure_tournament' && selectedTemplate && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '640px', margin: '0 auto' }}>
+          <div className="control-card" style={{ padding: '28px', background: '#121216', borderRadius: '18px', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.35)'}`, boxShadow: '0 12px 35px rgba(0,0,0,0.6)' }}>
+            
+            {/* Header do Modelo Selecionado */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px', borderBottom: '1px solid #252530', paddingBottom: '16px' }}>
+              <img 
+                src={selectedTemplate.cover_image || 'https://via.placeholder.com/100'} 
+                alt="" 
+                style={{ width: '60px', height: '60px', borderRadius: '12px', objectFit: 'cover', border: '1px solid #333' }} 
+              />
+              <div>
+                <span style={{ fontSize: '0.75rem', color: activeTheme?.accentColor || '#b062eb', fontWeight: '700', textTransform: 'uppercase' }}>
+                  Modelo Selecionado
+                </span>
+                <h2 style={{ margin: '2px 0 0 0', fontSize: '1.25rem', color: '#fff', fontWeight: '800' }}>
+                  {selectedTemplate.name}
+                </h2>
+                <span style={{ fontSize: '0.82rem', color: '#888' }}>
+                  {rawItems.length} imagens disponíveis
+                </span>
+              </div>
+            </div>
+
+            {/* MODO TORNEIO: SELETOR DE TAMANHO DE CHAVEAMENTO */}
+            {mode === 'x1' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Settings2 size={16} color={activeTheme?.accentColor || '#b062eb'} />
+                  <span style={{ fontSize: '0.92rem', color: '#fff', fontWeight: '800' }}>
+                    Escolha a Quantidade de Participantes (Chaves):
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
+                  {/* Opção: 8 Participantes */}
+                  {rawItems.length >= 8 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBracketSize('8')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: selectedBracketSize === '8' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                        background: selectedBracketSize === '8' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                        color: selectedBracketSize === '8' ? '#fff' : '#aaa',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ fontSize: '1.1rem', color: selectedBracketSize === '8' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>8 Chaves</div>
+                      <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>7 Duelos (Rápido)</div>
+                    </button>
+                  )}
+
+                  {/* Opção: 16 Participantes */}
+                  {rawItems.length >= 16 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBracketSize('16')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: selectedBracketSize === '16' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                        background: selectedBracketSize === '16' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                        color: selectedBracketSize === '16' ? '#fff' : '#aaa',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ fontSize: '1.1rem', color: selectedBracketSize === '16' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>16 Chaves</div>
+                      <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>15 Duelos (Padrão)</div>
+                    </button>
+                  )}
+
+                  {/* Opção: 32 Participantes */}
+                  {rawItems.length >= 32 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBracketSize('32')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: selectedBracketSize === '32' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                        background: selectedBracketSize === '32' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                        color: selectedBracketSize === '32' ? '#fff' : '#aaa',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ fontSize: '1.1rem', color: selectedBracketSize === '32' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>32 Chaves</div>
+                      <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>31 Duelos (Médio)</div>
+                    </button>
+                  )}
+
+                  {/* Opção: 64 Participantes */}
+                  {rawItems.length >= 64 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBracketSize('64')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: selectedBracketSize === '64' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                        background: selectedBracketSize === '64' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                        color: selectedBracketSize === '64' ? '#fff' : '#aaa',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ fontSize: '1.1rem', color: selectedBracketSize === '64' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>64 Chaves</div>
+                      <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>63 Duelos (Grande)</div>
+                    </button>
+                  )}
+
+                  {/* Opção: Todas as Imagens */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedBracketSize('all')}
+                    style={{
+                      padding: '12px',
+                      borderRadius: '10px',
+                      border: selectedBracketSize === 'all' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                      background: selectedBracketSize === 'all' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                      color: selectedBracketSize === 'all' ? '#fff' : '#aaa',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      transition: 'all 0.15s',
+                      gridColumn: rawItems.length < 8 ? 'span 2' : 'auto'
+                    }}
+                  >
+                    <div style={{ fontSize: '1.1rem', color: selectedBracketSize === 'all' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>
+                      Todas ({rawItems.length})
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>Copa Completa</div>
+                  </button>
+                </div>
+
+                <div style={{ background: '#17171f', padding: '10px 14px', borderRadius: '10px', fontSize: '0.8rem', color: '#aaa', border: '1px solid #24242e' }}>
+                  {selectedBracketSize === 'all' 
+                    ? `O torneio incluirá todas as ${rawItems.length} imagens. Caso o número não seja uma potência exata de 2, uma rodada preliminar automática qualificará os vencedores sem deixar ninguém de fora!`
+                    : `Serão sorteadas aleatoriamente ${selectedBracketSize} imagens deste modelo para disputar o chaveamento eliminatório.`}
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginBottom: '24px', background: '#17171f', padding: '14px', borderRadius: '12px', border: '1px solid #24242e' }}>
+                <h4 style={{ margin: '0 0 6px 0', color: '#fff', fontSize: '0.95rem' }}>
+                  Batalha Completa de Tier List
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: '#aaa', lineHeight: '1.4' }}>
+                  Todas as <strong>{rawItems.length} imagens</strong> participarão das comparações. O algoritmo inteligente vai ordenar cada uma perfeitamente nos Tiers S, A, B, C e D em aproximadamente <strong>{Math.round(rawItems.length * Math.log2(rawItems.length))} duelos</strong>.
+                </p>
+              </div>
+            )}
+
+            {/* Botões de Ação */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setGameState('select_template')}
+                className="btn-secondary"
+                style={{ padding: '11px 18px', fontSize: '0.9rem' }}
+              >
+                Trocar Modelo
+              </button>
+              <button
+                type="button"
+                onClick={() => startDuelSession(rawItems, mode, selectedBracketSize)}
+                className="btn-primary"
+                style={{ padding: '11px 24px', fontSize: '0.95rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                <Swords size={16} /> Iniciar Duelos Agora
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -655,11 +880,11 @@ export default function DueloX1() {
                   </span>
                   <button 
                     type="button" 
-                    onClick={() => setGameState('select_template')} 
+                    onClick={() => setGameState('configure_tournament')} 
                     className="btn-secondary" 
                     style={{ padding: '4px 10px', fontSize: '0.75rem' }}
                   >
-                    Trocar Modelo
+                    Ajustar Chaves
                   </button>
                 </div>
               </div>
@@ -895,7 +1120,7 @@ export default function DueloX1() {
                     gap: '6px'
                   }}
                 >
-                  <CheckCircle2 size={14} /> Classificados para a Próxima Fase ({nextRoundItems.length})
+                  <CheckCircle2 size={14} /> Classificados para a Próxima Fase ({nextRoundItems.length + pendingByeItems.length})
                 </button>
 
                 <button
@@ -966,7 +1191,7 @@ export default function DueloX1() {
               {/* CONTEÚDO 2: CLASSIFICADOS PARA A PRÓXIMA FASE */}
               {activeInspectorTab === 'classified' && (
                 <div>
-                  {nextRoundItems.length === 0 ? (
+                  {nextRoundItems.length === 0 && pendingByeItems.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '16px', color: '#777', fontSize: '0.85rem' }}>
                       Nenhum personagem classificado ainda nesta rodada. Escolha o vencedor do duelo acima para classificar!
                     </div>
@@ -1108,7 +1333,7 @@ export default function DueloX1() {
       {gameState === 'finished' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', textAlign: 'center' }}>
           
-          {/* RESULTADO DO MODO X1 (MATA-MATA) */}
+          {/* RESULTADO DO MODO DUELO (MATA-MATA) */}
           {mode === 'x1' && podium.champion && (
             <div className="control-card" style={{ width: '100%', padding: '30px', background: '#121216', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, borderRadius: '20px' }}>
               <Crown size={44} color="#ffd700" style={{ margin: '0 auto 10px auto' }} />
@@ -1151,11 +1376,19 @@ export default function DueloX1() {
               <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
-                  onClick={() => startDuelSession(rawItems, 'x1')}
+                  onClick={() => startDuelSession(rawItems, 'x1', selectedBracketSize)}
                   className="btn-primary"
                   style={{ padding: '12px 24px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
                   <RotateCcw size={16} /> Jogar Novamente
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGameState('configure_tournament')}
+                  className="btn-secondary"
+                  style={{ padding: '12px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <Sliders size={16} /> Alterar Chaves
                 </button>
                 <button
                   type="button"
@@ -1233,8 +1466,8 @@ export default function DueloX1() {
                     {/* Itens do Tier */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '8px', flex: 1, alignItems: 'center' }}>
                       {tier.items.map(item => (
-                        <div key={item.id} style={{ width: '64px', height: '64px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#222' }} title={item.nome}>
-                          <img src={item.src} alt={item.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div key={item.id} style={{ width: '64px', height: '64px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#09090d', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title={item.nome}>
+                          <img src={item.src} alt={item.nome} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '2px' }} />
                         </div>
                       ))}
                     </div>
