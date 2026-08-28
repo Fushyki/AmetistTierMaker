@@ -468,6 +468,55 @@ export async function importGameCharacters(query) {
     };
   }
 
+  // 6. The Seven Deadly Sins: Origin (7dsorigin.app)
+  if (q.includes('nanatsu') || q.includes('7ds') || q.includes('deadly sins') || q.includes('seven deadly') || (q.includes('origin') && !q.includes('genshin'))) {
+    const originCharacters = [
+      { slug: 'meliodas', name: 'Meliodas' },
+      { slug: 'tristan', name: 'Tristan' },
+      { slug: 'ban', name: 'Ban' },
+      { slug: 'escanor', name: 'Escanor' },
+      { slug: 'king', name: 'King' },
+      { slug: 'diane', name: 'Diane' },
+      { slug: 'elizabeth', name: 'Elizabeth' },
+      { slug: 'merlin', name: 'Merlin' },
+      { slug: 'gowther', name: 'Gowther' },
+      { slug: 'elaine', name: 'Elaine' },
+      { slug: 'derieri', name: 'Derieri' },
+      { slug: 'jericho', name: 'Jericho' },
+      { slug: 'guila', name: 'Guila' },
+      { slug: 'howzer', name: 'Howzer' },
+      { slug: 'gil-thunder', name: 'Gilthunder' },
+      { slug: 'griamore', name: 'Griamore' },
+      { slug: 'hendrickson', name: 'Hendrickson' },
+      { slug: 'dreyfus', name: 'Dreyfus' },
+      { slug: 'slader', name: 'Slader' },
+      { slug: 'klotho', name: 'Clotho' },
+      { slug: 'daisy', name: 'Daisy' },
+      { slug: 'drake', name: 'Drake' },
+      { slug: 'manny', name: 'Manny' },
+      { slug: 'bug', name: 'Bug' },
+      { slug: 'dreydrin', name: 'Dreydrin' },
+      { slug: 'tioreh', name: 'Tioreh' }
+    ];
+
+    const items = originCharacters.map((c, i) => ({
+      id: `7ds-${c.slug}-${Date.now()}`,
+      src: `https://7dsorigin.app/images/characters/${c.slug}.webp`,
+      nome: c.name,
+      tierId: null,
+      colIndex: null,
+      uploadIndex: Date.now() + i
+    }));
+
+    return {
+      title: 'The Seven Deadly Sins: Origin',
+      cover: 'https://7dsorigin.app/images/characters/meliodas.webp',
+      items,
+      category: 'games',
+      sourceLabel: `7DS Origin DB (${items.length} Personagens)`
+    };
+  }
+
   throw new Error(`Jogo específico "${query}" não possui rota dedicada. Buscando na base universal...`);
 }
 
