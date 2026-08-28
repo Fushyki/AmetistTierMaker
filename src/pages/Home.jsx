@@ -5,7 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../services/supabaseClient';
 import { isAdmin } from '../utils/admin';
 import { confirmAction } from '../utils/alerts';
-import { Trash2, Pencil, Star, Sparkles } from 'lucide-react';
+import { Trash2, Pencil, Star, Sparkles, Swords, Layers, Plus } from 'lucide-react';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
 import CategoryBadge, { CategoryIcon } from '../components/CategoryBadge';
 import { notify } from '../utils/notifications';
@@ -111,7 +111,7 @@ export default function Home() {
         Crie suas próprias Tier Lists de forma rápida e mobile-friendly!
       </p>
 
-      <div style={{ background: 'linear-gradient(90deg, rgba(176,98,235,0.08) 0%, rgba(255,215,0,0.06) 100%)', padding: '10px 20px', borderRadius: '10px', border: '1px solid rgba(176,98,235,0.25)', marginBottom: '22px', maxWidth: '600px' }}>
+      <div style={{ background: 'linear-gradient(90deg, rgba(176,98,235,0.08) 0%, rgba(255,215,0,0.06) 100%)', padding: '10px 20px', borderRadius: '10px', border: '1px solid rgba(176,98,235,0.25)', marginBottom: '18px', maxWidth: '600px' }}>
         <p style={{ margin: 0, color: '#ccc', fontSize: '0.85rem', lineHeight: '1.4' }}>
           {!user ? (
             "Crie sua conta gratuitamente para salvar suas Tier Lists e criar seus templates, além de continuar editando elas de qualquer dispositivo, a qualquer momento."
@@ -119,6 +119,19 @@ export default function Home() {
             "Bem-vindo de volta! Escolha um modelo da comunidade abaixo para começar, ou clique em 'Criar Modelo' no topo para montar a sua própria base de personagens."
           )}
         </p>
+      </div>
+
+      {/* Botões de Ação Rápida */}
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '28px' }}>
+        <Link to="/tierlist" className="btn-primary" style={{ padding: '10px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+          <Layers size={16} /> Montar Tier List
+        </Link>
+        <Link to="/duelo" className="btn-secondary" style={{ padding: '10px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', borderColor: activeTheme?.accentBorder || 'rgba(176,98,235,0.4)', color: '#fff' }}>
+          <Swords size={16} color={activeTheme?.accentColor || '#b062eb'} /> Modo Duelo X1 & Batalha
+        </Link>
+        <Link to="/template-maker" className="btn-secondary" style={{ padding: '10px 18px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem' }}>
+          <Plus size={15} /> Criar Modelo
+        </Link>
       </div>
 
       {/* SEÇÃO: DESTAQUES DO AMETIST (PINADOS PELO ADMIN) */}

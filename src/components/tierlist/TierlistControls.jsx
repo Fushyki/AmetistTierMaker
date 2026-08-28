@@ -9,7 +9,9 @@ import {
   ChevronDown, 
   ChevronUp, 
   SlidersHorizontal,
-  FileCode
+  FileCode,
+  Share2,
+  Swords
 } from 'lucide-react';
 
 export default function TierlistControls({
@@ -18,10 +20,10 @@ export default function TierlistControls({
   colunas,
   canUndo,
   onExportImage,
-  onExportJSON,
-  onImportJSON,
+  onOpenShare,
   onSaveToCloud,
   onEnterPresentation,
+  onStartDuel,
   onLayoutChange,
   onColunasChange,
   onUndo,
@@ -47,15 +49,15 @@ export default function TierlistControls({
       </div>
 
       <div className={`controls-wrapper ${isCollapsedMobile ? 'mobile-collapsed' : ''}`}>
-        {/* GRUPO 1: AÇÕES PRINCIPAIS E NUVEM */}
+        {/* GRUPO 1: AÇÕES PRINCIPAIS E COMPARTILHAMENTO */}
         <div className="control-card">
-          <h3>Salvar & Nuvem</h3>
+          <h3>Salvar & Compartilhar</h3>
           <div className="btn-grid">
             <button onClick={onExportImage} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
               <Download size={14} /> Salvar Imagem
             </button>
-            <button onClick={onExportJSON} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-              <FileCode size={14} /> Salvar (JSON)
+            <button onClick={onOpenShare} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              <Share2 size={14} /> Compartilhar
             </button>
             {user ? (
               <button onClick={onSaveToCloud} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
@@ -69,10 +71,11 @@ export default function TierlistControls({
                 <span style={{ fontSize: '0.68rem', color: 'var(--accent-color)', textAlign: 'center' }}>Faça login para salvar!</span>
               </div>
             )}
-            <label className="btn-secondary" style={{ cursor: 'pointer', textAlign: 'center', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-              <Upload size={14} /> Carregar (JSON)
-              <input type="file" accept=".json" onChange={onImportJSON} style={{ display: 'none' }} />
-            </label>
+            {onStartDuel && (
+              <button onClick={onStartDuel} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <Swords size={14} /> Duelo 1v1
+              </button>
+            )}
           </div>
         </div>
 

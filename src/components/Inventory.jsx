@@ -1,15 +1,16 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
-import { Plus } from 'lucide-react';
+import { Plus, Search, X } from 'lucide-react';
 import DroppableArea from './DroppableArea';
 import SortableItem from './SortableItem';
 
 export default function Inventory({ items, onUpload, onClear, selectedItem, setSelectedItem, onSort, onAreaClick, onDuplicate, onUpdateApi, onDeleteSelected }) {
   const fileInputRef = useRef(null);
   
-  // States para os toggles de ordenação
-  const [sortNameAsc, setSortNameAsc] = React.useState(true);
-  const [sortDateAsc, setSortDateAsc] = React.useState(false);
+  // States para ordenação e filtro de nomes
+  const [sortNameAsc, setSortNameAsc] = useState(true);
+  const [sortDateAsc, setSortDateAsc] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -39,6 +40,13 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
     e.target.value = '';
   };
 
+  // Filtragem em tempo real pelo nome do personagem/item
+  const displayItems = items.filter(item => {
+    if (!searchQuery.trim()) return true;
+    const term = searchQuery.toLowerCase().trim();
+    return (item.nome || item.name || '').toLowerCase().includes(term);
+  });
+
   return (
     <div className="inventory-section">
       <div className="inventory-header">
@@ -55,6 +63,50 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
           onChange={handleFileChange}
         />
 
+        {/* Barra de Filtro de Nomes */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <Search size={14} color="#888" style={{ position: 'absolute', left: '10px', pointerEvents: 'none' }} />
+          <input
+            type="text"
+            placeholder="Filtrar por nome..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              padding: '6px 28px 6px 30px',
+              borderRadius: '20px',
+              border: '1px solid #333',
+              background: '#16161c',
+              color: '#fff',
+              fontSize: '0.8rem',
+              width: '160px',
+              outline: 'none',
+              transition: 'all 0.2s'
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--accent-color)'; e.currentTarget.style.width = '200px'; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = '#333'; if (!searchQuery) e.currentTarget.style.width = '160px'; }}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              style={{
+                position: 'absolute',
+                right: '8px',
+                background: 'none',
+                border: 'none',
+                color: '#888',
+                cursor: 'pointer',
+                padding: '2px',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+              title="Limpar filtro"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
+
         <div className="sort-controls">
           <span className="sort-label">Ordenar:</span>
           <button 
@@ -70,9 +122,6 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
           <button 
             className="sort-btn" 
             onClick={() => {
-              // Assumindo que a função onSort original tem um 'upload' que ordena por data.
-              // Como não temos 'upload-asc'/'upload-desc', vamos apenas chamar 'upload'
-              // e talvez você queira ajustar a lógica no Tierlist.jsx no futuro, mas o botão já será toggle.
               onSort('upload');
               setSortDateAsc(!sortDateAsc);
             }}
@@ -83,7 +132,7 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
 
         <div className="inventory-actions">
           <span className="contador-texto" style={{ marginRight: '10px' }}>
-            {items.length} imagens no inventário
+            {displayItems.length} {searchQuery ? `de ${items.length}` : ''} imagens
           </span>
           <div className="btn-group-mini">
             <button className="clear-inventory-btn" title="Excluir o personagem selecionado" onClick={onDeleteSelected}>
@@ -102,9 +151,14 @@ export default function Inventory({ items, onUpload, onClear, selectedItem, setS
         </div>
       </div>
 
-      <SortableContext items={items.map(i => i.id)} strategy={rectSortingStrategy}>
+      <SortableContext items={displayItems.map(i => i.id)} strategy={rectSortingStrategy}>
         <DroppableArea id="inventory" className="storage-box" onClick={onAreaClick}>
-          {items.map(item => (
+          {displayItems.length === 0 && searchQuery && (
+            <div style={{ color: '#888', fontSize: '0.85rem', padding: '12px', textAlign: 'center', width: '100%' }}>
+              Nenhuma imagem encontrada para "{searchQuery}".
+            </div>
+          )}
+          {displayItems.map(item => (
             <SortableItem 
               key={item.id} 
               id={item.id} 

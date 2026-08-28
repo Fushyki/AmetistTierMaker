@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { User } from 'lucide-react';
+import { User, Swords } from 'lucide-react';
 import '../styles/index.css';
 
 export default function Navbar() {
@@ -20,6 +20,9 @@ export default function Navbar() {
         {/* Center: Links */}
         <div className="navbar-links">
           <Link to="/" className="nav-item">Início</Link>
+          <Link to="/duelo" className="nav-item" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <Swords size={14} /> Duelo X1
+          </Link>
           <Link to="/template-maker" className="nav-item">Criar Modelo</Link>
         </div>
 

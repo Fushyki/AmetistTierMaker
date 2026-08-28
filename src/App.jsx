@@ -15,6 +15,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Profile = lazy(() => import('./pages/Profile'));
 const TemplateMaker = lazy(() => import('./pages/TemplateMaker'));
 const Copa = lazy(() => import('./pages/Copa'));
+const DueloX1 = lazy(() => import('./pages/DueloX1'));
 
 // Componente de fallback (carregamento)
 const PageLoader = () => (
@@ -41,6 +42,8 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/tierlist" element={<Tierlist />} />
+                  <Route path="/duelo" element={<DueloX1 />} />
+                  <Route path="/batalha" element={<DueloX1 />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/admin" element={<Profile />} />

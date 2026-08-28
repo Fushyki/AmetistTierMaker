@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DndContext, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,20 +9,23 @@ import { exportBoardAsImage } from '../utils/imageExporter';
 import { promptInput } from '../utils/alerts';
 import { toast } from '../utils/notifications';
 import { supabase } from '../services/supabaseClient';
-import { Pencil, Smartphone, X, CornerDownLeft } from 'lucide-react';
+import { Pencil, Smartphone, X, CornerDownLeft, Copy, Trash2, Swords } from 'lucide-react';
 
 import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
 import TierlistControls from '../components/tierlist/TierlistControls';
 import PresentationOverlay from '../components/tierlist/PresentationOverlay';
 import ExportModal from '../components/tierlist/ExportModal';
+import ShareModal from '../components/tierlist/ShareModal';
 import '../styles/index.css';
 
 export default function Tierlist() {
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const { siteTheme } = useTheme();
+  const { siteTheme, activeTheme } = useTheme();
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const {
     layoutMode,
@@ -243,10 +247,10 @@ export default function Tierlist() {
             colunas={colunas}
             canUndo={canUndo}
             onExportImage={() => setIsExportModalOpen(true)}
-            onExportJSON={handleExportJSON}
-            onImportJSON={handleImportJSON}
+            onOpenShare={() => setIsShareModalOpen(true)}
             onSaveToCloud={handleSaveToCloud}
             onEnterPresentation={() => setIsPresentationMode(true)}
+            onStartDuel={() => navigate(`/duelo${activeTemplateId ? `?templateId=${activeTemplateId}` : ''}`)}
             onLayoutChange={handleLayoutChange}
             onColunasChange={setColunas}
             onUndo={undo}
@@ -259,6 +263,15 @@ export default function Tierlist() {
           onClose={() => setIsExportModalOpen(false)}
           tierlistName={tierlistName}
           onExport={(format, quality) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: siteTheme || theme || 'ametist', quality })}
+        />
+
+        <ShareModal 
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          tierlistName={tierlistName}
+          onExportJSON={handleExportJSON}
+          onImportJSON={handleImportJSON}
+          activeTheme={activeTheme}
         />
 
         <div className="mobile-touch-hint">
@@ -301,9 +314,9 @@ export default function Tierlist() {
           />
         )}
 
-        {/* Barra Flutuante de Seleção Mobile / Touch */}
+        {/* Barra Flutuante de Ações do Personagem Selecionado (Mobile & PC) */}
         {selectedItem && (
-          <div className="mobile-selection-bar">
+          <div className="mobile-selection-bar" style={{ zIndex: 9999 }}>
             <div className="mobile-selection-info">
               <img src={selectedItem.src} alt={selectedItem.nome || 'Item'} className="mobile-selection-thumb" />
               <div className="mobile-selection-text">
@@ -311,7 +324,17 @@ export default function Tierlist() {
                 <span className="mobile-selection-hint">Toque em um Tier para posicionar</span>
               </div>
             </div>
-            <div className="mobile-selection-actions">
+            <div className="mobile-selection-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button 
+                type="button" 
+                onClick={handleDuplicateSelected} 
+                className="btn-mobile-return"
+                style={{ backgroundColor: 'rgba(176, 98, 235, 0.2)', borderColor: 'var(--accent-color)', color: '#fff' }}
+                title="Duplicar Personagem"
+              >
+                <Copy size={13} /> Duplicar
+              </button>
+
               {selectedItem.tierId !== null && (
                 <button 
                   type="button" 
@@ -319,16 +342,27 @@ export default function Tierlist() {
                   className="btn-mobile-return"
                   title="Devolver ao Banco de Imagens"
                 >
-                  <CornerDownLeft size={14} /> Devolver
+                  <CornerDownLeft size={13} /> Devolver
                 </button>
               )}
+
+              <button 
+                type="button" 
+                onClick={handleDeleteSelected} 
+                className="btn-mobile-return"
+                style={{ color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.4)' }}
+                title="Excluir Personagem"
+              >
+                <Trash2 size={13} /> Excluir
+              </button>
+
               <button 
                 type="button" 
                 onClick={() => setSelectedItem(null)} 
                 className="btn-mobile-cancel"
                 title="Desmarcar Seleção"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             </div>
           </div>
