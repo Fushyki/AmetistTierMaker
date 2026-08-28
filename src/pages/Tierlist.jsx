@@ -269,6 +269,13 @@ export default function Tierlist() {
           isOpen={isShareModalOpen}
           onClose={() => setIsShareModalOpen(false)}
           tierlistName={tierlistName}
+          items={items}
+          ranksData={ranksData}
+          layoutMode={layoutMode}
+          colunas={colunas}
+          columnTitles={columnTitles}
+          theme={siteTheme || theme || 'ametist'}
+          user={user}
           onExportJSON={handleExportJSON}
           onImportJSON={handleImportJSON}
           activeTheme={activeTheme}

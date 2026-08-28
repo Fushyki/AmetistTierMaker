@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Share2, 
@@ -9,32 +9,71 @@ import {
   Upload, 
   FileCode, 
   MessageCircle, 
-  Send
+  Send,
+  Sparkles,
+  CloudCheck,
+  Zap
 } from 'lucide-react';
+import { generateShareableLink } from '../../utils/shareLinkEncoder';
 import { toast } from '../../utils/notifications';
 
 export default function ShareModal({ 
   isOpen, 
   onClose, 
   tierlistName, 
+  items,
+  ranksData,
+  layoutMode,
+  colunas,
+  columnTitles,
+  theme,
+  user,
   onExportJSON, 
   onImportJSON,
   activeTheme 
 }) {
   const [activeTab, setActiveTab] = useState('link'); // 'link' ou 'json'
   const [copied, setCopied] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [isGenerating, setIsGenerating] = useState(true);
+  const [isCloud, setIsCloud] = useState(false);
+
+  // Gerar link compartilhável sempre que o modal for aberto
+  useEffect(() => {
+    if (isOpen) {
+      setIsGenerating(true);
+      generateShareableLink({
+        tierlistName,
+        items,
+        ranksData,
+        layoutMode,
+        colunas,
+        columnTitles,
+        theme,
+        user
+      })
+        .then(res => {
+          setShareUrl(res.url);
+          setIsCloud(res.isCloud);
+          setIsGenerating(false);
+        })
+        .catch(err => {
+          console.error('Erro ao gerar link:', err);
+          setShareUrl(window.location.href);
+          setIsGenerating(false);
+        });
+    }
+  }, [isOpen, tierlistName, items, ranksData, layoutMode, colunas, columnTitles, theme, user]);
 
   if (!isOpen) return null;
 
-  // Gerar o link de compartilhamento atual
-  const shareUrl = window.location.href;
-  const shareText = `Confira a minha Tier List "${tierlistName || 'Ametist Tier Maker'}" criada no Ametist: ${shareUrl}`;
+  const shareText = `Confira a minha Tier List "${tierlistName || 'Ametist Tier Maker'}" que acabei de montar no Ametist: ${shareUrl}`;
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success('Link copiado para a área de transferência!');
+      toast.success('Link da sua Tier List copiado!');
       setTimeout(() => setCopied(false), 2500);
     } catch (e) {
       toast.error('Não foi possível copiar o link.');
@@ -74,7 +113,7 @@ export default function ShareModal({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: 'rgba(0, 0, 0, 0.82)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
@@ -88,7 +127,7 @@ export default function ShareModal({
       <div 
         style={{
           width: '100%',
-          maxWidth: '500px',
+          maxWidth: '520px',
           backgroundColor: '#16161a',
           border: `1px solid ${activeTheme?.accentBorder || 'rgba(176, 98, 235, 0.35)'}`,
           borderRadius: '16px',
@@ -107,7 +146,7 @@ export default function ShareModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Share2 size={18} color={activeTheme?.accentColor || '#b062eb'} />
             <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#fff', fontWeight: '700' }}>
-              Compartilhar & Exportar
+              Compartilhar sua Tier List
             </h3>
           </div>
           <button
@@ -153,7 +192,7 @@ export default function ShareModal({
               transition: 'all 0.15s'
             }}
           >
-            <Link2 size={15} /> Gerar Link
+            <Link2 size={15} /> Gerar Link Direto
           </button>
           <button
             type="button"
@@ -182,8 +221,14 @@ export default function ShareModal({
         {/* Conteúdo: ABA LINK */}
         {activeTab === 'link' && (
           <div style={{ padding: '22px' }}>
-            <p style={{ margin: '0 0 14px 0', fontSize: '0.85rem', color: '#aaa', lineHeight: '1.4' }}>
-              Copie o link direto desta Tier List para enviar aos seus amigos ou compartilhar nas redes sociais:
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <Zap size={16} color={activeTheme?.accentColor || '#b062eb'} />
+              <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: '700' }}>
+                Link com a sua Montagem Exata
+              </span>
+            </div>
+            <p style={{ margin: '0 0 16px 0', fontSize: '0.82rem', color: '#aaa', lineHeight: '1.4' }}>
+              Este link armazena todas as suas escolhas, posições nas tiers, colunas e cores. Quem abrir este link verá a sua Tier List montada exatamente como está agora!
             </p>
 
             {/* Input com botão Copiar */}
@@ -191,21 +236,22 @@ export default function ShareModal({
               <input
                 type="text"
                 readOnly
-                value={shareUrl}
+                value={isGenerating ? 'Gerando link da sua Tier List...' : shareUrl}
                 style={{
                   flex: 1,
                   padding: '10px 12px',
                   borderRadius: '8px',
                   border: '1px solid #333',
                   background: '#121216',
-                  color: '#fff',
-                  fontSize: '0.85rem',
+                  color: isGenerating ? '#888' : '#fff',
+                  fontSize: '0.82rem',
                   outline: 'none'
                 }}
               />
               <button
                 type="button"
                 onClick={handleCopyLink}
+                disabled={isGenerating}
                 className="btn-primary"
                 style={{
                   display: 'inline-flex',
@@ -213,7 +259,8 @@ export default function ShareModal({
                   gap: '6px',
                   padding: '10px 16px',
                   fontSize: '0.85rem',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  opacity: isGenerating ? 0.6 : 1
                 }}
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -223,12 +270,13 @@ export default function ShareModal({
 
             {/* Botões de Compartilhamento Rápido */}
             <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '10px', fontWeight: '600' }}>
-              Compartilhar diretamente:
+              Enviar diretamente para seus amigos:
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
               <button
                 type="button"
                 onClick={handleShareWhatsApp}
+                disabled={isGenerating}
                 style={{
                   padding: '10px 12px',
                   borderRadius: '8px',
@@ -251,6 +299,7 @@ export default function ShareModal({
               <button
                 type="button"
                 onClick={handleShareTwitter}
+                disabled={isGenerating}
                 style={{
                   padding: '10px 12px',
                   borderRadius: '8px',
@@ -273,6 +322,7 @@ export default function ShareModal({
               <button
                 type="button"
                 onClick={handleShareTelegram}
+                disabled={isGenerating}
                 style={{
                   padding: '10px 12px',
                   borderRadius: '8px',
@@ -295,6 +345,7 @@ export default function ShareModal({
               <button
                 type="button"
                 onClick={handleCopyDiscordFormat}
+                disabled={isGenerating}
                 style={{
                   padding: '10px 12px',
                   borderRadius: '8px',
