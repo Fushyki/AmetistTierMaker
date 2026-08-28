@@ -45,6 +45,7 @@ export default function DueloX1() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [rawItems, setRawItems] = useState([]);
   const [selectedBracketSize, setSelectedBracketSize] = useState('all'); // '8', '16', '32', '64', '128', 'all'
+  const [selectedBattleSize, setSelectedBattleSize] = useState('32'); // '16', '32', '64', '100', 'all'
 
   // ESTADO DO MODO 1: DUELO (MATA-MATA)
   const [tournamentRounds, setTournamentRounds] = useState([]); // Array de rodadas com partidas
@@ -194,6 +195,7 @@ export default function DueloX1() {
 
     setRawItems(normalized);
     setSelectedBracketSize(normalized.length <= 16 ? 'all' : (normalized.length >= 32 ? '32' : '16'));
+    setSelectedBattleSize(normalized.length <= 16 ? 'all' : (normalized.length >= 32 ? '32' : '16'));
     setGameState('configure_tournament');
   };
 
@@ -211,7 +213,7 @@ export default function DueloX1() {
   };
 
   // Iniciar sessão de jogo com o tamanho de chave escolhido
-  const startDuelSession = (itemsList, selectedMode, bracketSize = selectedBracketSize) => {
+  const startDuelSession = (itemsList, selectedMode, sizeOption = (selectedMode === 'x1' ? selectedBracketSize : selectedBattleSize)) => {
     const shuffled = [...itemsList].sort(() => Math.random() - 0.5);
 
     if (selectedMode === 'x1') {
@@ -219,31 +221,26 @@ export default function DueloX1() {
       let byes = [];
       let isPreliminar = false;
 
-      if (bracketSize === 'all' || !bracketSize) {
+      if (sizeOption === 'all' || !sizeOption) {
         const total = shuffled.length;
-        // Encontra a maior potência de 2 menor ou igual a total
         let p = 2;
         while (p * 2 <= total) {
           p *= 2;
         }
 
         if (total === p) {
-          // Total já é potência de 2 exata (8, 16, 32, 64, etc.)
           tournamentItems = shuffled;
         } else {
-          // Torneio completo com Fase Preliminar para os itens extras
-          // Exemplo: 50 itens. p = 32. extra = 18.
-          // 18 confrontos preliminares usam 36 itens. Os 14 restantes ganham "Bye" (folga para a rodada 1).
           const extra = total - p;
           const preliminarCount = extra * 2;
           const preliminarItems = shuffled.slice(0, preliminarCount);
-          byes = shuffled.slice(preliminarCount); // Passam direto para a próxima fase
+          byes = shuffled.slice(preliminarCount);
 
           tournamentItems = preliminarItems;
           isPreliminar = true;
         }
       } else {
-        const targetSize = parseInt(bracketSize, 10) || 16;
+        const targetSize = parseInt(sizeOption, 10) || 16;
         tournamentItems = shuffled.slice(0, Math.min(targetSize, shuffled.length));
       }
 
@@ -269,9 +266,15 @@ export default function DueloX1() {
       setActiveInspectorTab('bracket');
       setGameState('playing');
     } else {
-      // Modo Batalha Tier List (Ranqueamento completo de 100% dos itens por inserção binária)
-      const first = shuffled[0];
-      const rest = shuffled.slice(1);
+      // Modo Batalha Tier List (Ranqueamento por inserção binária)
+      let battleItems = shuffled;
+      if (sizeOption !== 'all' && sizeOption) {
+        const targetSize = parseInt(sizeOption, 10) || 32;
+        battleItems = shuffled.slice(0, Math.min(targetSize, shuffled.length));
+      }
+
+      const first = battleItems[0];
+      const rest = battleItems.slice(1);
       const nextInsert = rest[0];
       const remainingUnranked = rest.slice(1);
 
@@ -280,7 +283,7 @@ export default function DueloX1() {
       setInsertItem(nextInsert);
       setBinaryRange({ low: 0, high: 1, mid: 0 });
       setComparisonsDone(0);
-      setEstimatedComparisons(Math.round(shuffled.length * Math.log2(shuffled.length)));
+      setEstimatedComparisons(Math.round(battleItems.length * Math.log2(battleItems.length)));
       setGameState('playing');
     }
   };
@@ -796,6 +799,28 @@ export default function DueloX1() {
                     </button>
                   )}
 
+                  {/* Opção: 128 Participantes */}
+                  {rawItems.length >= 128 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBracketSize('128')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: selectedBracketSize === '128' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                        background: selectedBracketSize === '128' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                        color: selectedBracketSize === '128' ? '#fff' : '#aaa',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ fontSize: '1.1rem', color: selectedBracketSize === '128' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>128 Chaves</div>
+                      <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>127 Duelos (Épico)</div>
+                    </button>
+                  )}
+
                   {/* Opção: Todas as Imagens */}
                   <button
                     type="button"
@@ -816,24 +841,139 @@ export default function DueloX1() {
                     <div style={{ fontSize: '1.1rem', color: selectedBracketSize === 'all' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>
                       Todas ({rawItems.length})
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>Copa Completa</div>
+                    <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>{rawItems.length - 1} Duelos</div>
                   </button>
                 </div>
 
-                <div style={{ background: '#17171f', padding: '10px 14px', borderRadius: '10px', fontSize: '0.8rem', color: '#aaa', border: '1px solid #24242e' }}>
-                  {selectedBracketSize === 'all' 
-                    ? `O torneio incluirá todas as ${rawItems.length} imagens. Caso o número não seja uma potência exata de 2, uma rodada preliminar automática qualificará os vencedores sem deixar ninguém de fora!`
-                    : `Serão sorteadas aleatoriamente ${selectedBracketSize} imagens deste modelo para disputar o chaveamento eliminatório.`}
+                <div style={{ background: '#17171f', padding: '10px 14px', borderRadius: '10px', fontSize: '0.82rem', color: '#aaa', border: '1px solid #24242e', lineHeight: '1.4' }}>
+                  {selectedBracketSize === 'all' ? (
+                    rawItems.length > 128 ? (
+                      <span style={{ color: '#fca5a5' }}>
+                        Atenção: Este modelo possui <strong>{rawItems.length} imagens</strong> (total de {rawItems.length - 1} duelos para chegar ao campeão). Se preferir uma partida rápida, selecione 16, 32 ou 64 chaves acima!
+                      </span>
+                    ) : (
+                      `O torneio incluirá todas as ${rawItems.length} imagens (${rawItems.length - 1} duelos totais com fase qualificatória automática).`
+                    )
+                  ) : (
+                    `Serão sorteadas aleatoriamente ${selectedBracketSize} imagens deste modelo para disputar o chaveamento eliminatório.`
+                  )}
                 </div>
               </div>
             ) : (
-              <div style={{ marginBottom: '24px', background: '#17171f', padding: '14px', borderRadius: '12px', border: '1px solid #24242e' }}>
-                <h4 style={{ margin: '0 0 6px 0', color: '#fff', fontSize: '0.95rem' }}>
-                  Batalha Completa de Tier List
-                </h4>
-                <p style={{ margin: 0, fontSize: '0.84rem', color: '#aaa', lineHeight: '1.4' }}>
-                  Todas as <strong>{rawItems.length} imagens</strong> participarão das comparações. O algoritmo inteligente vai ordenar cada uma perfeitamente nos Tiers S, A, B, C e D em aproximadamente <strong>{Math.round(rawItems.length * Math.log2(rawItems.length))} duelos</strong>.
-                </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Settings2 size={16} color={activeTheme?.accentColor || '#b062eb'} />
+                  <span style={{ fontSize: '0.92rem', color: '#fff', fontWeight: '800' }}>
+                    Escolha a Quantidade de Itens para a Batalha:
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
+                  {/* 16 Itens */}
+                  {rawItems.length >= 16 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBattleSize('16')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: selectedBattleSize === '16' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                        background: selectedBattleSize === '16' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                        color: selectedBattleSize === '16' ? '#fff' : '#aaa',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ fontSize: '1.1rem', color: selectedBattleSize === '16' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>16 Itens</div>
+                      <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>~60 Duelos (Rápido)</div>
+                    </button>
+                  )}
+
+                  {/* 32 Itens */}
+                  {rawItems.length >= 32 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBattleSize('32')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: selectedBattleSize === '32' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                        background: selectedBattleSize === '32' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                        color: selectedBattleSize === '32' ? '#fff' : '#aaa',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ fontSize: '1.1rem', color: selectedBattleSize === '32' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>32 Itens</div>
+                      <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>~150 Duelos (Ideal)</div>
+                    </button>
+                  )}
+
+                  {/* 64 Itens */}
+                  {rawItems.length >= 64 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBattleSize('64')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: selectedBattleSize === '64' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                        background: selectedBattleSize === '64' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                        color: selectedBattleSize === '64' ? '#fff' : '#aaa',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ fontSize: '1.1rem', color: selectedBattleSize === '64' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>64 Itens</div>
+                      <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>~360 Duelos</div>
+                    </button>
+                  )}
+
+                  {/* Todas as Imagens */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedBattleSize('all')}
+                    style={{
+                      padding: '12px',
+                      borderRadius: '10px',
+                      border: selectedBattleSize === 'all' ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                      background: selectedBattleSize === 'all' ? `${activeTheme?.accentColor || '#b062eb'}22` : '#16161c',
+                      color: selectedBattleSize === 'all' ? '#fff' : '#aaa',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      transition: 'all 0.15s',
+                      gridColumn: rawItems.length < 16 ? 'span 2' : 'auto'
+                    }}
+                  >
+                    <div style={{ fontSize: '1.1rem', color: selectedBattleSize === 'all' ? (activeTheme?.accentColor || '#b062eb') : '#fff' }}>
+                      Todas ({rawItems.length})
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '2px' }}>
+                      ~{Math.round(rawItems.length * Math.log2(rawItems.length)).toLocaleString()} Duelos
+                    </div>
+                  </button>
+                </div>
+
+                <div style={{ background: '#17171f', padding: '10px 14px', borderRadius: '10px', fontSize: '0.82rem', color: '#aaa', border: '1px solid #24242e', lineHeight: '1.4' }}>
+                  {selectedBattleSize === 'all' ? (
+                    rawItems.length > 80 ? (
+                      <span style={{ color: '#fca5a5' }}>
+                        Atenção: Ordenar 100% de {rawItems.length} imagens comparando 2 a 2 requer aproximadamente {Math.round(rawItems.length * Math.log2(rawItems.length)).toLocaleString()} duelos! Recomendamos selecionar 16 ou 32 itens para gerar a Tier List em poucos minutos.
+                      </span>
+                    ) : (
+                      `O algoritmo binário comparará todas as ${rawItems.length} imagens para posicioná-las perfeitamente nos Tiers S, A, B, C e D.`
+                    )
+                  ) : (
+                    `Serão sorteadas ${selectedBattleSize} imagens para você comparar e classificar diretamente nos Tiers.`
+                  )}
+                </div>
               </div>
             )}
 
@@ -849,7 +989,7 @@ export default function DueloX1() {
               </button>
               <button
                 type="button"
-                onClick={() => startDuelSession(rawItems, mode, selectedBracketSize)}
+                onClick={() => startDuelSession(rawItems, mode, mode === 'x1' ? selectedBracketSize : selectedBattleSize)}
                 className="btn-primary"
                 style={{ padding: '11px 24px', fontSize: '0.95rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}
               >
