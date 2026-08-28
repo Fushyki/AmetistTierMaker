@@ -881,6 +881,25 @@ export default function TemplateMaker() {
               >
                 Genshin Impact (Project Amber)
               </button>
+              <button
+                type="button"
+                onClick={() => setApiConfig({
+                  url: 'https://raw.githubusercontent.com/Fushyki/AmetistTierMaker/master/public/data/7ds_origin.json',
+                  pagesToFetch: 1,
+                  arrayPath: '',
+                  namePath: 'nome',
+                  imagePath: 'src',
+                  imageBaseUrl: '',
+                  replaceFrom: '',
+                  replaceTo: '',
+                  imageSuffix: ''
+                })}
+                style={{ background: '#292934', border: '1px solid #3d3d4e', borderRadius: '6px', color: '#fff', padding: '5px 10px', fontSize: '0.78rem', cursor: 'pointer', transition: 'border-color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#3d3d4e'}
+              >
+                7DS: Origin (Oficial)
+              </button>
             </div>
 
             <div style={{ display: 'grid', gap: '10px' }}>
