@@ -24,8 +24,24 @@ export default function Tierlist() {
   const { user } = useAuth();
   const { siteTheme, activeTheme } = useTheme();
   const [isPresentationMode, setIsPresentationMode] = useState(false);
+  const [presentationScale, setPresentationScale] = useState(1);
+  const [presentationShowInventory, setPresentationShowInventory] = useState(true);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  const handleQuickExport = (action = 'copy') => {
+    exportBoardAsImage(
+      `${tierlistName || 'minha-tierlist'}.png`,
+      'board',
+      'landscape',
+      {
+        title: tierlistName,
+        theme: siteTheme || theme || 'ametist',
+        quality: 'discord',
+        action: action
+      }
+    );
+  };
 
   const {
     layoutMode,
@@ -204,7 +220,18 @@ export default function Tierlist() {
       <div className={`tierlist-container ${isPresentationMode ? 'presentation-mode' : ''}`}>
         
         {isPresentationMode && (
-          <PresentationOverlay onExit={() => setIsPresentationMode(false)} />
+          <PresentationOverlay 
+            onExit={() => setIsPresentationMode(false)}
+            tierlistName={tierlistName}
+            totalItems={items.length}
+            rankedItemsCount={items.filter(i => i.tierId !== null).length}
+            showInventory={presentationShowInventory}
+            onToggleInventory={() => setPresentationShowInventory(prev => !prev)}
+            scale={presentationScale}
+            onChangeScale={setPresentationScale}
+            onQuickExport={handleQuickExport}
+            activeTheme={activeTheme}
+          />
         )}
 
         {!isPresentationMode && (
@@ -280,32 +307,41 @@ export default function Tierlist() {
           activeTheme={activeTheme}
         />
 
-        <div className="mobile-touch-hint">
-          <Smartphone size={15} />
-          <span>Toque no personagem e depois toque no tier desejado para posicionar rapidamente.</span>
+        {!isPresentationMode && (
+          <div className="mobile-touch-hint">
+            <Smartphone size={15} />
+            <span>Toque no personagem e depois toque no tier desejado para posicionar rapidamente.</span>
+          </div>
+        )}
+
+        <div style={{
+          transform: isPresentationMode && presentationScale !== 1 ? `scale(${presentationScale})` : 'none',
+          transformOrigin: 'top center',
+          transition: 'transform 0.15s ease',
+          width: '100%'
+        }}>
+          <TierBoard 
+            ranksData={ranksData} 
+            items={items.filter(item => item.tierId !== null)} 
+            colunas={colunas}
+            columnTitles={columnTitles}
+            layoutMode={layoutMode}
+            theme={siteTheme || theme || 'ametist'}
+            onRemoveRow={handleRemoveRow}
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
+            onAreaClick={handleAreaClick}
+            onDoubleClickItem={handleDoubleClickItem}
+            onMoveRow={handleMoveRow}
+            onAddRow={handleAddRow}
+            onUpdateRow={handleUpdateRow}
+            onUpdateGroupTitle={handleUpdateGroupTitle}
+            onUpdateColumnTitle={handleUpdateColumnTitle}
+            isPresentationMode={isPresentationMode}
+          />
         </div>
 
-        <TierBoard 
-          ranksData={ranksData} 
-          items={items.filter(item => item.tierId !== null)} 
-          colunas={colunas}
-          columnTitles={columnTitles}
-          layoutMode={layoutMode}
-          theme={siteTheme || theme || 'ametist'}
-          onRemoveRow={handleRemoveRow}
-          selectedItem={selectedItem}
-          setSelectedItem={setSelectedItem}
-          onAreaClick={handleAreaClick}
-          onDoubleClickItem={handleDoubleClickItem}
-          onMoveRow={handleMoveRow}
-          onAddRow={handleAddRow}
-          onUpdateRow={handleUpdateRow}
-          onUpdateGroupTitle={handleUpdateGroupTitle}
-          onUpdateColumnTitle={handleUpdateColumnTitle}
-          isPresentationMode={isPresentationMode}
-        />
-
-        {!isPresentationMode && (
+        {(!isPresentationMode || presentationShowInventory) && (
           <Inventory 
             items={items.filter(item => item.tierId === null)} 
             onUpload={handleUpload}
