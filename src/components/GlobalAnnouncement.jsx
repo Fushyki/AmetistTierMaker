@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabaseClient';
 import { Sparkles, Star, Info, AlertTriangle, X } from 'lucide-react';
@@ -15,35 +15,79 @@ export default function GlobalAnnouncement() {
 
   const [isDismissed, setIsDismissed] = useState(false);
 
-  useEffect(() => {
-    const fetchAnnouncement = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('templates')
-          .select('data')
-          .eq('name', '__SYSTEM_ANNOUNCEMENT__')
-          .maybeSingle();
+  const fetchAnnouncement = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('templates')
+        .select('data')
+        .eq('name', '__SYSTEM_ANNOUNCEMENT__')
+        .maybeSingle();
 
-        if (data && data.data) {
-          setAnnouncement(data.data);
-          localStorage.setItem('ametist_global_announcement', JSON.stringify(data.data));
-          
-          const dismissedId = localStorage.getItem('ametist_announcement_dismissed_id');
-          if (dismissedId && dismissedId === data.data.updatedAt) {
-            setIsDismissed(true);
-          } else {
-            setIsDismissed(false);
-          }
-        } else if (!error && !data) {
-          setAnnouncement(null);
+      if (data && data.data) {
+        setAnnouncement(data.data);
+        localStorage.setItem('ametist_global_announcement', JSON.stringify(data.data));
+        
+        const dismissedId = localStorage.getItem('ametist_announcement_dismissed_id');
+        if (dismissedId && dismissedId === data.data.updatedAt) {
+          setIsDismissed(true);
+        } else {
+          setIsDismissed(false);
         }
-      } catch (err) {
-        console.error('Erro ao carregar aviso global:', err);
+      } else if (!error && !data) {
+        setAnnouncement(null);
+        localStorage.removeItem('ametist_global_announcement');
       }
-    };
-
-    fetchAnnouncement();
+    } catch (err) {
+      console.warn('Erro ao sincronizar aviso global:', err);
+    }
   }, []);
+
+  useEffect(() => {
+    // 1. Busca inicial imediata
+    fetchAnnouncement();
+
+    // 2. Inscrição em Tempo Real (Supabase Realtime)
+    const channel = supabase
+      .channel('ametist-live-announcements')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'templates',
+          filter: 'name=eq.__SYSTEM_ANNOUNCEMENT__'
+        },
+        (payload) => {
+          if (payload.new && payload.new.data) {
+            const newData = payload.new.data;
+            setAnnouncement(newData);
+            localStorage.setItem('ametist_global_announcement', JSON.stringify(newData));
+            setIsDismissed(false);
+          } else if (payload.eventType === 'DELETE') {
+            setAnnouncement(null);
+            localStorage.removeItem('ametist_global_announcement');
+          }
+        }
+      )
+      .subscribe();
+
+    // 3. Polling em background a cada 25 segundos para garantir entrega instantânea
+    const interval = setInterval(fetchAnnouncement, 25000);
+
+    // 4. Sincronização ao focar na janela
+    const handleWindowFocus = () => {
+      fetchAnnouncement();
+    };
+    window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener('visibilitychange', handleWindowFocus);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+      window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener('visibilitychange', handleWindowFocus);
+    };
+  }, [fetchAnnouncement]);
 
   if (!announcement || !announcement.active || isDismissed) {
     return null;

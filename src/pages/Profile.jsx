@@ -78,7 +78,15 @@ export default function Profile() {
   const [avatarTab, setAvatarTab] = useState('upload'); // 'upload', 'presets', 'url'
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+  const [profileAvatar, setProfileAvatar] = useState(() => {
+    return user?.user_metadata?.avatar_url || (user?.id ? localStorage.getItem('ametist_user_avatar_' + user.id) : null);
+  });
   const avatarFileInputRef = useRef(null);
+
+  useEffect(() => {
+    const current = user?.user_metadata?.avatar_url || (user?.id ? localStorage.getItem('ametist_user_avatar_' + user.id) : null);
+    setProfileAvatar(current);
+  }, [user]);
 
   // Estados de troca de senha
   const [newPassword, setNewPassword] = useState('');
@@ -260,12 +268,12 @@ export default function Profile() {
         .maybeSingle();
 
       if (existing) {
-        await supabase.from('templates').update({ data: payload, is_public: false }).eq('id', existing.id);
+        await supabase.from('templates').update({ data: payload, is_public: true }).eq('id', existing.id);
       } else {
         await supabase.from('templates').insert([{
           user_id: user.id,
           name: '__SYSTEM_ANNOUNCEMENT__',
-          is_public: false,
+          is_public: true,
           cover_image: '',
           data: payload
         }]);
@@ -427,10 +435,22 @@ export default function Profile() {
   const handleSaveAvatar = async (newUrl) => {
     try {
       setIsSavingAvatar(true);
+      if (user?.id) {
+        if (newUrl) {
+          localStorage.setItem('ametist_user_avatar_' + user.id, newUrl);
+        } else {
+          localStorage.removeItem('ametist_user_avatar_' + user.id);
+        }
+        setProfileAvatar(newUrl || null);
+        window.dispatchEvent(new CustomEvent('ametist-avatar-updated', { detail: { avatarUrl: newUrl, userId: user.id } }));
+      }
+
       const { error } = await supabase.auth.updateUser({
         data: { avatar_url: newUrl }
       });
-      if (error) throw error;
+      if (error) {
+        console.warn('Erro ao sincronizar avatar com Supabase user_metadata:', error);
+      }
       if (showCustomToast) {
         showCustomToast('Foto Atualizada', newUrl ? 'Sua foto de perfil foi alterada com sucesso!' : 'Foto de perfil removida.', 'palette');
       } else {
@@ -571,9 +591,9 @@ export default function Profile() {
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
             >
-              {user?.user_metadata?.avatar_url ? (
+              {profileAvatar ? (
                 <img 
-                  src={user.user_metadata.avatar_url} 
+                  src={profileAvatar} 
                   alt="Avatar" 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />

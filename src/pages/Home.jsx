@@ -206,7 +206,7 @@ export default function Home() {
           <Layers size={16} /> Montar Tier List
         </Link>
         <Link to="/duelo" className="btn-secondary" style={{ padding: '10px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', borderColor: activeTheme?.accentBorder || 'rgba(176,98,235,0.4)', color: '#fff' }}>
-          <Swords size={16} color={activeTheme?.accentColor || '#b062eb'} /> Modo Duelo & Batalha
+          <Swords size={16} color={activeTheme?.accentColor || '#b062eb'} /> Modo Duelo
         </Link>
         <Link to="/template-maker" className="btn-secondary" style={{ padding: '10px 18px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem' }}>
           <Plus size={15} /> Criar Modelo

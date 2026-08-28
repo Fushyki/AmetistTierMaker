@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Swords } from 'lucide-react';
@@ -6,6 +6,23 @@ import '../styles/index.css';
 
 export default function Navbar() {
   const { user } = useAuth();
+  const [avatarUrl, setAvatarUrl] = useState(() => {
+    return user?.user_metadata?.avatar_url || (user?.id ? localStorage.getItem('ametist_user_avatar_' + user.id) : null);
+  });
+
+  useEffect(() => {
+    const current = user?.user_metadata?.avatar_url || (user?.id ? localStorage.getItem('ametist_user_avatar_' + user.id) : null);
+    setAvatarUrl(current);
+
+    const handleAvatarUpdate = (e) => {
+      if (e.detail?.userId === user?.id || !e.detail?.userId) {
+        setAvatarUrl(e.detail?.avatarUrl || null);
+      }
+    };
+
+    window.addEventListener('ametist-avatar-updated', handleAvatarUpdate);
+    return () => window.removeEventListener('ametist-avatar-updated', handleAvatarUpdate);
+  }, [user]);
 
   return (
     <nav className="ametist-navbar">
@@ -30,9 +47,9 @@ export default function Navbar() {
         <div className="navbar-auth">
           {user ? (
             <Link to="/profile" className="nav-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              {user.user_metadata?.avatar_url ? (
+              {avatarUrl ? (
                 <img 
-                  src={user.user_metadata.avatar_url} 
+                  src={avatarUrl} 
                   alt="Avatar" 
                   style={{ 
                     width: '20px', 
