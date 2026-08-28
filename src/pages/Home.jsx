@@ -75,7 +75,7 @@ export default function Home() {
           .from('templates')
           .select('id, name, cover_image, created_at, user_id, data')
           .eq('is_public', true)
-          .neq('name', '__SYSTEM_ANNOUNCEMENT__')
+          .not('name', 'like', '__%')
           .order('created_at', { ascending: false });
         
         if (error) {

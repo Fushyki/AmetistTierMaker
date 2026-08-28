@@ -1,11 +1,12 @@
 import LZString from 'lz-string';
+import { supabase } from '../services/supabaseClient';
 
 /**
  * Utilitário para geração e leitura de Links Compartilháveis de Tier Lists
- * Utiliza compressão LZString URL-safe para links universais, autossuficientes e instantâneos.
+ * Suporta Links Curtos em Nuvem (ideais para Discord/WhatsApp) e Fallback Comprimido LZ-String.
  */
 
-// Gera o link compartilhável completo e autossuficiente com o estado da Tier List
+// Gera o link compartilhável completo com o estado da Tier List
 export async function generateShareableLink({
   tierlistName,
   items,
@@ -13,12 +14,51 @@ export async function generateShareableLink({
   layoutMode,
   colunas,
   columnTitles,
-  theme
+  theme,
+  user
 }) {
   const origin = window.location.origin;
 
+  // 1. Se o usuário estiver logado, cria um link curto público na nuvem (evita limite de 2000 chars do Discord)
+  if (user && user.id) {
+    try {
+      const fullData = {
+        type: 'shared_tierlist',
+        tierlistName: tierlistName || 'Tier List Compartilhada',
+        items: items || [],
+        ranksData: ranksData || [],
+        layoutMode: layoutMode || 'classico',
+        colunas: colunas || 1,
+        columnTitles: columnTitles || [],
+        theme: theme || 'ametist',
+        createdAt: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('templates')
+        .insert([{
+          user_id: user.id,
+          name: `__SHARED__:${(tierlistName || 'Tierlist').slice(0, 35)}`,
+          is_public: true,
+          cover_image: items && items[0]?.src ? items[0].src : '',
+          data: fullData
+        }])
+        .select('id')
+        .single();
+
+      if (!error && data && data.id) {
+        return {
+          url: `${origin}/tierlist?id=${data.id}`,
+          isCloud: true
+        };
+      }
+    } catch (e) {
+      console.warn('Fallback para link comprimido local:', e);
+    }
+  }
+
+  // 2. Fallback Instantâneo Comprimido (funciona sem login e offline)
   try {
-    // 1. Prepara o payload enxuto e estritamente serializável
     const compactPayload = {
       n: tierlistName || 'Minha Tier List',
       r: ranksData || [],
@@ -32,11 +72,9 @@ export async function generateShareableLink({
       l: layoutMode || 'classico',
       c: colunas || 1,
       ct: columnTitles || [],
-      t: theme || 'ametist',
-      ts: Date.now()
+      t: theme || 'ametist'
     };
 
-    // 2. Comprime em string URI-Safe
     const jsonStr = JSON.stringify(compactPayload);
     const compressed = LZString.compressToEncodedURIComponent(jsonStr);
 
@@ -45,7 +83,7 @@ export async function generateShareableLink({
       isCloud: false
     };
   } catch (err) {
-    console.error('Erro ao gerar link compartilhável comprimido:', err);
+    console.error('Erro ao gerar link comprimido:', err);
     return {
       url: window.location.href,
       isCloud: false
@@ -59,7 +97,6 @@ export function decodeSharedTierlist(shareParam) {
   try {
     const jsonStr = LZString.decompressFromEncodedURIComponent(shareParam);
     if (!jsonStr) {
-      // Fallback para caso tenha sido passado como JSON decodificado ou URI encoded
       try {
         const rawJson = decodeURIComponent(shareParam);
         const rawData = JSON.parse(rawJson);

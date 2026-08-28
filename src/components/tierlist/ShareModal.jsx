@@ -235,6 +235,19 @@ export default function ShareModal({
                 {copied ? 'Copiado!' : 'Copiar Link'}
               </button>
             </div>
+
+            {/* Status do Link */}
+            {shareUrl.includes('?id=') ? (
+              <div style={{ padding: '8px 12px', background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)', borderRadius: '8px', fontSize: '0.78rem', color: '#86efac', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Check size={14} color="#4ade80" />
+                <span>Link Curto em Nuvem ativo: perfeito para colar no Discord, WhatsApp e Twitter sem virar arquivo .txt!</span>
+              </div>
+            ) : (
+              <div style={{ padding: '8px 12px', background: 'rgba(176, 98, 235, 0.1)', border: '1px solid rgba(176, 98, 235, 0.25)', borderRadius: '8px', fontSize: '0.78rem', color: '#d8b4fe', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Zap size={14} color="#c084fc" />
+                <span>Link universal instantâneo. {user ? '' : '(Dica: Conecte sua conta para gerar Links Curtos super enxutos no Discord!)'}</span>
+              </div>
+            )}
           </div>
         )}
 
