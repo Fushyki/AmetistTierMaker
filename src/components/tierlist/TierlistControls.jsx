@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Download, 
   Cloud, 
-  Upload, 
   Eye, 
   RotateCcw, 
   RefreshCw, 
   ChevronDown, 
   ChevronUp, 
   SlidersHorizontal,
-  FileCode,
   Share2,
-  Swords
+  Lock
 } from 'lucide-react';
 
 export default function TierlistControls({
@@ -23,12 +22,12 @@ export default function TierlistControls({
   onOpenShare,
   onSaveToCloud,
   onEnterPresentation,
-  onStartDuel,
   onLayoutChange,
   onColunasChange,
   onUndo,
   onReset
 }) {
+  const navigate = useNavigate();
   const [isCollapsedMobile, setIsCollapsedMobile] = useState(false);
 
   return (
@@ -49,35 +48,57 @@ export default function TierlistControls({
       </div>
 
       <div className={`controls-wrapper ${isCollapsedMobile ? 'mobile-collapsed' : ''}`}>
-        {/* GRUPO 1: AÇÕES PRINCIPAIS E COMPARTILHAMENTO */}
-        <div className="control-card">
-          <h3>Salvar & Compartilhar</h3>
-          <div className="btn-grid">
-            <button onClick={onExportImage} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-              <Download size={14} /> Salvar Imagem
-            </button>
-            <button onClick={onOpenShare} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-              <Share2 size={14} /> Compartilhar
-            </button>
-            {user ? (
+        {/* GRUPO 1: AÇÕES PRINCIPAIS E COMPARTILHAMENTO (BLOQUEADO PARA NÃO-LOGADOS) */}
+        {user ? (
+          <div className="control-card">
+            <h3>Salvar & Compartilhar</h3>
+            <div className="btn-grid">
+              <button onClick={onExportImage} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <Download size={14} /> Salvar Imagem
+              </button>
+              <button onClick={onOpenShare} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <Share2 size={14} /> Compartilhar
+              </button>
               <button onClick={onSaveToCloud} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                 <Cloud size={14} /> Salvar na Nuvem
               </button>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                <button disabled className="btn-primary" style={{ opacity: 0.5, cursor: 'not-allowed', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                  <Cloud size={14} /> Salvar na Nuvem
-                </button>
-                <span style={{ fontSize: '0.68rem', color: 'var(--accent-color)', textAlign: 'center' }}>Faça login para salvar!</span>
-              </div>
-            )}
-            {onStartDuel && (
-              <button onClick={onStartDuel} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                <Swords size={14} /> Duelo
-              </button>
-            )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="control-card" style={{ border: '1px solid rgba(255, 215, 0, 0.3)', background: 'linear-gradient(180deg, #16161c 0%, #121216 100%)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                Salvar & Compartilhar
+              </h3>
+              <span style={{ fontSize: '0.68rem', color: '#ffd700', background: 'rgba(255, 215, 0, 0.15)', border: '1px solid rgba(255, 215, 0, 0.4)', padding: '2px 6px', borderRadius: '4px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <Lock size={10} /> BLOQUEADO
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'center', padding: '4px 0' }}>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: '#aaa', lineHeight: '1.4' }}>
+                Faça login para salvar na nuvem, exportar imagens em alta qualidade e gerar links compartilháveis.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="btn-primary"
+                style={{
+                  marginTop: '2px',
+                  padding: '8px 12px',
+                  fontSize: '0.82rem',
+                  fontWeight: '800',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Lock size={13} /> Entrar para Liberar
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* GRUPO 2: CONFIGURAÇÃO DO TABULEIRO */}
         <div className="control-card">

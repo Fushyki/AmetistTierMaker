@@ -9,7 +9,7 @@ import { exportBoardAsImage } from '../utils/imageExporter';
 import { promptInput } from '../utils/alerts';
 import { toast } from '../utils/notifications';
 import { supabase } from '../services/supabaseClient';
-import { Pencil, Smartphone, X, CornerDownLeft, Copy, Trash2, Swords } from 'lucide-react';
+import { Pencil, Smartphone, X, CornerDownLeft, Copy, Trash2 } from 'lucide-react';
 
 import TierBoard from '../components/TierBoard';
 import Inventory from '../components/Inventory';
@@ -250,7 +250,6 @@ export default function Tierlist() {
             onOpenShare={() => setIsShareModalOpen(true)}
             onSaveToCloud={handleSaveToCloud}
             onEnterPresentation={() => setIsPresentationMode(true)}
-            onStartDuel={() => navigate(`/duelo${activeTemplateId ? `?templateId=${activeTemplateId}` : ''}`)}
             onLayoutChange={handleLayoutChange}
             onColunasChange={setColunas}
             onUndo={undo}
