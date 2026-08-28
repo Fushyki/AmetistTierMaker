@@ -492,7 +492,7 @@ export default function DueloX1() {
     }
 
     toast.success('Tier List gerada com sucesso! Abrindo tabuleiro...');
-    window.location.href = '/tierlist';
+    navigate('/tierlist?battle=true');
   };
 
   // Obter dados do duelo atual

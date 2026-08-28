@@ -115,8 +115,32 @@ export function useTierlistState(user) {
       const idParam = searchParams.get('id');
       const templateId = searchParams.get('templateId');
       const isNew = searchParams.get('new') === 'true';
+      const fromBattle = searchParams.get('battle') === 'true';
       const currentId = localStorage.getItem('tierlist-current-id');
       const forceCloudLoad = localStorage.getItem('tierlist-force-cloud-load') === 'true';
+
+      // 0. Carregamento de Batalha / Duelo (?battle=true)
+      if (fromBattle) {
+        try {
+          const savedItems = JSON.parse(localStorage.getItem('tierlist-items') || '[]');
+          const savedRanks = JSON.parse(localStorage.getItem('tierlist-ranks') || '[]');
+          const savedName = localStorage.getItem('tierlist-name') || 'Tier List (Ranqueada na Batalha)';
+          const savedLayout = localStorage.getItem('tierlist-layout') || 'classico';
+
+          saveHistoryState(items, ranksData);
+          setItems(savedItems);
+          setRanksData(savedRanks);
+          setTierlistName(savedName);
+          setLayoutMode(savedLayout);
+          setColunas(1);
+
+          searchParams.delete('battle');
+          setSearchParams(searchParams);
+          return;
+        } catch (e) {
+          console.error('Erro ao sincronizar dados da batalha:', e);
+        }
+      }
 
       // 1. Carregamento de Link Compartilhado (?share=...)
       if (shareParam) {
@@ -316,7 +340,7 @@ export function useTierlistState(user) {
     };
 
     initPage();
-  }, []);
+  }, [searchParams]);
 
   // Manipulação de Linhas e Tabuleiro
   const handleUpload = (newItems) => {
