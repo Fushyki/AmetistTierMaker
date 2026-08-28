@@ -440,7 +440,7 @@ export default function DueloX1() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Swords size={24} color={activeTheme?.accentColor || '#b062eb'} />
             <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#fff' }}>
-              {mode === 'x1' ? 'Duelo X1: Mata-Mata' : 'Batalha Tier List'}
+              {mode === 'x1' ? 'Duelo: Mata-Mata' : 'Batalha Tier List'}
             </h1>
           </div>
         </div>
@@ -468,7 +468,7 @@ export default function DueloX1() {
               transition: 'all 0.15s'
             }}
           >
-            <Trophy size={14} /> Torneio X1
+            <Trophy size={14} /> Torneio Mata-Mata
           </button>
           <button
             type="button"

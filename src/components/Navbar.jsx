@@ -21,7 +21,7 @@ export default function Navbar() {
         <div className="navbar-links">
           <Link to="/" className="nav-item">Início</Link>
           <Link to="/duelo" className="nav-item" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            <Swords size={14} /> Duelo X1
+            <Swords size={14} /> Duelo
           </Link>
           <Link to="/template-maker" className="nav-item">Criar Modelo</Link>
         </div>

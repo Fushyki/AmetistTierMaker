@@ -73,7 +73,7 @@ export default function TierlistControls({
             )}
             {onStartDuel && (
               <button onClick={onStartDuel} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                <Swords size={14} /> Duelo 1v1
+                <Swords size={14} /> Duelo
               </button>
             )}
           </div>
