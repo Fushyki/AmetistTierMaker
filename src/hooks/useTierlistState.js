@@ -5,6 +5,7 @@ import { supabase } from '../services/supabaseClient';
 import { fetchAndParseAPI } from '../utils/apiParser';
 import { confirmAction, promptInput } from '../utils/alerts';
 import { autoImport } from '../utils/autoImporter';
+import { decodeSharedTierlist } from '../utils/shareLinkEncoder';
 import { useHistory } from './useHistory';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -110,13 +111,45 @@ export function useTierlistState(user) {
   // Inicialização de Dados / Carregamento de Templates ou Nuvem
   useEffect(() => {
     const initPage = async () => {
+      const shareParam = searchParams.get('share');
       const idParam = searchParams.get('id');
       const templateId = searchParams.get('templateId');
       const isNew = searchParams.get('new') === 'true';
       const currentId = localStorage.getItem('tierlist-current-id');
       const forceCloudLoad = localStorage.getItem('tierlist-force-cloud-load') === 'true';
 
-      // Carregamento de Tier List salva (?id=...)
+      // 1. Carregamento de Link Compartilhado (?share=...)
+      if (shareParam) {
+        try {
+          const shared = decodeSharedTierlist(shareParam);
+          if (shared) {
+            saveHistoryState(items, ranksData);
+            setTierlistName(shared.tierlistName);
+            setRanksData(shared.ranksData);
+            setItems(shared.items);
+            setLayoutMode(shared.layoutMode);
+            setColunas(shared.colunas);
+            setColumnTitles(shared.columnTitles);
+            setTheme(shared.theme);
+
+            localStorage.setItem('tierlist-name', shared.tierlistName);
+            localStorage.setItem('tierlist-ranks', JSON.stringify(shared.ranksData));
+            localStorage.setItem('tierlist-items', JSON.stringify(shared.items));
+            localStorage.setItem('tierlist-layout', shared.layoutMode);
+            localStorage.setItem('tierlist-column-titles', JSON.stringify(shared.columnTitles));
+            localStorage.removeItem('tierlist-current-id');
+
+            toast.success(`Tier List "${shared.tierlistName}" carregada via link!`);
+            searchParams.delete('share');
+            setSearchParams(searchParams);
+            return;
+          }
+        } catch (e) {
+          console.error('Erro ao ler link compartilhado:', e);
+        }
+      }
+
+      // 2. Carregamento de Tier List salva (?id=...)
       if (idParam) {
         try {
           const { data } = await supabase.from('tierlists').select('name, data').eq('id', idParam).single();

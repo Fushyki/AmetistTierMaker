@@ -16,6 +16,7 @@ import Inventory from '../components/Inventory';
 import TierlistControls from '../components/tierlist/TierlistControls';
 import PresentationOverlay from '../components/tierlist/PresentationOverlay';
 import ExportModal from '../components/tierlist/ExportModal';
+import ShareModal from '../components/tierlist/ShareModal';
 import '../styles/index.css';
 
 export default function Tierlist() {
@@ -24,6 +25,7 @@ export default function Tierlist() {
   const { siteTheme, activeTheme } = useTheme();
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const {
     layoutMode,
@@ -245,8 +247,7 @@ export default function Tierlist() {
             colunas={colunas}
             canUndo={canUndo}
             onExportImage={() => setIsExportModalOpen(true)}
-            onExportJSON={handleExportJSON}
-            onImportJSON={handleImportJSON}
+            onOpenShare={() => setIsShareModalOpen(true)}
             onSaveToCloud={handleSaveToCloud}
             onEnterPresentation={() => setIsPresentationMode(true)}
             onStartDuel={() => navigate(`/duelo${activeTemplateId ? `?templateId=${activeTemplateId}` : ''}`)}
@@ -262,6 +263,22 @@ export default function Tierlist() {
           onClose={() => setIsExportModalOpen(false)}
           tierlistName={tierlistName}
           onExport={(format, quality) => exportBoardAsImage(`${tierlistName || 'minha-tierlist'}.png`, 'board', format, { title: tierlistName, theme: siteTheme || theme || 'ametist', quality })}
+        />
+
+        <ShareModal 
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          tierlistName={tierlistName}
+          items={items}
+          ranksData={ranksData}
+          layoutMode={layoutMode}
+          colunas={colunas}
+          columnTitles={columnTitles}
+          theme={siteTheme || theme || 'ametist'}
+          user={user}
+          onExportJSON={handleExportJSON}
+          onImportJSON={handleImportJSON}
+          activeTheme={activeTheme}
         />
 
         <div className="mobile-touch-hint">
