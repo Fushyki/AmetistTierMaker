@@ -720,17 +720,17 @@ export default function DueloX1() {
             <div
               onClick={() => handlePickCard('left')}
               style={{
-                flex: '1 1 260px',
-                maxWidth: '340px',
-                minHeight: '380px',
+                flex: '1 1 280px',
+                maxWidth: '380px',
+                minHeight: '430px',
                 background: '#15151a',
                 border: selectedSide === 'left' ? `3px solid ${activeTheme?.accentColor || '#b062eb'}` : '2px solid #282834',
-                borderRadius: '18px',
+                borderRadius: '20px',
                 overflow: 'hidden',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                boxShadow: selectedSide === 'left' ? `0 0 30px ${activeTheme?.accentColor || '#b062eb'}77` : '0 10px 30px rgba(0,0,0,0.6)',
+                boxShadow: selectedSide === 'left' ? `0 0 35px ${activeTheme?.accentColor || '#b062eb'}88` : '0 10px 30px rgba(0,0,0,0.6)',
                 transition: 'all 0.15s ease',
                 transform: selectedSide === 'left' ? 'scale(1.03)' : 'scale(1)'
               }}
@@ -747,21 +747,27 @@ export default function DueloX1() {
                 }
               }}
             >
-              <div style={{ width: '100%', height: '280px', backgroundColor: '#0e0e12', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '100%', height: '340px', backgroundColor: '#09090d', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img 
+                  src={currentCardLeft.src} 
+                  alt="" 
+                  aria-hidden="true"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(20px)', opacity: 0.35, transform: 'scale(1.15)' }} 
+                />
                 <img 
                   src={currentCardLeft.src} 
                   alt={currentCardLeft.nome} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} 
                 />
               </div>
               <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-                <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#fff', textAlign: 'center', marginBottom: '10px' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#fff', textAlign: 'center', marginBottom: '12px' }}>
                   {currentCardLeft.nome}
                 </div>
                 <button
                   type="button"
                   className="btn-primary"
-                  style={{ width: '100%', padding: '10px', fontSize: '0.9rem', fontWeight: '700', borderRadius: '10px' }}
+                  style={{ width: '100%', padding: '11px', fontSize: '0.92rem', fontWeight: '700', borderRadius: '12px' }}
                 >
                   Escolher Este
                 </button>
@@ -770,8 +776,8 @@ export default function DueloX1() {
 
             {/* SELO CENTRAL VS */}
             <div style={{
-              width: '54px',
-              height: '54px',
+              width: '56px',
+              height: '56px',
               borderRadius: '50%',
               background: activeTheme?.gradient || 'var(--accent-gradient)',
               display: 'flex',
@@ -779,8 +785,8 @@ export default function DueloX1() {
               justifyContent: 'center',
               color: '#fff',
               fontWeight: '900',
-              fontSize: '1.1rem',
-              boxShadow: `0 0 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.4)'}`,
+              fontSize: '1.15rem',
+              boxShadow: `0 0 24px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.45)'}`,
               flexShrink: 0,
               zIndex: 2
             }}>
@@ -791,17 +797,17 @@ export default function DueloX1() {
             <div
               onClick={() => handlePickCard('right')}
               style={{
-                flex: '1 1 260px',
-                maxWidth: '340px',
-                minHeight: '380px',
+                flex: '1 1 280px',
+                maxWidth: '380px',
+                minHeight: '430px',
                 background: '#15151a',
                 border: selectedSide === 'right' ? `3px solid ${activeTheme?.accentColor || '#b062eb'}` : '2px solid #282834',
-                borderRadius: '18px',
+                borderRadius: '20px',
                 overflow: 'hidden',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                boxShadow: selectedSide === 'right' ? `0 0 30px ${activeTheme?.accentColor || '#b062eb'}77` : '0 10px 30px rgba(0,0,0,0.6)',
+                boxShadow: selectedSide === 'right' ? `0 0 35px ${activeTheme?.accentColor || '#b062eb'}88` : '0 10px 30px rgba(0,0,0,0.6)',
                 transition: 'all 0.15s ease',
                 transform: selectedSide === 'right' ? 'scale(1.03)' : 'scale(1)'
               }}
@@ -818,21 +824,27 @@ export default function DueloX1() {
                 }
               }}
             >
-              <div style={{ width: '100%', height: '280px', backgroundColor: '#0e0e12', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '100%', height: '340px', backgroundColor: '#09090d', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img 
+                  src={currentCardRight.src} 
+                  alt="" 
+                  aria-hidden="true"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(20px)', opacity: 0.35, transform: 'scale(1.15)' }} 
+                />
                 <img 
                   src={currentCardRight.src} 
                   alt={currentCardRight.nome} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} 
                 />
               </div>
               <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-                <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#fff', textAlign: 'center', marginBottom: '10px' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#fff', textAlign: 'center', marginBottom: '12px' }}>
                   {currentCardRight.nome}
                 </div>
                 <button
                   type="button"
                   className="btn-primary"
-                  style={{ width: '100%', padding: '10px', fontSize: '0.9rem', fontWeight: '700', borderRadius: '10px' }}
+                  style={{ width: '100%', padding: '11px', fontSize: '0.92rem', fontWeight: '700', borderRadius: '12px' }}
                 >
                   Escolher Este
                 </button>
@@ -971,8 +983,18 @@ export default function DueloX1() {
                             boxShadow: '0 0 12px rgba(34, 197, 94, 0.2)'
                           }}
                         >
-                          <div style={{ width: '100%', height: '80px', backgroundColor: '#000' }}>
-                            <img src={item.src} alt={item.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <div style={{ width: '100%', height: '95px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <img 
+                              src={item.src} 
+                              alt="" 
+                              aria-hidden="true"
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(10px)', opacity: 0.25 }} 
+                            />
+                            <img 
+                              src={item.src} 
+                              alt={item.nome} 
+                              style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} 
+                            />
                           </div>
                           <div style={{ padding: '8px', textAlign: 'center' }}>
                             <div style={{ fontSize: '0.78rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -1006,11 +1028,21 @@ export default function DueloX1() {
                             border: '1px solid #332222',
                             borderRadius: '10px',
                             overflow: 'hidden',
-                            opacity: 0.65
+                            opacity: 0.75
                           }}
                         >
-                          <div style={{ width: '100%', height: '80px', backgroundColor: '#000', filter: 'grayscale(80%)' }}>
-                            <img src={item.src} alt={item.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <div style={{ width: '100%', height: '95px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <img 
+                              src={item.src} 
+                              alt="" 
+                              aria-hidden="true"
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(10px)', opacity: 0.15 }} 
+                            />
+                            <img 
+                              src={item.src} 
+                              alt={item.nome} 
+                              style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '4px', filter: 'grayscale(90%)' }} 
+                            />
                           </div>
                           <div style={{ padding: '8px', textAlign: 'center' }}>
                             <div style={{ fontSize: '0.78rem', fontWeight: '700', color: '#aaa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -1050,7 +1082,7 @@ export default function DueloX1() {
                   <div
                     key={item.id || idx}
                     style={{
-                      width: '70px',
+                      width: '76px',
                       flexShrink: 0,
                       background: '#16161c',
                       border: '1px solid #282832',
@@ -1058,8 +1090,8 @@ export default function DueloX1() {
                       overflow: 'hidden'
                     }}
                   >
-                    <div style={{ width: '100%', height: '54px', backgroundColor: '#000' }}>
-                      <img src={item.src} alt={item.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ width: '100%', height: '62px', backgroundColor: '#09090d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={item.src} alt={item.nome} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '2px' }} />
                     </div>
                     <div style={{ padding: '4px', fontSize: '0.7rem', color: '#fff', textAlign: 'center', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       #{idx + 1}
@@ -1089,20 +1121,28 @@ export default function DueloX1() {
 
               {/* Card do Grande Campeão */}
               <div style={{
-                maxWidth: '280px',
+                maxWidth: '320px',
                 margin: '0 auto 24px auto',
-                borderRadius: '16px',
+                borderRadius: '18px',
                 overflow: 'hidden',
                 border: '3px solid #ffd700',
                 boxShadow: '0 0 40px rgba(255, 215, 0, 0.4)',
                 background: '#16161c'
               }}>
-                <img 
-                  src={podium.champion.src} 
-                  alt={podium.champion.nome} 
-                  style={{ width: '100%', height: '240px', objectFit: 'cover' }} 
-                />
-                <div style={{ padding: '14px', fontSize: '1.15rem', fontWeight: '800', color: '#fff' }}>
+                <div style={{ width: '100%', height: '300px', backgroundColor: '#09090d', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img 
+                    src={podium.champion.src} 
+                    alt="" 
+                    aria-hidden="true"
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(20px)', opacity: 0.4, transform: 'scale(1.15)' }} 
+                  />
+                  <img 
+                    src={podium.champion.src} 
+                    alt={podium.champion.nome} 
+                    style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '14px' }} 
+                  />
+                </div>
+                <div style={{ padding: '16px', fontSize: '1.2rem', fontWeight: '800', color: '#fff' }}>
                   {podium.champion.nome}
                 </div>
               </div>
