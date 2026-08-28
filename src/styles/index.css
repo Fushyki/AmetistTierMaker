@@ -1372,3 +1372,82 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--accent-color) !important;
   box-shadow: 0 0 10px var(--accent-glow) !important;
 }
+
+/* OTIMIZAÇÕES MOBILE & FLUIDEZ TOUCH */
+button, a, input, select, textarea, .template-card, .duel-card {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ARENA DE DUELO RESPONSIVA (DESKTOP & MOBILE) */
+.duel-arena-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  flex-wrap: wrap;
+  margin: 4px 0;
+}
+
+.duel-card {
+  flex: 1 1 280px;
+  max-width: 380px;
+  min-height: 420px;
+  background: #15151a;
+  border: 2px solid #282834;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+}
+
+.duel-card-img-box {
+  width: 100%;
+  height: 320px;
+  background-color: #09090d;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .duel-arena-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .duel-card {
+    flex: none;
+    max-width: 100%;
+    min-height: auto;
+    border-radius: 14px;
+  }
+
+  .duel-card-img-box {
+    height: 180px;
+  }
+
+  .duel-card .btn-primary {
+    padding: 8px 6px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .duel-vs-badge {
+    display: none !important;
+  }
+
+  .template-grid-responsive {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+

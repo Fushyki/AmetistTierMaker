@@ -1101,30 +1101,21 @@ export default function DueloX1() {
           </div>
 
           {/* ARENA DOS 2 CARDS (ESQUERDA VS DIREITA) */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', width: '100%', flexWrap: 'wrap', margin: '4px 0' }}>
+          <div className="duel-arena-grid">
             
             {/* CARD 1 (ESQUERDA) */}
             <div
+              className="duel-card"
               onClick={() => handlePickCard('left')}
               style={{
-                flex: '1 1 280px',
-                maxWidth: '380px',
-                minHeight: '430px',
-                background: '#15151a',
-                border: selectedSide === 'left' ? `3px solid ${activeTheme?.accentColor || '#b062eb'}` : '2px solid #282834',
-                borderRadius: '20px',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
+                borderColor: selectedSide === 'left' ? (activeTheme?.accentColor || '#b062eb') : '#282834',
                 boxShadow: selectedSide === 'left' ? `0 0 35px ${activeTheme?.accentColor || '#b062eb'}88` : '0 10px 30px rgba(0,0,0,0.6)',
-                transition: 'all 0.15s ease',
                 transform: selectedSide === 'left' ? 'scale(1.03)' : 'scale(1)'
               }}
               onMouseEnter={e => {
                 if (selectedSide === null) {
                   e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb';
-                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
                 }
               }}
               onMouseLeave={e => {
@@ -1134,7 +1125,7 @@ export default function DueloX1() {
                 }
               }}
             >
-              <div style={{ width: '100%', height: '340px', backgroundColor: '#09090d', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="duel-card-img-box">
                 <img 
                   src={currentCardLeft.src} 
                   alt="" 
@@ -1144,17 +1135,17 @@ export default function DueloX1() {
                 <img 
                   src={currentCardLeft.src} 
                   alt={currentCardLeft.nome} 
-                  style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} 
+                  style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '8px' }} 
                 />
               </div>
-              <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#fff', textAlign: 'center', marginBottom: '12px' }}>
+              <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
+                <div style={{ fontSize: '0.98rem', fontWeight: '800', color: '#fff', textAlign: 'center', marginBottom: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {currentCardLeft.nome}
                 </div>
                 <button
                   type="button"
                   className="btn-primary"
-                  style={{ width: '100%', padding: '11px', fontSize: '0.92rem', fontWeight: '700', borderRadius: '12px' }}
+                  style={{ width: '100%', padding: '10px', fontSize: '0.88rem', fontWeight: '700', borderRadius: '10px' }}
                 >
                   Escolher Este
                 </button>
@@ -1162,9 +1153,9 @@ export default function DueloX1() {
             </div>
 
             {/* SELO CENTRAL VS */}
-            <div style={{
-              width: '56px',
-              height: '56px',
+            <div className="duel-vs-badge" style={{
+              width: '52px',
+              height: '52px',
               borderRadius: '50%',
               background: activeTheme?.gradient || 'var(--accent-gradient)',
               display: 'flex',
@@ -1172,7 +1163,7 @@ export default function DueloX1() {
               justifyContent: 'center',
               color: '#fff',
               fontWeight: '900',
-              fontSize: '1.15rem',
+              fontSize: '1.1rem',
               boxShadow: `0 0 24px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.45)'}`,
               flexShrink: 0,
               zIndex: 2
@@ -1182,26 +1173,17 @@ export default function DueloX1() {
 
             {/* CARD 2 (DIREITA) */}
             <div
+              className="duel-card"
               onClick={() => handlePickCard('right')}
               style={{
-                flex: '1 1 280px',
-                maxWidth: '380px',
-                minHeight: '430px',
-                background: '#15151a',
-                border: selectedSide === 'right' ? `3px solid ${activeTheme?.accentColor || '#b062eb'}` : '2px solid #282834',
-                borderRadius: '20px',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
+                borderColor: selectedSide === 'right' ? (activeTheme?.accentColor || '#b062eb') : '#282834',
                 boxShadow: selectedSide === 'right' ? `0 0 35px ${activeTheme?.accentColor || '#b062eb'}88` : '0 10px 30px rgba(0,0,0,0.6)',
-                transition: 'all 0.15s ease',
                 transform: selectedSide === 'right' ? 'scale(1.03)' : 'scale(1)'
               }}
               onMouseEnter={e => {
                 if (selectedSide === null) {
                   e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb';
-                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
                 }
               }}
               onMouseLeave={e => {
@@ -1211,7 +1193,7 @@ export default function DueloX1() {
                 }
               }}
             >
-              <div style={{ width: '100%', height: '340px', backgroundColor: '#09090d', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="duel-card-img-box">
                 <img 
                   src={currentCardRight.src} 
                   alt="" 
@@ -1221,17 +1203,17 @@ export default function DueloX1() {
                 <img 
                   src={currentCardRight.src} 
                   alt={currentCardRight.nome} 
-                  style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} 
+                  style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', padding: '8px' }} 
                 />
               </div>
-              <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#fff', textAlign: 'center', marginBottom: '12px' }}>
+              <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
+                <div style={{ fontSize: '0.98rem', fontWeight: '800', color: '#fff', textAlign: 'center', marginBottom: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {currentCardRight.nome}
                 </div>
                 <button
                   type="button"
                   className="btn-primary"
-                  style={{ width: '100%', padding: '11px', fontSize: '0.92rem', fontWeight: '700', borderRadius: '12px' }}
+                  style={{ width: '100%', padding: '10px', fontSize: '0.88rem', fontWeight: '700', borderRadius: '10px' }}
                 >
                   Escolher Este
                 </button>
