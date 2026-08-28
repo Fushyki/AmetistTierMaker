@@ -9,11 +9,15 @@ import {
   ArrowLeft, 
   Layers, 
   Check, 
-  Share2, 
   Search, 
   Zap, 
   ChevronRight,
-  Flame
+  Flame,
+  GitBranch,
+  XCircle,
+  Clock,
+  CheckCircle2,
+  ListOrdered
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { useTheme } from '../contexts/ThemeContext';
@@ -41,7 +45,9 @@ export default function DueloX1() {
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [nextRoundItems, setNextRoundItems] = useState([]);
+  const [eliminatedItems, setEliminatedItems] = useState([]); // Array de itens eliminados com informações da fase
   const [podium, setPodium] = useState({ champion: null, runnerUp: null, third: null });
+  const [activeInspectorTab, setActiveInspectorTab] = useState('bracket'); // 'bracket', 'classified', 'eliminated'
 
   // ESTADO DO MODO 2: BATALHA TIER LIST (RANQUEAMENTO POR COMPARAÇÃO BINÁRIA)
   const [rankedList, setRankedList] = useState([]); // Itens já ordenados
@@ -104,7 +110,7 @@ export default function DueloX1() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, mode, tournamentRounds, currentRoundIndex, currentMatchIndex, nextRoundItems, insertItem, binaryRange, rankedList, unrankedItems]);
+  }, [gameState, mode, tournamentRounds, currentRoundIndex, currentMatchIndex, nextRoundItems, insertItem, binaryRange, rankedList, unrankedItems, selectedSide]);
 
   // Função para inicializar o template selecionado
   const handleSelectTemplate = (tpl) => {
@@ -118,7 +124,6 @@ export default function DueloX1() {
       }
     }
     if (!items || items.length < 3) {
-      // Tenta ler do localStorage se for o template atual
       try {
         const localItems = JSON.parse(localStorage.getItem('tierlist-items') || '[]');
         if (localItems && localItems.length >= 3) {
@@ -132,7 +137,6 @@ export default function DueloX1() {
       return;
     }
 
-    // Normaliza os itens
     const normalized = items.map((item, idx) => ({
       id: item.id || `duel-item-${idx}`,
       src: item.src || item.image || item.url,
@@ -143,13 +147,22 @@ export default function DueloX1() {
     startDuelSession(normalized, mode);
   };
 
+  // Nomes amigáveis para as fases do chaveamento
+  const getRoundLabel = (matchesCount) => {
+    if (matchesCount === 1) return 'Grande Final';
+    if (matchesCount === 2) return 'Semifinais';
+    if (matchesCount === 4) return 'Quartas de Final';
+    if (matchesCount === 8) return 'Oitavas de Final';
+    if (matchesCount === 16) return '16-avos de Final';
+    return `Fase de ${matchesCount * 2}`;
+  };
+
   // Iniciar sessão de jogo
   const startDuelSession = (itemsList, selectedMode) => {
     const shuffled = [...itemsList].sort(() => Math.random() - 0.5);
 
     if (selectedMode === 'x1') {
-      // Modo Mata-Mata Torneio
-      // Ajusta para a potência de 2 mais próxima ou usa os primeiros 8, 16, 32 itens
+      // Modo Mata-Mata Torneio (Ajusta para 4, 8, 16 ou 32 participantes)
       let count = shuffled.length;
       let power = 2;
       while (power * 2 <= count && power * 2 <= 32) {
@@ -160,8 +173,11 @@ export default function DueloX1() {
       const firstRoundMatches = [];
       for (let i = 0; i < tournamentItems.length; i += 2) {
         firstRoundMatches.push({
+          id: `match-0-${i / 2}`,
           itemA: tournamentItems[i],
-          itemB: tournamentItems[i + 1] || tournamentItems[0]
+          itemB: tournamentItems[i + 1] || tournamentItems[0],
+          winner: null,
+          loser: null
         });
       }
 
@@ -169,11 +185,12 @@ export default function DueloX1() {
       setCurrentRoundIndex(0);
       setCurrentMatchIndex(0);
       setNextRoundItems([]);
+      setEliminatedItems([]);
       setPodium({ champion: null, runnerUp: null, third: null });
+      setActiveInspectorTab('bracket');
       setGameState('playing');
     } else {
-      // Modo Batalha Tier List (Ranqueamento completo)
-      // Algoritmo de Inserção Binária Interativa
+      // Modo Batalha Tier List (Ranqueamento completo por inserção binária)
       const first = shuffled[0];
       const rest = shuffled.slice(1);
       const nextInsert = rest[0];
@@ -182,9 +199,8 @@ export default function DueloX1() {
       setRankedList([first]);
       setUnrankedItems(remainingUnranked);
       setInsertItem(nextInsert);
-      setBinaryRange({ low: 0, high: 1, mid: 0 }); // Comparar com o primeiro item
+      setBinaryRange({ low: 0, high: 1, mid: 0 });
       setComparisonsDone(0);
-      // Estimativa teórica de duelos: N * log2(N)
       setEstimatedComparisons(Math.round(shuffled.length * Math.log2(shuffled.length)));
       setGameState('playing');
     }
@@ -192,7 +208,7 @@ export default function DueloX1() {
 
   // Processar o voto no Duelo Atual
   const handlePickCard = (winnerSide) => {
-    if (selectedSide !== null) return; // Evita duplo clique rápido
+    if (selectedSide !== null) return;
     setSelectedSide(winnerSide);
 
     setTimeout(() => {
@@ -212,6 +228,23 @@ export default function DueloX1() {
     const winner = winnerSide === 'left' ? currentMatch.itemA : currentMatch.itemB;
     const loser = winnerSide === 'left' ? currentMatch.itemB : currentMatch.itemA;
 
+    const roundName = getRoundLabel(currentRound.length);
+
+    // Registra o vencedor na partida atual
+    currentMatch.winner = winner;
+    currentMatch.loser = loser;
+
+    // Registra o eliminado
+    setEliminatedItems(prev => [
+      ...prev,
+      {
+        ...loser,
+        eliminatedIn: roundName,
+        roundIndex: currentRoundIndex,
+        lostTo: winner.nome
+      }
+    ]);
+
     const newNextItems = [...nextRoundItems, winner];
 
     // Se ainda há partidas nesta rodada
@@ -221,7 +254,7 @@ export default function DueloX1() {
     } else {
       // Rodada terminada!
       if (newNextItems.length === 1) {
-        // FINALÍSSIMA TERMINADA -> TEMOS O CAMPEÃO!
+        // GRANDE FINAL TERMINADA -> TEMOS O CAMPEÃO!
         setPodium({
           champion: newNextItems[0],
           runnerUp: loser,
@@ -233,8 +266,11 @@ export default function DueloX1() {
         const nextRoundMatches = [];
         for (let i = 0; i < newNextItems.length; i += 2) {
           nextRoundMatches.push({
+            id: `match-${currentRoundIndex + 1}-${i / 2}`,
             itemA: newNextItems[i],
-            itemB: newNextItems[i + 1]
+            itemB: newNextItems[i + 1],
+            winner: null,
+            loser: null
           });
         }
         setTournamentRounds(prev => [...prev, nextRoundMatches]);
@@ -249,7 +285,7 @@ export default function DueloX1() {
   const processTierListBattlePick = (winnerSide) => {
     setComparisonsDone(prev => prev + 1);
     const { low, high, mid } = binaryRange;
-    const insertIsBetter = (winnerSide === 'left'); // Item novo está na esquerda
+    const insertIsBetter = (winnerSide === 'left');
 
     let newLow = low;
     let newHigh = high;
@@ -261,7 +297,6 @@ export default function DueloX1() {
     }
 
     if (newLow >= newHigh) {
-      // Posição de inserção encontrada!
       const newRanked = [...rankedList];
       newRanked.splice(newLow, 0, insertItem);
       setRankedList(newRanked);
@@ -277,7 +312,6 @@ export default function DueloX1() {
           mid: Math.floor(newRanked.length / 2)
         });
       } else {
-        // Todos os itens foram ordenados com sucesso!
         finishTierListGeneration(newRanked);
       }
     } else {
@@ -290,10 +324,9 @@ export default function DueloX1() {
     }
   };
 
-  // Finalizar e gerar a Tier List automaticamente dividida por Tiers
+  // Finalizar e gerar a Tier List automaticamente
   const finishTierListGeneration = (finalRanked) => {
     const total = finalRanked.length;
-    // Distribuição inteligente por percentis
     const sCount = Math.max(1, Math.round(total * 0.15));
     const aCount = Math.max(1, Math.round(total * 0.25));
     const bCount = Math.max(1, Math.round(total * 0.30));
@@ -315,7 +348,6 @@ export default function DueloX1() {
   const handleOpenInTierlistBoard = () => {
     if (!generatedTierList) return;
 
-    // Converte os itens para o formato do useTierlistState
     const placedItems = [];
     generatedTierList.forEach(tier => {
       tier.items.forEach(item => {
@@ -339,7 +371,6 @@ export default function DueloX1() {
       }
     ];
 
-    // Salva no localStorage para o Tierlist.jsx ler
     localStorage.setItem('tierlist-items', JSON.stringify(placedItems));
     localStorage.setItem('tierlist-ranks', JSON.stringify(ranksData));
     localStorage.setItem('tierlist-name', `${selectedTemplate?.name || 'Tier List'} (Ranqueada no Duelo)`);
@@ -352,11 +383,11 @@ export default function DueloX1() {
     navigate('/tierlist');
   };
 
-  // Obter itens atuais do duelo
+  // Obter dados do duelo atual
   let currentCardLeft = null;
   let currentCardRight = null;
   let roundTitle = '';
-  let duelProgress = 0;
+  let roundMatchesTotal = 1;
 
   if (gameState === 'playing') {
     if (mode === 'x1') {
@@ -365,33 +396,50 @@ export default function DueloX1() {
         currentCardLeft = round[currentMatchIndex].itemA;
         currentCardRight = round[currentMatchIndex].itemB;
       }
-      const totalInRound = round ? round.length : 1;
-      if (totalInRound === 1) roundTitle = 'Grande Final!';
-      else if (totalInRound === 2) roundTitle = 'Semifinal';
-      else if (totalInRound === 4) roundTitle = 'Quartas de Final';
-      else roundTitle = `Oitavas de Final (${currentMatchIndex + 1}/${totalInRound})`;
-      
-      duelProgress = Math.round(((currentMatchIndex) / totalInRound) * 100);
+      roundMatchesTotal = round ? round.length : 1;
+      roundTitle = getRoundLabel(roundMatchesTotal);
     } else {
       currentCardLeft = insertItem;
       currentCardRight = rankedList[binaryRange.mid];
-      roundTitle = `Duelo ${comparisonsDone + 1}`;
-      duelProgress = Math.min(95, Math.round((comparisonsDone / Math.max(1, estimatedComparisons)) * 100));
+      roundTitle = `Comparação ${comparisonsDone + 1}`;
     }
   }
 
+  // Gera a lista de fases estimadas para a barra de etapas do torneio
+  const getTournamentStages = () => {
+    if (!tournamentRounds || tournamentRounds.length === 0) return [];
+    const firstRoundSize = tournamentRounds[0].length;
+    const stages = [];
+    let size = firstRoundSize;
+    let idx = 0;
+    while (size >= 1) {
+      stages.push({
+        index: idx,
+        size: size,
+        label: getRoundLabel(size),
+        isCompleted: idx < currentRoundIndex,
+        isCurrent: idx === currentRoundIndex
+      });
+      size = Math.floor(size / 2);
+      idx++;
+    }
+    return stages;
+  };
+
+  const tournamentStages = getTournamentStages();
+
   return (
-    <div className="tierlist-container" style={{ maxWidth: '1000px', margin: '0 auto', padding: '16px 12px 60px 12px' }}>
+    <div className="tierlist-container" style={{ maxWidth: '1020px', margin: '0 auto', padding: '16px 12px 60px 12px' }}>
       
       {/* HEADER PRINCIPAL */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Link to="/" className="btn-secondary" style={{ padding: '8px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
-            <ArrowLeft size={16} /> Voltar
+            <ArrowLeft size={16} /> Início
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Swords size={24} color={activeTheme?.accentColor || '#b062eb'} />
-            <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: '#fff' }}>
+            <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#fff' }}>
               {mode === 'x1' ? 'Duelo X1: Mata-Mata' : 'Batalha Tier List'}
             </h1>
           </div>
@@ -456,10 +504,10 @@ export default function DueloX1() {
             <h2 style={{ margin: '0 0 8px 0', fontSize: '1.3rem', color: '#fff' }}>
               Escolha um Modelo para Iniciar os Duelos
             </h2>
-            <p style={{ color: '#aaa', fontSize: '0.9rem', maxWidth: '550px', margin: '0 auto 20px auto', lineHeight: '1.4' }}>
+            <p style={{ color: '#aaa', fontSize: '0.88rem', maxWidth: '550px', margin: '0 auto 20px auto', lineHeight: '1.4' }}>
               {mode === 'x1'
-                ? 'Em cada rodada você escolhe o vencedor entre 2 cards até coroar o Grande Campeão Supremo do torneio!'
-                : 'Compare itens 2 a 2 de forma rápida e divertida. O algoritmo inteligente vai calcular as notas e montar sua Tier List inteira automaticamente!'}
+                ? 'Em cada rodada você escolhe o vencedor entre 2 cartas. Veja o chaveamento completo, quem avançou e quem foi eliminado até a Grande Final!'
+                : 'Compare itens 2 a 2 de forma rápida. O algoritmo inteligente calcula as notas e monta sua Tier List inteira automaticamente!'}
             </p>
 
             <div style={{ maxWidth: '400px', margin: '0 auto', position: 'relative' }}>
@@ -521,7 +569,7 @@ export default function DueloX1() {
                       {t.name}
                     </h3>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: activeTheme?.accentColor || '#b062eb', fontSize: '0.8rem', fontWeight: '700' }}>
-                      <span>Jogar Duelo</span>
+                      <span>Iniciar Duelos</span>
                       <ChevronRight size={14} />
                     </div>
                   </div>
@@ -533,36 +581,84 @@ export default function DueloX1() {
 
       {/* TELA 2: ARENA DE DUELO (JOGANDO) */}
       {gameState === 'playing' && currentCardLeft && currentCardRight && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* Barra de Status & Progresso */}
-          <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#121216', padding: '10px 18px', borderRadius: '12px', border: '1px solid #262630' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.85rem', color: '#888' }}>Modelo:</span>
-              <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: '700' }}>{selectedTemplate?.name}</span>
+          {/* BARRA DE FASES & ETAPAS DO CHAVEAMENTO */}
+          {mode === 'x1' && (
+            <div style={{ background: '#131317', border: '1px solid #282832', borderRadius: '14px', padding: '12px 16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <GitBranch size={16} color={activeTheme?.accentColor || '#b062eb'} />
+                  <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: '800' }}>
+                    Fase Atual: <span style={{ color: activeTheme?.accentColor || '#b062eb' }}>{roundTitle}</span>
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '0.82rem', color: '#aaa', fontWeight: '600' }}>
+                    Duelo <span style={{ color: '#fff', fontWeight: '800' }}>{currentMatchIndex + 1}</span> de <span style={{ color: '#fff', fontWeight: '800' }}>{roundMatchesTotal}</span>
+                  </span>
+                  <button 
+                    type="button" 
+                    onClick={() => setGameState('select_template')} 
+                    className="btn-secondary" 
+                    style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                  >
+                    Trocar Modelo
+                  </button>
+                </div>
+              </div>
+
+              {/* Linha do Tempo / Etapas da Copa */}
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
+                {tournamentStages.map((stg) => (
+                  <div
+                    key={stg.index}
+                    style={{
+                      flex: 1,
+                      minWidth: '110px',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      background: stg.isCurrent 
+                        ? `${activeTheme?.accentColor || '#b062eb'}22` 
+                        : stg.isCompleted 
+                          ? '#182418' 
+                          : '#17171c',
+                      border: stg.isCurrent 
+                        ? `1.5px solid ${activeTheme?.accentColor || '#b062eb'}` 
+                        : stg.isCompleted 
+                          ? '1px solid #22c55e44' 
+                          : '1px solid #24242c',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {stg.isCompleted ? (
+                      <CheckCircle2 size={14} color="#22c55e" />
+                    ) : stg.isCurrent ? (
+                      <Flame size={14} color={activeTheme?.accentColor || '#b062eb'} />
+                    ) : (
+                      <Clock size={14} color="#666" />
+                    )}
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.78rem', color: stg.isCurrent ? '#fff' : stg.isCompleted ? '#4ade80' : '#777', fontWeight: stg.isCurrent ? '800' : '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {stg.label}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '0.85rem', color: activeTheme?.accentColor || '#b062eb', fontWeight: '700' }}>
-                {roundTitle}
-              </span>
-              <button 
-                type="button" 
-                onClick={() => setGameState('select_template')} 
-                className="btn-secondary" 
-                style={{ padding: '4px 10px', fontSize: '0.75rem' }}
-              >
-                Trocar Modelo
-              </button>
-            </div>
-          </div>
+          )}
 
           {/* Dica de Teclado */}
           <div style={{ fontSize: '0.8rem', color: '#777', textAlign: 'center' }}>
-            Clique na carta favorita ou use as teclas <span style={{ color: '#aaa', fontWeight: '700' }}>[Seta Esquerda / A]</span> e <span style={{ color: '#aaa', fontWeight: '700' }}>[Seta Direita / D]</span>
+            Clique na carta que você prefere ou use as teclas <span style={{ color: '#aaa', fontWeight: '700' }}>[Seta Esquerda / A]</span> e <span style={{ color: '#aaa', fontWeight: '700' }}>[Seta Direita / D]</span>
           </div>
 
           {/* ARENA DOS 2 CARDS (ESQUERDA VS DIREITA) */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', width: '100%', flexWrap: 'wrap', margin: '10px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', width: '100%', flexWrap: 'wrap', margin: '4px 0' }}>
             
             {/* CARD 1 (ESQUERDA) */}
             <div
@@ -618,8 +714,8 @@ export default function DueloX1() {
 
             {/* SELO CENTRAL VS */}
             <div style={{
-              width: '56px',
-              height: '56px',
+              width: '54px',
+              height: '54px',
               borderRadius: '50%',
               background: activeTheme?.gradient || 'var(--accent-gradient)',
               display: 'flex',
@@ -687,6 +783,236 @@ export default function DueloX1() {
               </div>
             </div>
           </div>
+
+          {/* PAINEL INFORMATIVO DO TORNEIO: CHAVEAMENTO, CLASSIFICADOS E ELIMINADOS */}
+          {mode === 'x1' && (
+            <div className="control-card" style={{ padding: '16px', background: '#121216', border: '1px solid #282834', borderRadius: '14px', marginTop: '8px' }}>
+              
+              {/* Abas do Painel */}
+              <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #25252e', paddingBottom: '10px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setActiveInspectorTab('bracket')}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: activeInspectorTab === 'bracket' ? (activeTheme?.accentColor || '#b062eb') : '#181820',
+                    color: activeInspectorTab === 'bracket' ? '#fff' : '#888',
+                    fontSize: '0.82rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <GitBranch size={14} /> Duelos da Rodada ({tournamentRounds[currentRoundIndex]?.length || 0})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveInspectorTab('classified')}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: activeInspectorTab === 'classified' ? '#22c55e' : '#181820',
+                    color: activeInspectorTab === 'classified' ? '#fff' : '#888',
+                    fontSize: '0.82rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <CheckCircle2 size={14} /> Classificados para a Próxima Fase ({nextRoundItems.length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveInspectorTab('eliminated')}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: activeInspectorTab === 'eliminated' ? '#ef4444' : '#181820',
+                    color: activeInspectorTab === 'eliminated' ? '#fff' : '#888',
+                    fontSize: '0.82rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <XCircle size={14} /> Cartas Eliminadas ({eliminatedItems.length})
+                </button>
+              </div>
+
+              {/* CONTEÚDO 1: DUELOS DA RODADA ATUAL */}
+              {activeInspectorTab === 'bracket' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px' }}>
+                  {tournamentRounds[currentRoundIndex]?.map((match, idx) => {
+                    const isCurrent = idx === currentMatchIndex;
+                    const isDone = match.winner !== null;
+                    return (
+                      <div
+                        key={match.id || idx}
+                        style={{
+                          background: isCurrent ? `${activeTheme?.accentColor || '#b062eb'}18` : '#16161c',
+                          border: isCurrent ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282832',
+                          borderRadius: '10px',
+                          padding: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px',
+                          opacity: isDone ? 0.6 : 1
+                        }}
+                      >
+                        {/* Item A */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                          <img src={match.itemA?.src} alt="" style={{ width: '28px', height: '28px', borderRadius: '4px', objectFit: 'cover' }} />
+                          <span style={{ fontSize: '0.78rem', color: match.winner?.id === match.itemA?.id ? '#4ade80' : '#fff', fontWeight: match.winner?.id === match.itemA?.id ? '800' : '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {match.itemA?.nome}
+                          </span>
+                        </div>
+
+                        <span style={{ fontSize: '0.7rem', color: '#666', fontWeight: '800' }}>VS</span>
+
+                        {/* Item B */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0, justifyContent: 'flex-end' }}>
+                          <span style={{ fontSize: '0.78rem', color: match.winner?.id === match.itemB?.id ? '#4ade80' : '#fff', fontWeight: match.winner?.id === match.itemB?.id ? '800' : '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'right' }}>
+                            {match.itemB?.nome}
+                          </span>
+                          <img src={match.itemB?.src} alt="" style={{ width: '28px', height: '28px', borderRadius: '4px', objectFit: 'cover' }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* CONTEÚDO 2: CLASSIFICADOS PARA A PRÓXIMA FASE */}
+              {activeInspectorTab === 'classified' && (
+                <div>
+                  {nextRoundItems.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '16px', color: '#777', fontSize: '0.85rem' }}>
+                      Nenhum personagem classificado ainda nesta rodada. Escolha o vencedor do duelo acima para classificar!
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '10px' }}>
+                      {nextRoundItems.map((item, idx) => (
+                        <div
+                          key={item.id || idx}
+                          style={{
+                            background: '#16161c',
+                            border: '1.5px solid #22c55e',
+                            borderRadius: '10px',
+                            overflow: 'hidden',
+                            boxShadow: '0 0 12px rgba(34, 197, 94, 0.2)'
+                          }}
+                        >
+                          <div style={{ width: '100%', height: '80px', backgroundColor: '#000' }}>
+                            <img src={item.src} alt={item.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </div>
+                          <div style={{ padding: '8px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.78rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {item.nome}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#4ade80', fontWeight: '700', marginTop: '2px' }}>
+                              ✓ Classificado
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* CONTEÚDO 3: CARTAS DESCARTADAS / ELIMINADAS */}
+              {activeInspectorTab === 'eliminated' && (
+                <div>
+                  {eliminatedItems.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '16px', color: '#777', fontSize: '0.85rem' }}>
+                      Nenhuma carta descartada ainda. O torneio está apenas começando!
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '10px' }}>
+                      {eliminatedItems.map((item, idx) => (
+                        <div
+                          key={item.id || idx}
+                          style={{
+                            background: '#141418',
+                            border: '1px solid #332222',
+                            borderRadius: '10px',
+                            overflow: 'hidden',
+                            opacity: 0.65
+                          }}
+                        >
+                          <div style={{ width: '100%', height: '80px', backgroundColor: '#000', filter: 'grayscale(80%)' }}>
+                            <img src={item.src} alt={item.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </div>
+                          <div style={{ padding: '8px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.78rem', fontWeight: '700', color: '#aaa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {item.nome}
+                            </div>
+                            <div style={{ fontSize: '0.68rem', color: '#f87171', fontWeight: '600', marginTop: '2px' }}>
+                              {item.eliminatedIn}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PAINEL INFORMATIVO DO MODO BATALHA TIER LIST */}
+          {mode === 'tierlist_battle' && (
+            <div className="control-card" style={{ padding: '16px', background: '#121216', border: '1px solid #282834', borderRadius: '14px', marginTop: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ListOrdered size={16} color={activeTheme?.accentColor || '#b062eb'} />
+                  <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: '800' }}>
+                    Itens Já Ranqueados ({rankedList.length} de {rawItems.length})
+                  </span>
+                </div>
+                <span style={{ fontSize: '0.8rem', color: '#aaa' }}>
+                  Restantes na fila: <strong style={{ color: '#fff' }}>{unrankedItems.length + (insertItem ? 1 : 0)}</strong>
+                </span>
+              </div>
+
+              {/* Lista dos Itens Já Ordenados */}
+              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '6px' }}>
+                {rankedList.map((item, idx) => (
+                  <div
+                    key={item.id || idx}
+                    style={{
+                      width: '70px',
+                      flexShrink: 0,
+                      background: '#16161c',
+                      border: '1px solid #282832',
+                      borderRadius: '8px',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <div style={{ width: '100%', height: '54px', backgroundColor: '#000' }}>
+                      <img src={item.src} alt={item.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <div style={{ padding: '4px', fontSize: '0.7rem', color: '#fff', textAlign: 'center', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      #{idx + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -697,12 +1023,12 @@ export default function DueloX1() {
           {/* RESULTADO DO MODO X1 (MATA-MATA) */}
           {mode === 'x1' && podium.champion && (
             <div className="control-card" style={{ width: '100%', padding: '30px', background: '#121216', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, borderRadius: '20px' }}>
-              <Crown size={42} color="#ffd700" style={{ margin: '0 auto 10px auto' }} />
+              <Crown size={44} color="#ffd700" style={{ margin: '0 auto 10px auto' }} />
               <h2 style={{ margin: '0 0 6px 0', fontSize: '1.6rem', color: '#fff', fontWeight: '900' }}>
                 CAMPEÃO SUPREMO!
               </h2>
               <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '24px' }}>
-                Após todas as rodadas do torneio eliminatório, este foi o grande vencedor escolhido por você:
+                Após todas as fases do chaveamento, este foi o grande vencedor escolhido por você:
               </p>
 
               {/* Card do Grande Campeão */}
