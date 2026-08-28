@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../services/supabaseClient';
 import { isAdmin } from '../utils/admin';
 import { confirmAction } from '../utils/alerts';
+import { processImage } from '../utils/imageProcessor';
 import { 
   Palette, 
   User, 
@@ -30,13 +31,30 @@ import {
   Search,
   RefreshCw,
   Bell,
-  Globe
+  Globe,
+  Camera,
+  UploadCloud,
+  Link2,
+  Image as ImageIcon,
+  X
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { toast, notify } from '../utils/notifications';
 import { TEMPLATE_CATEGORIES } from '../data/categories';
 import CategoryBadge, { CategoryIcon } from '../components/CategoryBadge';
 import '../styles/index.css';
+
+const AVATAR_PRESETS = [
+  { id: 'ametist', name: 'Cristal Ametista', url: '/ametist-logo.png' },
+  { id: 'gem', name: 'Gema Estelar', url: '/cristal.png' },
+  { id: 'cyber', name: 'Cyberbot', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Ametist' },
+  { id: 'felix', name: 'Aventureiro', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Felix' },
+  { id: 'aria', name: 'Feiticeira', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aria' },
+  { id: 'nova', name: 'Neon Gamer', url: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Nova' },
+  { id: 'shadow', name: 'Sombra', url: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Shadow' },
+  { id: 'luna', name: 'Estilo Pop', url: 'https://api.dicebear.com/7.x/micah/svg?seed=Luna' },
+  { id: 'crystal', name: 'Forma Geométrica', url: 'https://api.dicebear.com/7.x/shapes/svg?seed=Crystal' }
+];
 
 export default function Profile() {
   const { user, loading: authLoading } = useAuth();
@@ -48,6 +66,13 @@ export default function Profile() {
   const [userTemplates, setUserTemplates] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Estados de troca de foto de perfil
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [avatarTab, setAvatarTab] = useState('upload'); // 'upload', 'presets', 'url'
+  const [customAvatarUrl, setCustomAvatarUrl] = useState('');
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+  const avatarFileInputRef = useRef(null);
 
   // Estados de troca de senha
   const [newPassword, setNewPassword] = useState('');
@@ -346,6 +371,43 @@ export default function Profile() {
     }
   };
 
+  const handleSaveAvatar = async (newUrl) => {
+    try {
+      setIsSavingAvatar(true);
+      const { error } = await supabase.auth.updateUser({
+        data: { avatar_url: newUrl }
+      });
+      if (error) throw error;
+      if (showCustomToast) {
+        showCustomToast('Foto Atualizada', newUrl ? 'Sua foto de perfil foi alterada com sucesso!' : 'Foto de perfil removida.', 'palette');
+      } else {
+        toast.success(newUrl ? 'Foto de perfil alterada com sucesso!' : 'Foto de perfil removida.');
+      }
+      setIsAvatarModalOpen(false);
+      setCustomAvatarUrl('');
+    } catch (err) {
+      toast.error('Erro ao atualizar foto: ' + err.message);
+    } finally {
+      setIsSavingAvatar(false);
+    }
+  };
+
+  const handleAvatarFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      return toast.error('Por favor, selecione um arquivo de imagem.');
+    }
+    try {
+      setIsSavingAvatar(true);
+      const processed = await processImage(file, 256, 256, 0.88);
+      await handleSaveAvatar(processed.dataUrl);
+    } catch (err) {
+      toast.error('Erro ao processar imagem: ' + err.message);
+      setIsSavingAvatar(false);
+    }
+  };
+
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     if (newPassword.length < 6) return toast.error('A senha deve ter pelo menos 6 caracteres.');
@@ -417,63 +479,130 @@ export default function Profile() {
   return (
     <div className="container" style={{ padding: '10px 15px', maxWidth: '1000px', margin: '15px auto 30px', color: '#fff' }}>
       
-      {/* CABEÇALHO DO PERFIL */}
+      {/* CABEÇALHO DO PERFIL COM LINHA DE GRADIENTE DINÂMICA */}
       <div 
         className="control-card" 
         style={{ 
-          padding: '24px', 
+          padding: 0, 
           marginBottom: '20px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          flexWrap: 'wrap', 
-          gap: '16px',
-          background: 'linear-gradient(135deg, rgba(26,26,30,0.9) 0%, rgba(20,20,24,0.95) 100%)',
-          border: '1px solid ' + (activeTheme?.accentBorder || 'rgba(176,98,235,0.3)')
+          background: 'linear-gradient(135deg, rgba(26,26,30,0.95) 0%, rgba(20,20,24,0.98) 100%)',
+          border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.35)'}`,
+          borderRadius: '12px',
+          overflow: 'hidden',
+          boxShadow: `0 8px 32px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.12)'}`,
+          transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            borderRadius: '50%',
-            background: activeTheme?.gradient || 'linear-gradient(135deg, #b062eb 0%, #7928ca 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.6rem',
-            fontWeight: '800',
-            color: '#fff',
-            boxShadow: '0 0 20px ' + (activeTheme?.accentColor || '#b062eb') + '55'
-          }}>
-            {((user?.email || user?.user_metadata?.display_name || 'U')[0]).toUpperCase()}
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#fff', fontWeight: '700' }}>
-                {user?.user_metadata?.display_name || (user?.email ? user.email.split('@')[0] : 'Usuário')}
-              </h2>
-              {isAdmin(user) ? (
-                <span style={{ fontSize: '0.72rem', padding: '2px 8px', background: 'rgba(239,68,68,0.2)', border: '1px solid #ef4444', color: '#f87171', borderRadius: '4px', fontWeight: 'bold' }}>
-                  ADMIN
-                </span>
-              ) : (
-                <span style={{ fontSize: '0.72rem', padding: '2px 8px', background: (activeTheme?.accentColor || '#b062eb') + '22', border: '1px solid ' + (activeTheme?.accentColor || '#b062eb') + '66', color: activeTheme?.accentColor || '#d8b4fe', borderRadius: '4px', fontWeight: '600' }}>
-                  MEMBRO VIP
-                </span>
-              )}
-            </div>
-            <p style={{ margin: 0, color: '#8e8e99', fontSize: '0.85rem' }}>{user?.email || 'Conta Ametist'}</p>
-          </div>
-        </div>
+        {/* Linha Decorativa Superior Reativa ao Tema */}
+        <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)', boxShadow: `0 0 12px ${activeTheme?.accentGlow || 'var(--accent-glow)'}` }} />
 
-        <button 
-          onClick={handleLogout}
-          className="btn-secondary"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
-        >
-          <LogOut size={15} /> Sair da Conta
-        </button>
+        <div style={{ padding: '22px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+            
+            {/* Foto de Perfil Interativa com Troca em 1 Clique */}
+            <div 
+              onClick={() => setIsAvatarModalOpen(true)}
+              title="Clique para mudar sua foto de perfil"
+              style={{
+                position: 'relative',
+                width: '70px',
+                height: '70px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                border: `2.5px solid ${activeTheme?.accentColor || '#b062eb'}`,
+                boxShadow: `0 0 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.45)'}`,
+                overflow: 'hidden',
+                flexShrink: 0,
+                transition: 'transform 0.18s ease, box-shadow 0.18s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              {user?.user_metadata?.avatar_url ? (
+                <img 
+                  src={user.user_metadata.avatar_url} 
+                  alt="Avatar" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+              ) : (
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  background: activeTheme?.gradient || 'linear-gradient(135deg, #b062eb 0%, #7928ca 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.7rem',
+                  fontWeight: '800',
+                  color: '#fff'
+                }}>
+                  {((user?.email || user?.user_metadata?.display_name || 'U')[0]).toUpperCase()}
+                </div>
+              )}
+              
+              {/* Badge da Câmera */}
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: 'rgba(0, 0, 0, 0.72)',
+                padding: '3px 0',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                color: '#fff'
+              }}>
+                <Camera size={12} />
+              </div>
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#fff', fontWeight: '700' }}>
+                  {user?.user_metadata?.display_name || (user?.email ? user.email.split('@')[0] : 'Usuário')}
+                </h2>
+                {isAdmin(user) ? (
+                  <span style={{ fontSize: '0.72rem', padding: '2px 8px', background: 'rgba(239,68,68,0.2)', border: '1px solid #ef4444', color: '#f87171', borderRadius: '4px', fontWeight: 'bold' }}>
+                    ADMIN
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.72rem', padding: '2px 8px', background: (activeTheme?.accentColor || '#b062eb') + '22', border: '1px solid ' + (activeTheme?.accentColor || '#b062eb') + '66', color: activeTheme?.accentColor || '#d8b4fe', borderRadius: '4px', fontWeight: '600' }}>
+                    MEMBRO VIP
+                  </span>
+                )}
+              </div>
+              <p style={{ margin: '0 0 6px 0', color: '#8e8e99', fontSize: '0.85rem' }}>{user?.email || 'Conta Ametist'}</p>
+              
+              <button
+                type="button"
+                onClick={() => setIsAvatarModalOpen(true)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: 0,
+                  color: activeTheme?.accentColor || '#b062eb',
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Camera size={12} /> Alterar foto de perfil
+              </button>
+            </div>
+          </div>
+
+          <button 
+            onClick={handleLogout}
+            className="btn-secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
+          >
+            <LogOut size={15} /> Sair da Conta
+          </button>
+        </div>
       </div>
 
       {/* ABAS DE NAVEGAÇÃO */}
@@ -532,241 +661,316 @@ export default function Profile() {
       {/* CONTEÚDO DA ABA: MINHAS TIER LISTS */}
       {activeTab === 'tierlists' && (
         <div className="profile-tab-content">
-          <div className="control-card" style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700', borderBottom: 'none', paddingBottom: 0, textAlign: 'left', textTransform: 'none' }}>
-                Minhas Listas Salvas na Nuvem
-              </h3>
-              <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#8e8e99' }}>
-                Acesse, renomeie ou continue editando suas tier lists salvas na nuvem.
-              </p>
-            </div>
-            <input 
-              type="search"
-              placeholder="Buscar nas minhas listas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ padding: '7px 14px', borderRadius: '20px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.85rem' }}
-            />
-          </div>
-
-          {loadingData ? (
-            <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Carregando suas tier lists...</p>
-          ) : filteredTierlists.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '30px 15px', color: '#888' }}>
-              <p style={{ marginBottom: '15px' }}>Você ainda não salvou nenhuma tier list na nuvem.</p>
-              <Link to="/tierlist" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                Montar Minha Primeira Tier List
-              </Link>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
-              {filteredTierlists.map(item => (
-                <div 
-                  key={item.id}
-                  style={{
-                    backgroundColor: '#17171c',
-                    border: '1px solid #282832',
-                    borderRadius: '10px',
-                    padding: '14px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    gap: '12px'
-                  }}
-                >
-                  <div>
-                    <h4 style={{ margin: '0 0 6px 0', fontSize: '0.95rem', color: '#fff' }}>{item.name}</h4>
-                    <span style={{ fontSize: '0.75rem', color: '#777' }}>
-                      Atualizado em: {new Date(item.updated_at || item.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <button 
-                      onClick={() => {
-                        localStorage.setItem('tierlist-current-id', item.id);
-                        localStorage.setItem('tierlist-force-cloud-load', 'true');
-                        navigate('/tierlist');
-                      }}
-                      className="btn-primary"
-                      style={{ flex: 1, padding: '6px 10px', fontSize: '0.8rem' }}
-                    >
-                      Abrir Tier List
-                    </button>
-                    <button 
-                      onClick={() => handleRenameTierlist(item.id, item.name)}
-                      className="btn-secondary"
-                      style={{ padding: '6px 10px' }}
-                      title="Renomear"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteTierlist(item.id)}
-                      className="btn-danger outline"
-                      style={{ padding: '6px 10px' }}
-                      title="Excluir"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+          <div className="control-card" style={{ padding: 0, borderRadius: '12px', overflow: 'hidden', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
+            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)' }} />
+            <div style={{ padding: '22px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700', borderBottom: 'none', paddingBottom: 0, textAlign: 'left', textTransform: 'none' }}>
+                    Minhas Listas Salvas na Nuvem
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#8e8e99' }}>
+                    Acesse, renomeie ou continue editando suas tier lists salvas na nuvem.
+                  </p>
                 </div>
-              ))}
+                <input 
+                  type="search"
+                  placeholder="Buscar nas minhas listas..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ padding: '7px 14px', borderRadius: '20px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              {loadingData ? (
+                <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Carregando suas tier lists...</p>
+              ) : filteredTierlists.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px 15px', color: '#888' }}>
+                  <p style={{ marginBottom: '15px' }}>Você ainda não salvou nenhuma tier list na nuvem.</p>
+                  <Link to="/tierlist" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
+                    Montar Minha Primeira Tier List
+                  </Link>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+                  {filteredTierlists.map(item => (
+                    <div 
+                      key={item.id}
+                      style={{
+                        backgroundColor: '#17171c',
+                        border: '1px solid #282832',
+                        borderRadius: '10px',
+                        padding: '14px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '12px'
+                      }}
+                    >
+                      <div>
+                        <h4 style={{ margin: '0 0 6px 0', fontSize: '0.95rem', color: '#fff' }}>{item.name}</h4>
+                        <span style={{ fontSize: '0.75rem', color: '#777' }}>
+                          Atualizado em: {new Date(item.updated_at || item.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button 
+                          onClick={() => {
+                            localStorage.setItem('tierlist-current-id', item.id);
+                            localStorage.setItem('tierlist-force-cloud-load', 'true');
+                            navigate('/tierlist');
+                          }}
+                          className="btn-primary"
+                          style={{ flex: 1, padding: '6px 10px', fontSize: '0.8rem' }}
+                        >
+                          Abrir Tier List
+                        </button>
+                        <button 
+                          onClick={() => handleRenameTierlist(item.id, item.name)}
+                          className="btn-secondary"
+                          style={{ padding: '6px 10px' }}
+                          title="Renomear"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteTierlist(item.id)}
+                          className="btn-danger outline"
+                          style={{ padding: '6px 10px' }}
+                          title="Excluir"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
       )}
 
       {/* CONTEÚDO DA ABA: MEUS MODELOS */}
       {activeTab === 'templates' && (
         <div className="profile-tab-content">
-          <div className="control-card" style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700', borderBottom: 'none', paddingBottom: 0, textAlign: 'left', textTransform: 'none' }}>
-                Modelos Publicados por Você
-              </h3>
-              <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#8e8e99' }}>
-                Gerencie as configurações internas, capas, bancos de imagens e regras dos seus templates.
-              </p>
-            </div>
-            <Link to="/template-maker" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-              + Criar Novo Modelo
-            </Link>
-          </div>
+          <div className="control-card" style={{ padding: 0, borderRadius: '12px', overflow: 'hidden', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
+            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)' }} />
+            <div style={{ padding: '22px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700', borderBottom: 'none', paddingBottom: 0, textAlign: 'left', textTransform: 'none' }}>
+                    Modelos Publicados por Você
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#8e8e99' }}>
+                    Gerencie as configurações internas, capas, bancos de imagens e regras dos seus templates.
+                  </p>
+                </div>
+                <Link to="/template-maker" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                  + Criar Novo Modelo
+                </Link>
+              </div>
 
-          {loadingData ? (
-            <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Carregando seus modelos...</p>
-          ) : filteredTemplates.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '30px 15px', color: '#888' }}>
-              <p style={{ marginBottom: '15px' }}>Você ainda não publicou nenhum modelo.</p>
-              <Link to="/template-maker" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                Criar Meu Primeiro Modelo
-              </Link>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '14px' }}>
-              {filteredTemplates.map(template => (
-                <div 
-                  key={template.id}
-                  style={{
-                    backgroundColor: '#17171c',
-                    border: '1px solid #282832',
-                    borderRadius: '10px',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}
-                >
-                  <img 
-                    src={template.cover_image} 
-                    alt={template.name} 
-                    style={{ width: '100%', height: '115px', objectFit: 'cover' }}
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/300x150?text=Sem+Capa'; }}
-                  />
-                  <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <h4 style={{ margin: '0 0 6px 0', fontSize: '0.95rem', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {template.name}
-                      </h4>
-                      <span style={{ fontSize: '0.72rem', color: template.is_public ? '#4ade80' : '#facc15' }}>
-                        {template.is_public ? '● Público na Galeria' : '● Privado'}
-                      </span>
-                    </div>
+              {loadingData ? (
+                <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Carregando seus modelos...</p>
+              ) : filteredTemplates.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px 15px', color: '#888' }}>
+                  <p style={{ marginBottom: '15px' }}>Você ainda não publicou nenhum modelo.</p>
+                  <Link to="/template-maker" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
+                    Criar Meu Primeiro Modelo
+                  </Link>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '14px' }}>
+                  {filteredTemplates.map(template => (
+                    <div 
+                      key={template.id}
+                      style={{
+                        backgroundColor: '#17171c',
+                        border: '1px solid #282832',
+                        borderRadius: '10px',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      <img 
+                        src={template.cover_image} 
+                        alt={template.name} 
+                        style={{ width: '100%', height: '115px', objectFit: 'cover' }}
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/300x150?text=Sem+Capa'; }}
+                      />
+                      <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <h4 style={{ margin: '0 0 6px 0', fontSize: '0.95rem', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {template.name}
+                          </h4>
+                          <span style={{ fontSize: '0.72rem', color: template.is_public ? '#4ade80' : '#facc15' }}>
+                            {template.is_public ? '● Público na Galeria' : '● Privado'}
+                          </span>
+                        </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' }}>
-                      <Link 
-                        to={'/tierlist?templateId=' + template.id} 
-                        className="btn-primary"
-                        style={{ textDecoration: 'none', textAlign: 'center', padding: '7px 10px', fontSize: '0.8rem', fontWeight: '600' }}
-                      >
-                        Montar Tier List
-                      </Link>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <Link 
-                          to={'/template-maker?editTemplateId=' + template.id} 
-                          className="btn-secondary"
-                          style={{ flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '6px 8px', fontSize: '0.75rem', fontWeight: '600' }}
-                          title="Editar título, capa, banco de imagens e regras deste modelo"
-                        >
-                          <Pencil size={12} /> Editar Modelo
-                        </Link>
-                        <button 
-                          onClick={() => handleDeleteTemplate(template.id)}
-                          className="btn-danger outline"
-                          style={{ padding: '6px 10px' }}
-                          title="Excluir Modelo"
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' }}>
+                          <Link 
+                            to={'/tierlist?templateId=' + template.id} 
+                            className="btn-primary"
+                            style={{ textDecoration: 'none', textAlign: 'center', padding: '7px 10px', fontSize: '0.8rem', fontWeight: '600' }}
+                          >
+                            Montar Tier List
+                          </Link>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <Link 
+                              to={'/template-maker?editTemplateId=' + template.id} 
+                              className="btn-secondary"
+                              style={{ flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '6px 8px', fontSize: '0.75rem', fontWeight: '600' }}
+                              title="Editar título, capa, banco de imagens e regras deste modelo"
+                            >
+                              <Pencil size={12} /> Editar Modelo
+                            </Link>
+                            <button 
+                              onClick={() => handleDeleteTemplate(template.id)}
+                              className="btn-danger outline"
+                              style={{ padding: '6px 10px' }}
+                              title="Excluir Modelo"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
       )}
 
       {/* CONTEÚDO DA ABA: VISUAL & CORES */}
       {activeTab === 'visual' && (
         <div className="profile-tab-content" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          <div className="control-card" style={{ padding: '22px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <Palette size={20} color={activeTheme?.accentColor || '#b062eb'} />
-              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Tema Global de Cores</h3>
-            </div>
-            <p style={{ color: '#aaa', fontSize: '0.85rem', margin: '0 0 18px 0', lineHeight: '1.4' }}>
-              Escolha o esquema de cores que reflete sua personalidade. Todo o site e botões ativos mudarão instantaneamente.
-            </p>
+          <div className="control-card" style={{ padding: 0, borderRadius: '12px', overflow: 'hidden', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
+            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)' }} />
+            <div style={{ padding: '22px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <Palette size={20} color={activeTheme?.accentColor || '#b062eb'} />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700' }}>Tema Global de Cores</h3>
+              </div>
+              <p style={{ color: '#aaa', fontSize: '0.85rem', margin: '0 0 18px 0', lineHeight: '1.4' }}>
+                Escolha o esquema de cores que reflete sua personalidade. Todo o site, botões e linhas decorativas mudarão instantaneamente.
+              </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-              {availableThemes.map(t => {
-                const isSelected = siteTheme === t.id;
-                return (
-                  <div 
-                    key={t.id}
-                    onClick={() => setSiteTheme(t.id)}
-                    style={{
-                      backgroundColor: '#16161a',
-                      border: isSelected ? '2px solid ' + t.primaryColor : '2px solid #282830',
-                      borderRadius: '12px',
-                      padding: '14px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      transition: 'border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease',
-                      boxShadow: isSelected ? '0 0 16px ' + t.glowColor : 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <div style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '8px',
-                      background: t.gradient,
-                      boxShadow: '0 2px 8px ' + t.glowColor,
-                      flexShrink: 0
-                    }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: isSelected ? 'bold' : 'normal' }}>
-                        {t.name}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                {availableThemes.map(t => {
+                  const isSelected = siteTheme === t.id;
+                  return (
+                    <div 
+                      key={t.id}
+                      onClick={() => setSiteTheme(t.id)}
+                      style={{
+                        backgroundColor: '#16161a',
+                        border: isSelected ? '2px solid ' + t.accentColor : '2px solid #282830',
+                        borderRadius: '12px',
+                        padding: '14px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        transition: 'border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease',
+                        boxShadow: isSelected ? '0 0 16px ' + t.accentColor + '55' : 'none',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        background: t.gradient,
+                        boxShadow: '0 2px 8px ' + t.accentColor + '55',
+                        flexShrink: 0
+                      }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: isSelected ? 'bold' : 'normal' }}>
+                          {t.name}
+                        </div>
+                        <div style={{ color: isSelected ? t.accentColor : '#666', fontSize: '0.75rem', fontWeight: '500' }}>
+                          {isSelected ? '● Ativo no site' : 'Clique para usar'}
+                        </div>
                       </div>
-                      <div style={{ color: isSelected ? t.primaryColor : '#666', fontSize: '0.75rem', fontWeight: '500' }}>
-                        {isSelected ? '● Ativo no site' : 'Clique para usar'}
-                      </div>
+                      {isSelected && <Check size={16} color={t.accentColor} />}
                     </div>
-                    {isSelected && <Check size={16} color={t.primaryColor} />}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* PAINEL DE DEMONSTRAÇÃO DO TEMA EM TEMPO REAL */}
+          <div 
+            className="control-card" 
+            style={{ 
+              padding: 0, 
+              borderRadius: '12px', 
+              overflow: 'hidden', 
+              border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.35)'}`,
+              background: '#121216',
+              boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.1)'}`
+            }}
+          >
+            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)', boxShadow: `0 0 10px ${activeTheme?.accentGlow || 'var(--accent-glow)'}` }} />
+            
+            <div style={{ padding: '20px 22px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1rem', color: '#fff', fontWeight: '700' }}>
+                    Amostra em Tempo Real: <span style={{ color: activeTheme?.accentColor || '#b062eb' }}>{activeTheme?.name}</span>
+                  </h4>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#888' }}>
+                    Veja como os botões, realces, brilhos e linhas decorativas se comportam com este visual.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: activeTheme?.accentColor || '#b062eb', boxShadow: `0 0 8px ${activeTheme?.accentColor || '#b062eb'}` }} />
+                  <span style={{ fontSize: '0.8rem', color: '#aaa', fontFamily: 'monospace' }}>{activeTheme?.accentColor}</span>
+                </div>
+              </div>
+
+              {/* Elementos de Demonstração */}
+              <div style={{ 
+                background: '#18181f', 
+                border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, 
+                borderRadius: '10px', 
+                padding: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-around',
+                flexWrap: 'wrap',
+                gap: '12px'
+              }}>
+                <button className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+                  Botão Primário
+                </button>
+                <button className="btn-secondary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+                  Botão Secundário
+                </button>
+                <button className="btn-active" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+                  Item Selecionado
+                </button>
+                <div style={{ 
+                  padding: '4px 12px', 
+                  borderRadius: '20px', 
+                  border: `1px solid ${activeTheme?.accentColor || '#b062eb'}`, 
+                  background: `${activeTheme?.accentColor || '#b062eb'}22`,
+                  color: activeTheme?.accentColor || '#b062eb',
+                  fontSize: '0.8rem',
+                  fontWeight: '700'
+                }}>
+                  Badge Ativo
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1288,6 +1492,283 @@ export default function Profile() {
             </div>
           </div>
 
+        </div>
+      )}
+
+      {/* MODAL DE ALTERAR FOTO DE PERFIL */}
+      {isAvatarModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.82)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '16px'
+        }}>
+          <div style={{
+            background: '#141418',
+            border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.4)'}`,
+            borderRadius: '14px',
+            width: '100%',
+            maxWidth: '520px',
+            overflow: 'hidden',
+            boxShadow: `0 12px 40px ${activeTheme?.accentGlow || 'rgba(0,0,0,0.6)'}`,
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Linha Decorativa Superior do Modal */}
+            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)', boxShadow: `0 0 10px ${activeTheme?.accentGlow || 'var(--accent-glow)'}` }} />
+
+            {/* Cabeçalho do Modal */}
+            <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #22222a' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Camera size={18} color={activeTheme?.accentColor || '#b062eb'} />
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#fff', fontWeight: '700' }}>Alterar Foto de Perfil</h3>
+              </div>
+              <button
+                onClick={() => setIsAvatarModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Conteúdo do Modal */}
+            <div style={{ padding: '20px' }}>
+              {/* Preview Atual */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px', padding: '12px 16px', background: '#1a1a22', borderRadius: '10px', border: '1px solid #282834' }}>
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  border: `2px solid ${activeTheme?.accentColor || '#b062eb'}`,
+                  boxShadow: `0 0 12px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.3)'}`,
+                  flexShrink: 0
+                }}>
+                  {user?.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="Avatar Atual" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', background: activeTheme?.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 'bold', color: '#fff' }}>
+                      {((user?.email || 'U')[0]).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#fff' }}>Foto Atual</div>
+                  <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                    {user?.user_metadata?.avatar_url ? 'Foto personalizada ativa' : 'Usando inicial estilizada padrão'}
+                  </div>
+                </div>
+                {user?.user_metadata?.avatar_url && (
+                  <button
+                    onClick={() => handleSaveAvatar(null)}
+                    disabled={isSavingAvatar}
+                    className="btn-danger outline"
+                    style={{ padding: '6px 12px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <Trash2 size={12} /> Remover
+                  </button>
+                )}
+              </div>
+
+              {/* Modo de Escolha: Abas */}
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', borderBottom: '1px solid #252530', paddingBottom: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setAvatarTab('upload')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: avatarTab === 'upload' ? (activeTheme?.accentColor || '#b062eb') : 'transparent',
+                    color: avatarTab === 'upload' ? '#000' : '#aaa',
+                    fontWeight: '700',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <UploadCloud size={14} /> Upload
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAvatarTab('presets')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: avatarTab === 'presets' ? (activeTheme?.accentColor || '#b062eb') : 'transparent',
+                    color: avatarTab === 'presets' ? '#000' : '#aaa',
+                    fontWeight: '700',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Sparkles size={14} /> Galeria
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAvatarTab('url')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: avatarTab === 'url' ? (activeTheme?.accentColor || '#b062eb') : 'transparent',
+                    color: avatarTab === 'url' ? '#000' : '#aaa',
+                    fontWeight: '700',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Link2 size={14} /> Link URL
+                </button>
+              </div>
+
+              {/* Conteúdo Aba Upload */}
+              {avatarTab === 'upload' && (
+                <div style={{ textAlign: 'center', padding: '12px 10px' }}>
+                  <input
+                    type="file"
+                    ref={avatarFileInputRef}
+                    onChange={handleAvatarFileSelect}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                  />
+                  <div
+                    onClick={() => avatarFileInputRef.current?.click()}
+                    style={{
+                      border: `2px dashed ${activeTheme?.accentBorder || '#444'}`,
+                      borderRadius: '10px',
+                      padding: '24px 15px',
+                      cursor: 'pointer',
+                      background: '#16161d',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = activeTheme?.accentColor || '#b062eb'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = activeTheme?.accentBorder || '#444'; }}
+                  >
+                    <UploadCloud size={34} color={activeTheme?.accentColor || '#b062eb'} style={{ margin: '0 auto 8px' }} />
+                    <div style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 'bold', marginBottom: '4px' }}>
+                      Clique para escolher uma imagem
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                      PNG, JPG, WebP ou GIF (otimização e corte automático)
+                    </div>
+                  </div>
+                  {isSavingAvatar && (
+                    <div style={{ marginTop: '12px', color: activeTheme?.accentColor || '#b062eb', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                      Processando e atualizando foto...
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Conteúdo Aba Presets */}
+              {avatarTab === 'presets' && (
+                <div>
+                  <div style={{ fontSize: '0.8rem', color: '#aaa', marginBottom: '10px' }}>
+                    Escolha um avatar estilizado da nossa galeria:
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>
+                    {AVATAR_PRESETS.map(preset => (
+                      <div
+                        key={preset.id}
+                        onClick={() => handleSaveAvatar(preset.url)}
+                        style={{
+                          backgroundColor: '#171720',
+                          border: user?.user_metadata?.avatar_url === preset.url ? `2px solid ${activeTheme?.accentColor || '#b062eb'}` : '1px solid #282834',
+                          borderRadius: '10px',
+                          padding: '10px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '6px',
+                          transition: 'transform 0.15s, border-color 0.15s'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.04)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                      >
+                        <img src={preset.url} alt={preset.name} style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }} />
+                        <span style={{ fontSize: '0.72rem', color: '#ccc', textAlign: 'center', fontWeight: '500' }}>{preset.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Conteúdo Aba Link URL */}
+              {avatarTab === 'url' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', color: '#aaa', marginBottom: '6px', fontWeight: '600' }}>
+                      URL da Imagem Direta:
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://exemplo.com/minha-foto.jpg"
+                      value={customAvatarUrl}
+                      onChange={(e) => setCustomAvatarUrl(e.target.value)}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #333', background: '#16161a', color: '#fff', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                  {customAvatarUrl && (
+                    <div style={{ textAlign: 'center', padding: '10px', background: '#16161d', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '6px' }}>Pré-visualização:</div>
+                      <img
+                        src={customAvatarUrl}
+                        alt="Preview"
+                        style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${activeTheme?.accentColor || '#b062eb'}`, margin: '0 auto' }}
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    disabled={!customAvatarUrl.trim() || isSavingAvatar}
+                    onClick={() => handleSaveAvatar(customAvatarUrl.trim())}
+                    className="btn-primary"
+                    style={{ padding: '10px', fontSize: '0.85rem', fontWeight: '700' }}
+                  >
+                    {isSavingAvatar ? 'Salvando...' : 'Aplicar Foto de Perfil'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ padding: '12px 20px', background: '#101014', borderTop: '1px solid #202028', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setIsAvatarModalOpen(false)}
+                className="btn-secondary"
+                style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

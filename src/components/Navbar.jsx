@@ -26,8 +26,24 @@ export default function Navbar() {
         {/* Right Side: Auth */}
         <div className="navbar-auth">
           {user ? (
-            <Link to="/profile" className="nav-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <User size={14} /> Meu Perfil
+            <Link to="/profile" className="nav-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              {user.user_metadata?.avatar_url ? (
+                <img 
+                  src={user.user_metadata.avatar_url} 
+                  alt="Avatar" 
+                  style={{ 
+                    width: '20px', 
+                    height: '20px', 
+                    borderRadius: '50%', 
+                    objectFit: 'cover', 
+                    border: '1.5px solid var(--accent-color)',
+                    boxShadow: '0 0 8px var(--accent-glow)'
+                  }} 
+                />
+              ) : (
+                <User size={14} />
+              )}
+              <span>Meu Perfil</span>
             </Link>
           ) : (
             <Link to="/login" className="nav-btn">Entrar</Link>
