@@ -4,7 +4,7 @@
   # Ametist Tier Maker
   
   <p>
-    <b>A plataforma definitiva de criação, organização e personalização de Tier Lists modernas, responsivas e multidimensionais.</b>
+    <b>A plataforma definitiva de criação, organização, duelos e personalização de Tier Lists modernas, responsivas e multidimensionais.</b>
   </p>
   
   <a href="https://ametist-tier-maker.vercel.app/">
@@ -25,65 +25,72 @@
 
 Durante anos, os criadores de conteúdo, comunidades de jogos e entusiastas dependeram de ferramentas tradicionais de tier list (como o popular *Tiermaker*). No entanto, essas ferramentas carregam vícios graves:
 
-* **Interface Parada nos Anos 2000:** Layouts rígidos, poluídos por anúncios intrusivos e sem refinamento estético.
-* **Falta de Suporte a Múltiplas Colunas:** A maior limitação dos criadores tradicionais é a incapacidade de subdividir ranks. Você não consegue avaliar múltiplos critérios (ex: *DPS*, *Sub-DPS*, *Suporte* ou *Early Game / Late Game*) na mesma linha sem criar listas separadas.
-* **Experiência Mobile Sofrível:** Arrastar e soltar itens em smartphones costuma travar a rolagem da página, desconfigurar elementos ou simplesmente falhar no toque.
-* **Exportações Limitadas:** Imagens de baixa qualidade, sem opções de proporção para redes sociais ou que geram arquivos pesados demais para compartilhamento em mensageiros como o Discord.
+* **Interface Desatualizada:** Layouts rígidos, poluídos por anúncios intrusivos e sem refinamento estético.
+* **Falta de Suporte a Múltiplas Colunas:** Incapacidade de subdividir ranks para avaliar múltiplos critérios (ex: *DPS*, *Sub-DPS*, *Suporte* ou *Early Game / Late Game*) no mesmo quadro.
+* **Experiência Mobile Sofrível:** Arrastar e soltar itens em smartphones costuma travar a rolagem da página ou falhar no toque.
+* **Falta de Modos de Confronto Interativos:** Ausência de modos de duelo 1v1 ou torneios mata-mata com as imagens da lista.
+* **Exportações Limitadas:** Imagens de baixa qualidade e sem otimização de peso para Discord ou resolução 4K.
 
-O **Ametist Tier Maker** nasceu para ser a resposta definitiva a essas limitações: uma ferramenta contemporânea, construída com foco em **design premium (Dark Mode & Glassmorphism)**, **arquitetura Mobile-First**, **sistema multidimensional de múltiplas colunas** e **integração nativa com a nuvem**.
+O **Ametist Tier Maker** nasceu para superar essas limitações: uma suíte moderna construída com foco em **design premium (Dark Mode & Glassmorphism)**, **arquitetura Mobile-First**, **duelos interativos com chaveamento inteligente**, **sistema multidimensional de múltiplas colunas** e **integração nativa com nuvem**.
 
 <br/>
 
 ## Principais Diferenciais e Funcionalidades
 
 ### 1. Sistema Multidimensional de Múltiplas Colunas
-* **Modo Clássico e Modo Avançado:** Escolha entre o rankeamento tradicional por linhas ou ative de **1 a 4 colunas verticais independentes** por linha de tier.
-* **Sub-rótulos Customizáveis:** Nomeie cada coluna livremente (ex: *Build A*, *Build B*, *PVP*, *PVE*) para criar análises profundas em um único quadro.
-* **Organização Matricial:** Posicione e ordene personagens exatamente no quadrante desejado.
+* **Modo Clássico e Modo Avançado:** Alterne entre o rankeamento tradicional por linhas ou ative de **1 a 4 colunas verticais independentes** por linha de tier.
+* **Sub-rótulos Customizáveis:** Nomeie cada coluna livremente (ex: *Build A*, *Build B*, *PVP*, *PVE*) para análises aprofundadas.
+* **Organização Matricial:** Posicione e ordene personagens no quadrante exato desejado.
 
-### 2. Experiência Mobile-First Nativa
-* **Toque Inteligente (Tap-to-Move):** No celular, basta tocar no item para abrir uma **Barra Flutuante de Seleção** que permite posicionar ou devolver itens ao banco com um único toque.
-* **Controles Retráteis:** Painel de ferramentas expansível que prioriza o espaço visual do tabuleiro em telas menores.
-* **Grids e Abas Otimizadas:** Navegação lateral suave por toque em categorias, modelos e abas de perfil.
+### 2. Arena de Duelos & Batalhas 1v1
+* **Torneio Mata-Mata (Eliminatórias):**
+  * Seletor dinâmico de chaves (**8, 16, 32, 64, 128 ou Todas as Imagens**).
+  * Algoritmo automático de **Fase Preliminar + Byes** para quantidades que não são potências de 2, permitindo que 100% das imagens compitam sem cortes.
+  * Coroação do campeão com animações e registro automático no perfil do usuário.
+* **Batalha de Tier List (Algoritmo $N \log_2 N$):**
+  * Compare imagens 2 a 2 de forma ágil com estimativa realista de confrontos.
+  * O algoritmo de ordenação comparativa calcula as pontuações e distribui os itens nos Tiers **S, A, B, C e D**.
+  * **Exportação Instantânea:** Transfere o resultado com 1 clique diretamente para o Tabuleiro Oficial de Tier List, com todos os cards já posicionados.
 
-### 3. Exportação Gráfica com Seletor de Resolução
-* **Layouts Horizontal e Vertical:** Exporte o resultado no formato clássico ou em um card vertical elegante para stories, feeds e fóruns.
-* **Otimização de Tamanho (Discord vs 4K Ultra HD):**
-  * **Otimizado (Web / Discord):** Renderização nítida em alta definição com peso controlado (< 2.5MB) para envio direto em qualquer mensageiro.
-  * **Ultra HD (4K):** Renderização de altíssima densidade de pixels (`pixelRatio: 2`) com acabamento nítido para monitores grandes e impressões.
-* **Marca D'Água e Identidade Visual:** Renderização limpa através do motor de composição em Canvas.
+### 3. Sistema Social, Curtidas & Favoritos
+* **Curtidas em Tempo Real:** Botão de coração interativo em todos os modelos da comunidade, sincronizado com o Supabase.
+* **Filtro de Popularidade:** Ordene modelos na Home por *Mais Recentes* ou *Mais Curtidos*.
+* **Aba de Favoritos & Campeões no Perfil:** Painel dedicado para rever seus modelos favoritos e a galeria de personagens coroados nos seus torneios.
+* **Permissões de Membros:** Bloqueio harmonioso de salvamento na nuvem e compartilhamento para visitantes com convite amigável para criação de conta.
 
-### 4. Integração Dinâmica com APIs Externas & Web Scraping
-* **Importação Automática sem Custo de Armazenamento:** Conecte endpoints JSON públicos ou feeds de dados externos (como bancos de dados de *Honkai: Star Rail* e *Genshin Impact*).
-* **Renderização Direta via CDN:** O sistema utiliza URLs diretas e caching inteligente do navegador, mantendo o banco leve e veloz.
+### 4. Experiência Mobile-First & Fluidez Touch
+* **Arena de Duelo em Grade Compacta (Mobile):** Os cards de confronto se ajustam lado a lado em 2 colunas no celular, permitindo duelos rápidos com os polegares sem rolar a tela.
+* **Remoção de Delay de Toque (300ms):** Configuração `touch-action: manipulation` e `-webkit-tap-highlight-color: transparent` para resposta tátil instantânea.
+* **Toque Inteligente (Tap-to-Move):** No tabuleiro mobile, toque na imagem e no tier desejado para posicionar rapidamente sem depender apenas do arrasto.
+* **Controles Retráteis:** Painel expansível que maximiza o espaço visual do tabuleiro em smartphones.
 
-### 5. Modo Copa do Mundo (Torneio Mata-Mata)
-* **Chaveamento Dinâmico:** Módulo dedicado para criar confrontos diretos estilo eliminatórias da Copa do Mundo.
-* **Propagação Automática:** Vencedores de cada partida avançam automaticamente para as oitavas, quartas, semi e grande final.
+### 5. Exportação Gráfica com Seletor de Resolução
+* **Layouts Horizontal e Vertical:** Exporte o quadro no formato tradicional ou em card vertical para stories e redes sociais.
+* **Otimização de Tamanho:**
+  * **Otimizado (Web / Discord):** Renderização em alta definição com peso controlado (< 2.5MB) para envio direto sem erros de upload.
+  * **Ultra HD (4K):** Renderização de altíssima densidade (`pixelRatio: 2`) para monitores de alta resolução e impressões.
+* **Marca D'Água e Identidade Visual:** Renderização limpa pelo motor Canvas customizado.
 
-### 6. Personalização Visual & Temas Globais
-* **Paleta de Cores Dinâmica:** Alterne em tempo real entre temas como *Ametista*, *Safira*, *Esmeralda*, *Rubi*, *Âmbar* e *Cyberpunk*.
-* **Densidade de Interface:** Alterne entre modo Compacto e Confortável conforme o tamanho da sua tela.
+### 6. Integração Dinâmica com APIs Externas & Web Scraping
+* **Importação Automática:** Conecte endpoints JSON públicos ou feeds de dados externos (como bancos de dados de *Honkai: Star Rail* e *Genshin Impact*).
+* **Renderização Direta via CDN:** Utiliza URLs diretas com cache eficiente do navegador, mantendo o banco leve e veloz.
 
-### 7. Sincronização em Nuvem e Galeria Comunitária
-* **Autenticação Segura:** Login e cadastro gerenciados pelo Supabase Auth com criptografia robusta.
-* **Galeria de Modelos:** Publique modelos para a comunidade ou salve-os como privados para uso exclusivo no seu painel.
-* **Salvamento Híbrido:** Backup instantâneo local (`localStorage`) sincronizado com o banco PostgreSQL.
+### 7. Personalização Visual & Temas Globais
+* **Paletas Dinâmicas:** Alterne entre temas globais: *Ametist*, *Cyberpunk*, *Gold*, *Emerald*, *Pastel* e *Monochrome*.
+* **Iconografia Padronizada:** 100% dos ícones renderizados com vetores SVG modernos da biblioteca `lucide-react`.
 
 <br/>
 
 ## Arquitetura e Tecnologias
 
-A aplicação foi estruturada seguindo boas práticas de desacoplamento, performance e tipagem semântica:
-
 | Camada | Tecnologia | Finalidade |
 | :--- | :--- | :--- |
 | **Interface / SPA** | React 18 + Vite | Renderização reativa de alto desempenho e ciclo de build instantâneo. |
 | **Drag & Drop** | `@dnd-kit/core` & `@dnd-kit/sortable` | Motor de arrasto com suporte avançado a sensores de ponteiro e toque. |
-| **Estilização** | CSS3 Vanilla + CSS Variables | Glassmorphism, temas dinâmicos e arquitetura responsiva sem overhead de bibliotecas pesadas. |
+| **Estilização** | CSS3 Vanilla + CSS Variables | Glassmorphism, temas dinâmicos e arquitetura responsiva sem overhead. |
 | **Iconografia** | `lucide-react` | Vetores SVG modernos e consistentes em toda a interface. |
-| **Renderizador de Imagem** | `html2canvas` + Custom Canvas Engine | Composição gráfica para exportação em PNG de alta resolução. |
-| **Backend & Autenticação** | Supabase (BaaS) | Autenticação via JWT, gerenciamento de sessões e API REST segura. |
+| **Renderizador Gráfico** | `html2canvas` + Custom Canvas Engine | Composição gráfica para exportação em PNG de alta resolução. |
+| **Backend & Auth** | Supabase (BaaS) | Autenticação via JWT, gerenciamento de sessões e API REST segura. |
 | **Banco de Dados** | PostgreSQL com RLS e JSONB | Estruturas relacionais seguras com flexibilidade de documentos para os tabuleiros. |
 
 <br/>
@@ -101,10 +108,11 @@ AmetistTierMaker/
 │   │   └── Footer.jsx    # Rodapé institucional
 │   ├── contexts/         # Gerenciadores de estado global (Auth, Theme)
 │   ├── data/             # Coleções de dados locais, times da copa e temas
-│   ├── pages/            # Telas da aplicação (Home, Tierlist, TemplateMaker, Copa, Profile, Login)
+│   ├── hooks/            # Hooks customizados (useTierlistState, useHistory)
+│   ├── pages/            # Telas da aplicação (Home, Tierlist, DueloX1, TemplateMaker, Copa, Profile, Login)
 │   ├── services/         # Cliente Supabase e conectores
 │   ├── styles/           # Folhas de estilo modularizadas
-│   └── utils/            # Utilitários (notificações, exportador de imagens, validadores)
+│   └── utils/            # Utilitários (likesManager, notificações, exportador de imagens, validadores)
 ├── index.html            # Ponto de entrada com meta tags OpenGraph otimizadas
 ├── package.json          # Manifesto de dependências e scripts
 └── vite.config.js        # Configurações de compilação e divisão de chunks
