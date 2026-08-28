@@ -146,7 +146,7 @@ export function useTierlistState(user) {
       if (shareParam) {
         try {
           const shared = decodeSharedTierlist(shareParam);
-          if (shared) {
+          if (shared && shared.items) {
             saveHistoryState(items, ranksData);
             setTierlistName(shared.tierlistName);
             setRanksData(shared.ranksData);
@@ -162,44 +162,65 @@ export function useTierlistState(user) {
             localStorage.setItem('tierlist-layout', shared.layoutMode);
             localStorage.setItem('tierlist-column-titles', JSON.stringify(shared.columnTitles));
             localStorage.removeItem('tierlist-current-id');
+            localStorage.removeItem('tierlist-active-template-id');
 
             toast.success(`Tier List "${shared.tierlistName}" carregada via link!`);
             searchParams.delete('share');
-            setSearchParams(searchParams);
+            setSearchParams(searchParams, { replace: true });
             return;
+          } else {
+            toast.error('Não foi possível ler os dados da Tier List deste link.');
           }
         } catch (e) {
           console.error('Erro ao ler link compartilhado:', e);
+          toast.error('Erro ao processar o link compartilhado.');
         }
       }
 
       // 2. Carregamento de Tier List salva (?id=...)
       if (idParam) {
         try {
-          const { data } = await supabase.from('tierlists').select('name, data').eq('id', idParam).single();
-          if (data && data.data) {
-            saveHistoryState(items, ranksData);
-            setTierlistName(data.name || 'Tier List Compartilhada');
-            setItems(data.data.items || []);
-            setRanksData(data.data.ranksData || []);
-            if (data.data.layoutMode) setLayoutMode(data.data.layoutMode);
-            if (data.data.colunas) setColunas(data.data.colunas);
-            if (data.data.columnTitles) setColumnTitles(data.data.columnTitles);
-            if (data.data.theme) setTheme(data.data.theme);
+          let loadedName = null;
+          let loadedData = null;
 
-            localStorage.setItem('tierlist-name', data.name);
-            localStorage.setItem('tierlist-ranks', JSON.stringify(data.data.ranksData));
-            localStorage.setItem('tierlist-items', JSON.stringify(data.data.items));
+          const { data: tierRes } = await supabase.from('tierlists').select('name, data').eq('id', idParam).maybeSingle();
+          if (tierRes && tierRes.data) {
+            loadedName = tierRes.name;
+            loadedData = tierRes.data;
+          } else {
+            const { data: tplRes } = await supabase.from('templates').select('name, data').eq('id', idParam).maybeSingle();
+            if (tplRes && tplRes.data) {
+              loadedName = tplRes.name;
+              loadedData = tplRes.data;
+            }
+          }
+
+          if (loadedData) {
+            saveHistoryState(items, ranksData);
+            setTierlistName(loadedName || 'Tier List Compartilhada');
+            setItems(loadedData.items || []);
+            setRanksData(loadedData.ranksData || []);
+            if (loadedData.layoutMode) setLayoutMode(loadedData.layoutMode);
+            if (loadedData.colunas) setColunas(loadedData.colunas);
+            if (loadedData.columnTitles) setColumnTitles(loadedData.columnTitles);
+            if (loadedData.theme) setTheme(loadedData.theme);
+
+            localStorage.setItem('tierlist-name', loadedName || 'Tier List');
+            localStorage.setItem('tierlist-ranks', JSON.stringify(loadedData.ranksData || []));
+            localStorage.setItem('tierlist-items', JSON.stringify(loadedData.items || []));
             localStorage.setItem('tierlist-current-id', idParam);
 
-            toast.success(`Tier List "${data.name}" carregada com sucesso!`);
-            searchParams.delete('id');
-            setSearchParams(searchParams);
-            return;
+            toast.success(`Tier List "${loadedName || 'Compartilhada'}" carregada com sucesso!`);
+          } else {
+            toast.error('Tier list não encontrada ou link expirado.');
           }
         } catch (e) {
           console.error('Erro ao carregar tier list por id:', e);
+        } finally {
+          searchParams.delete('id');
+          setSearchParams(searchParams, { replace: true });
         }
+        return;
       }
 
       if (isNew) {
