@@ -661,8 +661,8 @@ export default function Profile() {
       {/* CONTEÚDO DA ABA: MINHAS TIER LISTS */}
       {activeTab === 'tierlists' && (
         <div className="profile-tab-content">
-          <div className="control-card" style={{ padding: 0, borderRadius: '12px', overflow: 'hidden', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
-            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)' }} />
+          <div className="control-card" style={{ padding: 0, borderRadius: '12px', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
+            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)', borderRadius: '12px 12px 0 0' }} />
             <div style={{ padding: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
@@ -755,8 +755,8 @@ export default function Profile() {
       {/* CONTEÚDO DA ABA: MEUS MODELOS */}
       {activeTab === 'templates' && (
         <div className="profile-tab-content">
-          <div className="control-card" style={{ padding: 0, borderRadius: '12px', overflow: 'hidden', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
-            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)' }} />
+          <div className="control-card" style={{ padding: 0, borderRadius: '12px', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
+            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)', borderRadius: '12px 12px 0 0' }} />
             <div style={{ padding: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
@@ -852,8 +852,9 @@ export default function Profile() {
       {activeTab === 'visual' && (
         <div className="profile-tab-content" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          <div className="control-card" style={{ padding: 0, borderRadius: '12px', overflow: 'hidden', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
-            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)' }} />
+          {/* Card: Tema Global de Cores */}
+          <div className="control-card" style={{ padding: 0, borderRadius: '12px', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
+            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)', borderRadius: '12px 12px 0 0' }} />
             <div style={{ padding: '22px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                 <Palette size={20} color={activeTheme?.accentColor || '#b062eb'} />
@@ -863,7 +864,7 @@ export default function Profile() {
                 Escolha o esquema de cores que reflete sua personalidade. Todo o site, botões e linhas decorativas mudarão instantaneamente.
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                 {availableThemes.map(t => {
                   const isSelected = siteTheme === t.id;
                   return (
@@ -892,12 +893,12 @@ export default function Profile() {
                         boxShadow: '0 2px 8px ' + t.accentColor + '55',
                         flexShrink: 0
                       }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: isSelected ? 'bold' : 'normal' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: isSelected ? 'bold' : 'normal', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {t.name}
                         </div>
                         <div style={{ color: isSelected ? t.accentColor : '#666', fontSize: '0.75rem', fontWeight: '500' }}>
-                          {isSelected ? '● Ativo no site' : 'Clique para usar'}
+                          {isSelected ? '● Ativo' : 'Clique para usar'}
                         </div>
                       </div>
                       {isSelected && <Check size={16} color={t.accentColor} />}
@@ -908,121 +909,59 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* PAINEL DE DEMONSTRAÇÃO DO TEMA EM TEMPO REAL */}
-          <div 
-            className="control-card" 
-            style={{ 
-              padding: 0, 
-              borderRadius: '12px', 
-              overflow: 'hidden', 
-              border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.35)'}`,
-              background: '#121216',
-              boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.1)'}`
-            }}
-          >
-            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)', boxShadow: `0 0 10px ${activeTheme?.accentGlow || 'var(--accent-glow)'}` }} />
-            
-            <div style={{ padding: '20px 22px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '1rem', color: '#fff', fontWeight: '700' }}>
-                    Amostra em Tempo Real: <span style={{ color: activeTheme?.accentColor || '#b062eb' }}>{activeTheme?.name}</span>
-                  </h4>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#888' }}>
-                    Veja como os botões, realces, brilhos e linhas decorativas se comportam com este visual.
-                  </p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: activeTheme?.accentColor || '#b062eb', boxShadow: `0 0 8px ${activeTheme?.accentColor || '#b062eb'}` }} />
-                  <span style={{ fontSize: '0.8rem', color: '#aaa', fontFamily: 'monospace' }}>{activeTheme?.accentColor}</span>
-                </div>
+          {/* Card: Densidade e Escala Visual */}
+          <div className="control-card" style={{ padding: 0, borderRadius: '12px', border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, background: '#121216', boxShadow: `0 4px 20px ${activeTheme?.accentGlow || 'rgba(176,98,235,0.08)'}` }}>
+            <div style={{ height: '3px', width: '100%', background: activeTheme?.gradient || 'var(--accent-gradient)', borderRadius: '12px 12px 0 0' }} />
+            <div style={{ padding: '22px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <Sliders size={20} color={activeTheme?.accentColor || '#b062eb'} />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700' }}>Densidade e Escala Visual</h3>
               </div>
+              <p style={{ color: '#aaa', fontSize: '0.85rem', margin: '0 0 18px 0', lineHeight: '1.4' }}>
+                Ajuste o tamanho dos elementos e espaçamento dos tabuleiros para melhor visualização na sua tela.
+              </p>
 
-              {/* Elementos de Demonstração */}
-              <div style={{ 
-                background: '#18181f', 
-                border: `1px solid ${activeTheme?.accentBorder || 'rgba(176,98,235,0.3)'}`, 
-                borderRadius: '10px', 
-                padding: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-around',
-                flexWrap: 'wrap',
-                gap: '12px'
-              }}>
-                <button className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-                  Botão Primário
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => setUiDensity('compact')}
+                  style={{
+                    padding: '14px 18px',
+                    borderRadius: '10px',
+                    border: uiDensity === 'compact' ? '2px solid ' + (activeTheme?.accentColor || '#b062eb') : '2px solid #2e2e38',
+                    backgroundColor: uiDensity === 'compact' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
+                    color: uiDensity === 'compact' ? '#fff' : '#aaa',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+                    boxShadow: uiDensity === 'compact' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Compacto (Recomendado)</div>
+                  <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Proporção ideal para ver todo o tabuleiro sem precisar de zoom</div>
                 </button>
-                <button className="btn-secondary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-                  Botão Secundário
+
+                <button
+                  type="button"
+                  onClick={() => setUiDensity('spacious')}
+                  style={{
+                    padding: '14px 18px',
+                    borderRadius: '10px',
+                    border: uiDensity === 'spacious' ? '2px solid ' + (activeTheme?.accentColor || '#b062eb') : '2px solid #2e2e38',
+                    backgroundColor: uiDensity === 'spacious' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
+                    color: uiDensity === 'spacious' ? '#fff' : '#aaa',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+                    boxShadow: uiDensity === 'spacious' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Confortável</div>
+                  <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Botões e textos maiores para monitores de alta resolução</div>
                 </button>
-                <button className="btn-active" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-                  Item Selecionado
-                </button>
-                <div style={{ 
-                  padding: '4px 12px', 
-                  borderRadius: '20px', 
-                  border: `1px solid ${activeTheme?.accentColor || '#b062eb'}`, 
-                  background: `${activeTheme?.accentColor || '#b062eb'}22`,
-                  color: activeTheme?.accentColor || '#b062eb',
-                  fontSize: '0.8rem',
-                  fontWeight: '700'
-                }}>
-                  Badge Ativo
-                </div>
               </div>
-            </div>
-          </div>
-
-          <div className="control-card" style={{ padding: '22px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <Sliders size={20} color={activeTheme?.accentColor || '#b062eb'} />
-              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Densidade e Escala Visual</h3>
-            </div>
-            <p style={{ color: '#aaa', fontSize: '0.85rem', margin: '0 0 18px 0', lineHeight: '1.4' }}>
-              Ajuste o tamanho dos elementos e espaçamento dos tabuleiros para melhor visualização na sua tela.
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-              <button
-                type="button"
-                onClick={() => setUiDensity('compact')}
-                style={{
-                  padding: '12px 20px',
-                  borderRadius: '10px',
-                  border: uiDensity === 'compact' ? '2px solid ' + (activeTheme?.accentColor || '#b062eb') : '2px solid #2e2e38',
-                  backgroundColor: uiDensity === 'compact' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
-                  color: uiDensity === 'compact' ? '#fff' : '#aaa',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                  boxShadow: uiDensity === 'compact' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none',
-                  boxSizing: 'border-box'
-                }}
-              >
-                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Compacto (Recomendado)</div>
-                <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Proporção ideal para ver todo o tabuleiro sem precisar de zoom</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setUiDensity('spacious')}
-                style={{
-                  padding: '12px 20px',
-                  borderRadius: '10px',
-                  border: uiDensity === 'spacious' ? '2px solid ' + (activeTheme?.accentColor || '#b062eb') : '2px solid #2e2e38',
-                  backgroundColor: uiDensity === 'spacious' ? (activeTheme?.accentColor || '#b062eb') + '25' : '#17171c',
-                  color: uiDensity === 'spacious' ? '#fff' : '#aaa',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                  boxShadow: uiDensity === 'spacious' ? '0 0 14px ' + (activeTheme?.accentColor || '#b062eb') + '30' : 'none',
-                  boxSizing: 'border-box'
-                }}
-              >
-                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>Confortável</div>
-                <div style={{ fontSize: '0.78rem', opacity: 0.8 }}>Botões e textos maiores para monitores de alta resolução</div>
-              </button>
             </div>
           </div>
         </div>
