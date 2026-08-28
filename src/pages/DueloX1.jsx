@@ -460,7 +460,8 @@ export default function DueloX1() {
           src: item.src || item.image || item.url,
           nome: item.nome || item.name || 'Item',
           tierId: tier.id,
-          colIndex: null
+          colIndex: 0,
+          uploadIndex: Date.now()
         });
       });
     });
@@ -491,7 +492,7 @@ export default function DueloX1() {
     }
 
     toast.success('Tier List gerada com sucesso! Abrindo tabuleiro...');
-    navigate('/tierlist');
+    window.location.href = '/tierlist';
   };
 
   // Obter dados do duelo atual

@@ -125,7 +125,7 @@ export default function TierRow({ rank, items, colunas, onRemoveRow, selectedIte
       
       <div className={`tier-drop-area grid-${colunas}`}>
         {Array.from({ length: colunas }).map((_, colIndex) => {
-          const colItems = items.filter(item => item.colIndex === colIndex);
+          const colItems = items.filter(item => item.colIndex === colIndex || (colIndex === 0 && (item.colIndex === null || item.colIndex === undefined || item.colIndex === 0)));
           const dropId = `tier-${rank.id}-col-${colIndex}`;
           
           return (
