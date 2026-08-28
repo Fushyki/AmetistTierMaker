@@ -56,10 +56,10 @@ export default function TierlistControls({
       <div className={`controls-wrapper ${isCollapsedMobile ? 'mobile-collapsed' : ''}`}>
         {/* GRUPO 1: AÇÕES PRINCIPAIS E COMPARTILHAMENTO */}
         <div className="control-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <h3 style={{ margin: 0 }}>Salvar & Compartilhar</h3>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px', minHeight: '20px' }}>
+            <h3 style={{ margin: 0, textAlign: 'center' }}>Salvar & Compartilhar</h3>
             {!user && (
-              <span style={{ fontSize: '0.68rem', color: '#aaa', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+              <span style={{ position: 'absolute', right: 0, fontSize: '0.68rem', color: '#aaa', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                 <Lock size={11} color="var(--accent-color)" /> Membros
               </span>
             )}
@@ -127,7 +127,7 @@ export default function TierlistControls({
 
         {/* GRUPO 2: CONFIGURAÇÃO DO TABULEIRO */}
         <div className="control-card">
-          <h3>Configuração</h3>
+          <h3 style={{ margin: '0 0 8px 0', textAlign: 'center' }}>Configuração</h3>
           <div className="btn-grid">
             <button 
               type="button" 
@@ -177,7 +177,7 @@ export default function TierlistControls({
 
         {/* GRUPO 3: EDIÇÃO E ZONA DE PERIGO */}
         <div className="control-card">
-          <h3>Edição</h3>
+          <h3 style={{ margin: '0 0 8px 0', textAlign: 'center' }}>Edição</h3>
           <div className="btn-grid">
             <button 
               type="button"
